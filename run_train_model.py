@@ -391,7 +391,10 @@ if __name__ == '__main__':
             except:
                 print("请检查模型文件夹是否正确！")
                 print(path)
-                exit(0)
+                if len(list_windows_size) > 0:
+                    pass
+                else:
+                    exit(0)
             model_args[args.name]["model_args"]["red_epochs"] = 1
             model_args[args.name]["model_args"]["blue_epochs"] = 1
             model_args[args.name]["model_args"]["batch_size"] = 1
