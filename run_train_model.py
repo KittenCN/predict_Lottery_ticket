@@ -23,7 +23,7 @@ if gpus:
     tf.config.experimental.set_memory_growth(gpus[0],True)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--name', default="dlt", type=str, help="选择训练数据")
+parser.add_argument('--name', default="kl8", type=str, help="选择训练数据")
 parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
 parser.add_argument('--red_epochs', default=1, type=int, help="红球训练轮数")
 parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮数")

@@ -16,7 +16,7 @@ from common import *
 import pandas as pd
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--name', default="dlt", type=str, help="选择训练数据")
+parser.add_argument('--name', default="kl8", type=str, help="选择训练数据")
 parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
 args = parser.parse_args()
 filedata = []
