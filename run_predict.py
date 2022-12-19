@@ -17,7 +17,7 @@ import pandas as pd
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="选择训练数据")
-parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
+parser.add_argument('--windows_size', default='-1', type=str, help="训练窗口大小,如有多个，用'，'隔开")
 args = parser.parse_args()
 filedata = []
 filetitle = []
@@ -241,6 +241,17 @@ if __name__ == '__main__':
         raise Exception("窗口大小不能为空！")
     else:
         list_windows_size = args.windows_size.split(",")
+        if list_windows_size[0] == "-1":
+            list_windows_size = []
+            path = model_path + model_args[args.name]["pathname"]['name']
+            dbtype_list = os.listdir(path)
+            try:
+                for dbtype in dbtype_list:
+                    list_windows_size.append(int(dbtype))
+                list_windows_size.sort(reverse=True)
+            except:
+                print("请检查模型文件夹是否正确！")
+                exit(0)
         for size in list_windows_size:
             tf.compat.v1.reset_default_graph()
             red_graph = tf.compat.v1.Graph()
