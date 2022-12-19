@@ -36,7 +36,7 @@ pred_key = {}
 ori_data = None
 save_epoch = 100
 save_interval = 600
-last_save_time = 0
+last_save_time = time.time()
 
 def create_train_data(name, windows):
     """ 创建训练数据
