@@ -250,13 +250,13 @@ if __name__ == '__main__':
                     list_windows_size.append(int(dbtype))
                 list_windows_size.sort(reverse=True)
             except:
-                print("请检查模型文件夹是否正确！")
-                print(path)
+                logger.info("请检查模型文件夹是否正确！")
+                logger.info(path)
                 if len(list_windows_size) > 0:
                     pass
                 else:
                     exit(0)
-        print("windows_size: {}".format(list_windows_size))
+        logger.info("windows_size: {}".format(list_windows_size))
         for size in list_windows_size:
             tf.compat.v1.reset_default_graph()
             red_graph = tf.compat.v1.Graph()
