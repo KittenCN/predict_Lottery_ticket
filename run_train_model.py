@@ -3,6 +3,7 @@
 Author: BigCat
 Modifier: KittenCN
 """
+import os
 import time
 import json
 import argparse
@@ -22,7 +23,7 @@ if gpus:
     tf.config.experimental.set_memory_growth(gpus[0],True)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--name', default="ssq", type=str, help="选择训练数据")
+parser.add_argument('--name', default="dlt", type=str, help="选择训练数据")
 parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
 parser.add_argument('--red_epochs', default=1, type=int, help="红球训练轮数")
 parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮数")
@@ -378,7 +379,16 @@ if __name__ == '__main__':
         model_args[args.name]["model_args"]["blue_epochs"] = int(args.blue_epochs)
         model_args[args.name]["model_args"]["batch_size"] = int(args.batch_size)
         if args.predict_pro == 1:
-            list_windows_size = [3,5,10,30,50,100,300,500]
+            list_windows_size = []
+            path = model_path + model_args[args.name]["pathname"]['name']
+            dbtype_list = os.listdir(path)
+            try:
+                for dbtype in dbtype_list:
+                    list_windows_size.append(int(dbtype))
+                list_windows_size.sort(reverse=True)
+            except:
+                print("请检查模型文件夹是否正确！")
+                exit(0)
             model_args[args.name]["model_args"]["red_epochs"] = 1
             model_args[args.name]["model_args"]["blue_epochs"] = 1
             model_args[args.name]["model_args"]["batch_size"] = 1
