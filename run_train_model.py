@@ -34,6 +34,8 @@ args = parser.parse_args()
 pred_key = {}
 ori_data = None
 save_epoch = 100
+save_interval = 600
+last_save_time = 0
 
 def create_train_data(name, windows):
     """ 创建训练数据
@@ -169,12 +171,13 @@ def train_red_ball_model(name, x_data, y_data):
                     epoch_start_time = time.time()
                     perindex = 0
                     totalloss = 0.0
-                if epoch % save_epoch == 0 and epoch > 0:
+                if epoch % save_epoch == 0 and epoch > 0 and time.time() - last_save_time >= save_interval:
                     pred_key[ball_name[0][0]] = red_ball_model.pred_sequence.name
                     if not os.path.exists(syspath):
                         os.makedirs(syspath)
                     # saver = tf.compat.v1.train.Saver()
                     saver.save(sess, "{}{}.{}".format(syspath, red_ball_model_name, extension))
+                    last_save_time = time.time()
             except tf.errors.OutOfRangeError:
                 logger.info("训练完成！")
                 pred_key[ball_name[0][0]] = red_ball_model.pred_sequence.name
@@ -310,12 +313,13 @@ def train_blue_ball_model(name, x_data, y_data):
                     epoch_start_time = time.time()
                     perindex = 0
                     totalloss = 0.0
-                if epoch % save_epoch == 0 and epoch > 0:
+                if epoch % save_epoch == 0 and epoch > 0 and time.time() - last_save_time >= save_interval:
                     pred_key[ball_name[1][0]] = blue_ball_model.pred_label.name if name == "ssq" else blue_ball_model.pred_sequence.name
                     if not os.path.exists(syspath):
                         os.mkdir(syspath)
                     # saver = tf.compat.v1.train.Saver()
                     saver.save(sess, "{}{}.{}".format(syspath, blue_ball_model_name, extension))
+                    last_save_time = time.time()
                     
             except tf.errors.OutOfRangeError:
                 logger.info("训练完成！")
