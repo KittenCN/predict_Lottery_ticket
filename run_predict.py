@@ -245,18 +245,16 @@ if __name__ == '__main__':
             list_windows_size = []
             path = model_path + model_args[args.name]["pathname"]['name']
             dbtype_list = os.listdir(path)
-            try:
-                for dbtype in dbtype_list:
+            for dbtype in dbtype_list:
+                try:
                     list_windows_size.append(int(dbtype))
-                list_windows_size.sort(reverse=True)
-            except:
-                logger.info("请检查模型文件夹是否正确！")
-                logger.info(path)
-                if len(list_windows_size) > 0:
+                except:
                     pass
-                else:
-                    exit(0)
-        logger.info("windows_size: {}".format(list_windows_size))
+            if len(list_windows_size) == 0:
+                raise Exception("没有找到训练模型！")
+            list_windows_size.sort(reverse=True)   
+            logger.info(path)
+            logger.info("windows_size: {}".format(list_windows_size))
         for size in list_windows_size:
             tf.compat.v1.reset_default_graph()
             red_graph = tf.compat.v1.Graph()

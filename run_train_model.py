@@ -384,24 +384,37 @@ if __name__ == '__main__':
             list_windows_size = []
             path = model_path + model_args[args.name]["pathname"]['name']
             dbtype_list = os.listdir(path)
-            try:
-                for dbtype in dbtype_list:
+            for dbtype in dbtype_list:
+                try:
                     list_windows_size.append(int(dbtype))
-                list_windows_size.sort(reverse=True)
-            except:
-                logger.info("请检查模型文件夹是否正确！")
-                logger.info(path)
-                if len(list_windows_size) > 0:
+                except:
                     pass
-                else:
-                    exit(0)
+            if len(list_windows_size) == 0:
+                raise Exception("没有找到训练模型！")
+            list_windows_size.sort(reverse=True)   
+            logger.info(path)
             logger.info("windows_size: {}".format(list_windows_size))
             model_args[args.name]["model_args"]["red_epochs"] = 1
             model_args[args.name]["model_args"]["blue_epochs"] = 1
             model_args[args.name]["model_args"]["batch_size"] = 1
-        if args.epochs > 1:
-            model_args[args.name]["model_args"]["red_epochs"] = 1
-            model_args[args.name]["model_args"]["blue_epochs"] = 1
-        elif args.epochs <= 0:
-            raise Exception("训练轮数不能小于1！")
+        else:
+            if args.epochs > 1:
+                model_args[args.name]["model_args"]["red_epochs"] = 1
+                model_args[args.name]["model_args"]["blue_epochs"] = 1
+            elif args.epochs <= 0:
+                raise Exception("训练轮数不能小于1！")
+            if list_windows_size[0] == "-1":
+                list_windows_size = []
+                path = model_path + model_args[args.name]["pathname"]['name']
+                dbtype_list = os.listdir(path)
+                for dbtype in dbtype_list:
+                    try:
+                        list_windows_size.append(int(dbtype))
+                    except:
+                        pass
+                if len(list_windows_size) == 0:
+                    raise Exception("没有找到训练模型！")
+                list_windows_size.sort(reverse=True)   
+                logger.info(path)
+                logger.info("windows_size: {}".format(list_windows_size))
         run(args.name, list_windows_size)
