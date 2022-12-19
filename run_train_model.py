@@ -25,9 +25,9 @@ if gpus:
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="选择训练数据")
 parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
-parser.add_argument('--red_epochs', default=1, type=int, help="红球训练轮数")
+parser.add_argument('--red_epochs', default=101, type=int, help="红球训练轮数")
 parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮数")
-parser.add_argument('--batch_size', default=1, type=int, help="集合数量")
+parser.add_argument('--batch_size', default=512, type=int, help="集合数量")
 parser.add_argument('--predict_pro', default=0, type=int, help="更新batch_size")
 parser.add_argument('--epochs', default=1, type=int, help="训练轮数(红蓝球交叉训练)")
 args = parser.parse_args()
@@ -82,6 +82,7 @@ def train_red_ball_model(name, x_data, y_data):
     :param y_data: 训练标签
     :return:
     """
+    global last_save_time
     m_args = model_args[name]
     if name not in ["pls"]:
         x_data = x_data - 1
@@ -195,6 +196,7 @@ def train_blue_ball_model(name, x_data, y_data):
     :param y_data: 训练标签
     :return:
     """
+    global last_save_time
     m_args = model_args[name]
     x_data = x_data - 1
     y_data = y_data - 1
