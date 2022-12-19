@@ -251,6 +251,7 @@ if __name__ == '__main__':
                 list_windows_size.sort(reverse=True)
             except:
                 print("请检查模型文件夹是否正确！")
+                print(path)
                 exit(0)
         for size in list_windows_size:
             tf.compat.v1.reset_default_graph()
