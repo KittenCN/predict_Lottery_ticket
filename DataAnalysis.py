@@ -40,7 +40,9 @@ def sortcnt(datacnt, dataori, rangenum=81):
     return datacnt, dataori
 
 def getdata():
-    strdata = input("Shrinkage ratio (split by ',' ): ").split(',')
+    strdata = input("输入要统计的出现次数，“，”分隔, -1结束: ").split(',')
+    if strdata[0] == "-1":
+        return 
     data = [int(i) for i in strdata]
     oridata = []
     for i in range(81):
@@ -65,11 +67,11 @@ def dfs(oridata, booldata, getnums, dep, ans, cur):
     return ans
 
 def shrink(oridata, booldata):
-    getnums = int(input("How many numbers do you want to get? (-1 means over) "))
+    getnums = int(input("输入要缩水至几个数? (-1表示结束) "))
     while getnums != -1:
         ans = dfs(oridata,booldata, getnums, 0, [], [0] * getnums)
-        print("There are {} ways to get {} numbers.".format(len(ans), getnums))
-        strSumMinMax = input("input the min and max of the numbers? (split by ',') ").split(',')
+        print("一共有 {} 条结果，可缩水至 {} 个数.".format(len(ans), getnums))
+        strSumMinMax = input("输入和值最小和最大值，用‘，’分隔").split(',')
         SumMinMax = [int(i) for i in strSumMinMax]
         SumMin = SumMinMax[0]
         SumMax = SumMinMax[1]
@@ -77,20 +79,35 @@ def shrink(oridata, booldata):
             if sum(ans[i]) < SumMin or sum(ans[i]) > SumMax:
                 continue
             print(ans[i])
-        getnums = int(input("How many numbers do you want to get? (-1 means over) "))
+        getnums = int(input("输入要缩水至几个数? (-1表示结束) "))
 
-def hisanalysis():
+def sumanalyusis(limit=-1):
     oridata = pd.read_csv("{}{}".format(name_path["kl8"]["path"], data_file_name))
     data = oridata.iloc[:, 2:].values
     sumori = [i for i in range(1401)]
     sumcnt = [0] * 1401
+    linenum = 0
     for row in data:
+        if limit != -1 and linenum >= limit:
+            break
+        linenum += 1
         sum = 0
         for item in row:
             sum += item
         sumcnt[sum] += 1
     sumcnt, sumori = sortcnt(sumcnt, sumori, 1401)
-    sumtop = int(input("input num of the top sumcnt:"))
+    lastcnt = -1
+    for i in range(1401):
+        if sumori[i] == 0 or sumcnt[i] == 0:
+            continue
+        if lastcnt != sumcnt[i]:
+            print()
+            print("{}: {}".format(sumcnt[i], sumori[i]), end = " ")
+            lastcnt = sumcnt[i]
+        elif lastcnt == sumcnt[i]:
+            print(sumori[i], end = " ")
+    print()
+    sumtop = int(input("输入要统计前几位和值:"))
     lastsum = -1
     sumans = []
     sumanscnt = 0
@@ -108,19 +125,21 @@ def hisanalysis():
 
 if __name__ == "__main__":
     while True:
+        print()
+        print(" 1. 读取预测数据并分析\r\n 2. 缩水\r\n 3. 和值分析\r\n 0. 退出\r\n")
         choice = int(input("input your choice:"))
         if choice == 1:
             _datainrow = []
-            n = int(input("how many data do you want to generate? -1 means get data from file:"))
+            n = int(input("输入数据组数，-1为从文件输入:"))
             if n != -1:
                 for i in range(n):
-                    tmpdata = input("please input the data #{}: ".format(i + 1)).strip().split(' ')
+                    tmpdata = input("输入第 #{} 组数据: ".format(i + 1)).strip().split(' ')
                     for item in tmpdata:
                         _datainrow.append(int(item))
                     _datainrow.append(int(item) for item in tmpdata)
                     ori_data.append(tmpdata)
             else:
-                filename = input("input the file name: ")
+                filename = input("输入文件名: ")
                 fileadd = "{}{}{}{}".format(predict_path, "kl8/", filename, ".csv")
                 ori_data = pd.read_csv(fileadd).values
                 for row in ori_data:
@@ -128,7 +147,7 @@ if __name__ == "__main__":
                         _datainrow.append(item)           
             datacnt, dataori = BasicAnalysis(ori_data)
             print()
-            currentnums = input("input current numbaers, -1 means oever: ").split(' ')
+            currentnums = input("输入当前获奖数据，-1为结束： ").split(' ')
             if currentnums[0] != -1:
                 curnums = [int(i) for i in currentnums]
                 curcnt = 0
@@ -138,7 +157,7 @@ if __name__ == "__main__":
                             curcnt += 1
                             break
                 totalnums = len(list(set(_datainrow)))
-                print("total success / total nums: {} / {}".format(curcnt, totalnums))
+                print("命中数 / 总预测数: {} / {}".format(curcnt, totalnums))
                 lastcnt = -1
                 for i in range(81):
                     if dataori[i] == 0:
@@ -151,13 +170,14 @@ if __name__ == "__main__":
                         elif lastcnt == datacnt[i]:
                             print(dataori[i], end = " ")
                 print()
+                oridata, booldata = getdata()
+                print(oridata)
 
         elif choice == 2:
             oridata, booldata = getdata()
-            print()
             shrink(oridata, booldata)
-            print()
         elif choice == 3:
-            hisanalysis()
+            limit = int(input("输入要分析的数据组数，-1为全部:"))
+            sumanalyusis(limit)
         if choice == 0:
             break
