@@ -156,13 +156,13 @@ def train_red_ball_model(name, x_data, y_data):
                     logger.info("w_size: {}, index: {}, loss: {:.4e}, tag: {}, pred: {}".format(
                         str(m_args["model_args"]["windows_size"]), str(index) + '/' + str(totalindex), loss_, y[0] + hotfixed, pred[0] + hotfixed)
                     )
-                    if args.predict_pro == 1:
-                        pred_key[ball_name[0][0]] = red_ball_model.pred_sequence.name
-                        if not os.path.exists(syspath):
-                            os.makedirs(syspath)
-                        # saver = tf.compat.v1.train.Saver()
-                        saver.save(sess, "{}{}.{}".format(syspath, red_ball_model_name, extension))
-                        break
+                    # if args.predict_pro == 1:
+                    #     pred_key[ball_name[0][0]] = red_ball_model.pred_sequence.name
+                    #     if not os.path.exists(syspath):
+                    #         os.makedirs(syspath)
+                    #     # saver = tf.compat.v1.train.Saver()
+                    #     saver.save(sess, "{}{}.{}".format(syspath, red_ball_model_name, extension))
+                    #     break
                 if index % epochindex == 0:
                     epoch += 1
                     logger.info("epoch: {}, cost time: {:.4f}, ETA: {:.4f}, per_loss: {:.4e}".format(epoch, time.time() - epoch_start_time, (time.time() - epoch_start_time) * (m_args["model_args"]["red_epochs"] - epoch - 1), totalloss / perindex / m_args["model_args"]["batch_size"]))
@@ -276,13 +276,13 @@ def train_blue_ball_model(name, x_data, y_data):
                         logger.info("w_size: {}, epoch: {}, loss: {:.4e}, tag: {}, pred: {}".format(
                             str(m_args["model_args"]["windows_size"]), str(index) + '/' + str(totalindex), loss_, np.argmax(y[0]) + 1, pred[0] + 1)
                         )
-                        if args.predict_pro == 1:
-                            pred_key[ball_name[1][0]] = blue_ball_model.pred_label.name if name == "ssq" else blue_ball_model.pred_sequence.name
-                            if not os.path.exists(syspath):
-                                os.mkdir(syspath)
-                            # saver = tf.compat.v1.train.Saver()
-                            saver.save(sess, "{}{}.{}".format(syspath, blue_ball_model_name, extension))
-                            break
+                        # if args.predict_pro == 1:
+                        #     pred_key[ball_name[1][0]] = blue_ball_model.pred_label.name if name == "ssq" else blue_ball_model.pred_sequence.name
+                        #     if not os.path.exists(syspath):
+                        #         os.mkdir(syspath)
+                        #     # saver = tf.compat.v1.train.Saver()
+                        #     saver.save(sess, "{}{}.{}".format(syspath, blue_ball_model_name, extension))
+                        #     break
                 else:
                     _, loss_, pred = sess.run([
                         train_step, blue_ball_model.loss, blue_ball_model.pred_sequence
@@ -297,13 +297,13 @@ def train_blue_ball_model(name, x_data, y_data):
                         logger.info("w_size: {}, epoch: {}, loss: {:.4e}, tag: {}, pred: {}".format(
                             str(m_args["model_args"]["windows_size"]), str(index) + '/' + str(totalindex), loss_,y[0] + 1, pred[0] + 1)
                         )
-                        if args.predict_pro == 1:
-                            pred_key[ball_name[1][0]] = blue_ball_model.pred_label.name if name == "ssq" else blue_ball_model.pred_sequence.name
-                            if not os.path.exists(syspath):
-                                os.mkdir(syspath)
-                            # saver = tf.compat.v1.train.Saver()
-                            saver.save(sess, "{}{}.{}".format(syspath, blue_ball_model_name, extension))
-                            break
+                        # if args.predict_pro == 1:
+                        #     pred_key[ball_name[1][0]] = blue_ball_model.pred_label.name if name == "ssq" else blue_ball_model.pred_sequence.name
+                        #     if not os.path.exists(syspath):
+                        #         os.mkdir(syspath)
+                        #     # saver = tf.compat.v1.train.Saver()
+                        #     saver.save(sess, "{}{}.{}".format(syspath, blue_ball_model_name, extension))
+                        #     break
                 if index % epochindex == 0:
                     epoch += 1
                     logger.info("epoch: {}, cost time: {:.4f}, ETA: {:.4f}, per_loss: {:.4e}".format(epoch, time.time() - epoch_start_time, (time.time() - epoch_start_time) * (m_args["model_args"]["blue_epochs"] - epoch - 1), totalloss / perindex / m_args["model_args"]["batch_size"]))
