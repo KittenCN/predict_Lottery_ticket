@@ -152,7 +152,7 @@ def train_red_ball_model(name, x_data, y_data):
                 })
                 perindex += 1
                 totalloss += loss_
-                if index % 10 == 0:
+                if index % 100 == 0:
                     if name not in ["pls"]:
                         hotfixed = 1
                     else:
@@ -278,7 +278,7 @@ def train_blue_ball_model(name, x_data, y_data):
                     })
                     perindex += 1
                     totalloss += loss_
-                    if index % 10 == 0:
+                    if index % 100 == 0:
                         logger.info("w_size: {}, epoch: {}, loss: {:.4e}, tag: {}, pred: {}".format(
                             str(m_args["model_args"]["windows_size"]), str(index) + '/' + str(totalindex), loss_, np.argmax(y[0]) + 1, pred[0] + 1)
                         )
@@ -299,7 +299,7 @@ def train_blue_ball_model(name, x_data, y_data):
                     })
                     perindex += 1
                     totalloss += loss_
-                    if index % 10 == 0:
+                    if index % 100 == 0:
                         logger.info("w_size: {}, epoch: {}, loss: {:.4e}, tag: {}, pred: {}".format(
                             str(m_args["model_args"]["windows_size"]), str(index) + '/' + str(totalindex), loss_,y[0] + 1, pred[0] + 1)
                         )
