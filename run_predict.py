@@ -256,6 +256,7 @@ if __name__ == '__main__':
                     pass
                 else:
                     exit(0)
+        print("windows_size: {}".format(list_windows_size))
         for size in list_windows_size:
             tf.compat.v1.reset_default_graph()
             red_graph = tf.compat.v1.Graph()
