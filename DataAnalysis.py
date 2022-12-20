@@ -11,6 +11,8 @@ def BasicAnalysis(oridata):
     # Return: None
     # Author: KittenCN
     global datacnt, dataori
+    datacnt = [0] * 81
+    dataori = [i for i in range(81)]
     for row in oridata:
         for item in row:
             datacnt[item] += 1
