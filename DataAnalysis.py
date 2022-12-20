@@ -148,7 +148,7 @@ if __name__ == "__main__":
             datacnt, dataori = BasicAnalysis(ori_data)
             print()
             currentnums = input("输入当前获奖数据，-1为结束： ").split(' ')
-            if currentnums[0] != -1:
+            if currentnums[0] != "-1":
                 curnums = [int(i) for i in currentnums]
                 curcnt = 0
                 for item in curnums:
