@@ -44,7 +44,7 @@ def sortcnt(datacnt, dataori, rangenum=81):
 def getdata():
     strdata = input("输入要统计的出现次数，“，”分隔, -1结束: ").split(',')
     if strdata[0] == "-1":
-        return 
+        return None, None
     data = [int(i) for i in strdata]
     oridata = []
     for i in range(81):
@@ -144,6 +144,8 @@ if __name__ == "__main__":
                 filename = input("输入文件名: ")
                 fileadd = "{}{}{}{}".format(predict_path, "kl8/", filename, ".csv")
                 ori_data = pd.read_csv(fileadd).values
+                limit = int(input("共有{}组数据，输入要分析前多少组：".format(len(ori_data))))
+                ori_data = ori_data[:limit]
                 for row in ori_data:
                     for item in row:
                         _datainrow.append(item)           
@@ -153,12 +155,16 @@ if __name__ == "__main__":
             if currentnums[0] != "-1":
                 curnums = [int(i) for i in currentnums]
                 curcnt = 0
+                tmp_cnt = [0] * len(ori_data)
                 for item in curnums:
-                    for row in ori_data:
+                    for i, row in enumerate(ori_data):
                         if item in row:
                             curcnt += 1
+                            tmp_cnt[i] += 1
                             break
                 totalnums = len(list(set(_datainrow)))
+                for i in range(len(tmp_cnt)):
+                    print("第{}组数据中，当前获奖数据出现的次数为{}次，概率为：{:.2f}%".format(i + 1, tmp_cnt[i], tmp_cnt[i] / totalnums * 100))
                 print("命中数 / 总预测数: {} / {}".format(curcnt, totalnums))
                 lastcnt = -1
                 for i in range(81):

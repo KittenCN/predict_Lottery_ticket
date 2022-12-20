@@ -2,6 +2,7 @@
 __pycache__/
 model/
 data/
+predict/
 *.py[cod]
 *$py.class
 *.csv
