@@ -172,8 +172,8 @@ if __name__ == "__main__":
                         elif lastcnt == datacnt[i]:
                             print(dataori[i], end = " ")
                 print()
-                oridata, booldata = getdata()
-                print(oridata)
+            oridata, booldata = getdata()
+            print(oridata)
 
         elif choice == 2:
             oridata, booldata = getdata()
