@@ -30,6 +30,7 @@ parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮�
 parser.add_argument('--batch_size', default=1, type=int, help="集合数量")
 parser.add_argument('--predict_pro', default=0, type=int, help="更新batch_size")
 parser.add_argument('--epochs', default=1, type=int, help="训练轮数(红蓝球交叉训练)")
+parser.add_argument('--cq', default=0, type=int, help="是否使用出球顺序，0：不使用（即按从小到大排序），1：使用")
 args = parser.parse_args()
 
 pred_key = {}
@@ -46,7 +47,10 @@ def create_train_data(name, windows):
     """
     global ori_data
     if ori_data is None:
-        ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
+        if args.cq == 1 and args.name == "kl8":
+            ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_cq_file_name))
+        else:
+            ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
     data = ori_data.copy()
     if not len(data):
         raise logger.error(" 请执行 get_data.py 进行数据下载！")

@@ -41,8 +41,8 @@ def get_current_number(name):
         current_num = soup.find("div", class_="wrap_datachart").find("input", id="end")["value"]
     return current_num
 
-def spider_cq(name="kl8", start=1, end=999999, type="train"):
-    if name == "kl8":
+def spider_cq(name="kl8", start=1, end=999999, mode="train"):
+    if name == "kl8" and mode == "train":
         url = "https://data.917500.cn/kl81000_cq_asc.txt"
         r = requests.get(url, headers = {'User-agent': 'chrome'})
         data = []
@@ -62,6 +62,8 @@ def spider_cq(name="kl8", start=1, end=999999, type="train"):
         df = pd.DataFrame(data)
         df.to_csv("{}{}".format(name_path[name]["path"], data_cq_file_name), encoding="utf-8",index=False)
         return pd.DataFrame(data)
+    else:
+        spider(name, start, end, mode)
 
 def spider(name="ssq", start=1, end=999999, mode="train", windows_size=0):
     """ 爬取历史数据
@@ -160,5 +162,5 @@ def spider(name="ssq", start=1, end=999999, mode="train", windows_size=0):
                 logger.warning("抱歉，没有找到数据源！")
         return pd.DataFrame(data)
 
-if __name__ == "__main__":
-    spider_cq("kl8", "20180101", "20180110", "train")
+# if __name__ == "__main__":
+#     spider_cq("kl8", "20180101", "20180110", "train")
