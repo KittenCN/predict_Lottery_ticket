@@ -41,6 +41,27 @@ def get_current_number(name):
         current_num = soup.find("div", class_="wrap_datachart").find("input", id="end")["value"]
     return current_num
 
+def spider_cq(name="kl8", start=1, end=999999, type="train"):
+    if name == "kl8":
+        url = "https://data.917500.cn/kl81000_cq_asc.txt"
+        r = requests.get(url, headers = {'User-agent': 'chrome'})
+        data = []
+        for line in r.text.split('\n'):
+            if len(line) < 10:
+                continue
+            item = dict()
+            line = line.split(',')
+            line = line[0].split(' ')
+            # item[u"id"] = line[0]
+            strdate = line[1].split('-')
+            item[u"期数"] = line[0]
+            item[u"日期"] = strdate[0] + strdate[1] + strdate[2]  
+            for i in range(1, 21):
+                item[u"红球_{}".format(i)] = line[i + 1]
+            data.append(item)
+        df = pd.DataFrame(data)
+        df.to_csv("{}{}".format(name_path[name]["path"], data_cq_file_name), encoding="utf-8",index=False)
+        return pd.DataFrame(data)
 
 def spider(name="ssq", start=1, end=999999, mode="train", windows_size=0):
     """ 爬取历史数据
@@ -138,3 +159,6 @@ def spider(name="ssq", start=1, end=999999, mode="train", windows_size=0):
             else:
                 logger.warning("抱歉，没有找到数据源！")
         return pd.DataFrame(data)
+
+if __name__ == "__main__":
+    spider_cq("kl8", "20180101", "20180110", "train")
