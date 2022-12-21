@@ -121,6 +121,13 @@ def train_red_ball_model(name, x_data, y_data):
             saver.restore(sess, "{}red_ball_model.ckpt".format(syspath))
             logger.info("已加载红球模型！")
 
+        if len(x_data) % m_args["model_args"]["batch_size"] != 0:
+            diff = m_args["model_args"]["batch_size"] - (len(x_data) % m_args["model_args"]["batch_size"])
+            while diff > 0:
+                random_index = np.random.randint(0, data_len)
+                x_data = np.append(x_data, [x_data[random_index]], axis=0)
+                y_data = np.append(y_data, [y_data[random_index]], axis=0)
+                diff -= 1
         dataset = tf.compat.v1.data.Dataset.from_tensor_slices((x_data, y_data))
         dataset = dataset.shuffle(buffer_size=data_len)
         dataset = dataset.batch(m_args["model_args"]["batch_size"])
@@ -138,13 +145,13 @@ def train_red_ball_model(name, x_data, y_data):
             try:
                 tf.compat.v1.get_default_graph().finalize()
                 x, y = sess.run(nextelement)
-                batch_size = len(x)
-                diff = m_args["model_args"]["batch_size"] - batch_size
-                while diff > 0:
-                    random_index = np.random.randint(0, data_len)
-                    x = np.append(x, [x_data[random_index]], axis=0)
-                    y = np.append(y, [y_data[random_index]], axis=0)
-                    diff -= 1
+                # batch_size = len(x)
+                # diff = m_args["model_args"]["batch_size"] - batch_size
+                # while diff > 0:
+                #     random_index = np.random.randint(0, data_len)
+                #     x = np.append(x, [x_data[random_index]], axis=0)
+                #     y = np.append(y, [y_data[random_index]], axis=0)
+                #     diff -= 1
                 index += 1
                 _, loss_, pred = sess.run([
                     train_step, red_ball_model.loss, red_ball_model.pred_sequence
@@ -247,7 +254,14 @@ def train_blue_ball_model(name, x_data, y_data):
             # saver = tf.compat.v1.train.Saver()
             saver.restore(sess, "{}blue_ball_model.ckpt".format(syspath))
             logger.info("已加载蓝球模型！")
-        
+
+        if len(x_data) % m_args["model_args"]["batch_size"] != 0:
+            diff = m_args["model_args"]["batch_size"] - (len(x_data) % m_args["model_args"]["batch_size"])
+            while diff > 0:
+                random_index = np.random.randint(0, data_len)
+                x_data = np.append(x_data, [x_data[random_index]], axis=0)
+                y_data = np.append(y_data, [y_data[random_index]], axis=0)
+                diff -= 1
         dataset = tf.compat.v1.data.Dataset.from_tensor_slices((x_data, y_data))
         dataset = dataset.shuffle(buffer_size=data_len)
         dataset = dataset.batch(m_args["model_args"]["batch_size"])
@@ -265,13 +279,13 @@ def train_blue_ball_model(name, x_data, y_data):
             try:
                 tf.compat.v1.get_default_graph().finalize()
                 x, y = sess.run(nextelement)
-                batch_size = len(x)
-                diff = m_args["model_args"]["batch_size"] - batch_size
-                while diff > 0:
-                    random_index = np.random.randint(0, data_len)
-                    x = np.append(x, [x_data[random_index]], axis=0)
-                    y = np.append(y, [y_data[random_index]], axis=0)
-                    diff -= 1
+                # batch_size = len(x)
+                # diff = m_args["model_args"]["batch_size"] - batch_size
+                # while diff > 0:
+                #     random_index = np.random.randint(0, data_len)
+                #     x = np.append(x, [x_data[random_index]], axis=0)
+                #     y = np.append(y, [y_data[random_index]], axis=0)
+                #     diff -= 1
                 index += 1
                 if name == "ssq":
                     _, loss_, pred = sess.run([
