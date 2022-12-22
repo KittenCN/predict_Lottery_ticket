@@ -18,6 +18,7 @@ import pandas as pd
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="选择训练数据")
 parser.add_argument('--windows_size', default='-1', type=str, help="训练窗口大小,如有多个，用'，'隔开")
+parser.add_argument('--cq', default=1, type=int, help="是否使用出球顺序，0：不使用（即按从小到大排序），1：使用")
 args = parser.parse_args()
 filedata = []
 filetitle = []
@@ -213,7 +214,10 @@ def run(name):
     global filedata, filetitle
     windows_size = model_args[name]["model_args"]["windows_size"]
     diff_number = windows_size - 1
-    data = spider(name, str(int(current_number) - diff_number), current_number, "predict")
+    if args.cq == 0:
+        data = spider(name, str(int(current_number) - diff_number), current_number, "predict")
+    else:
+        data = spider_cq(name, str(int(current_number) - diff_number), current_number, "predict")
     logger.info("【{}】预测期号：{} 窗口大小:{}".format(name_path[name]["name"], int(current_number) + 1, windows_size))
     predict_features_ = try_error(name, data, windows_size)
     # logger.info("预测结果：{}".format(get_final_result(name, predict_features_)))

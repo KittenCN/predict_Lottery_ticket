@@ -41,12 +41,13 @@ def get_current_number(name):
         current_num = soup.find("div", class_="wrap_datachart").find("input", id="end")["value"]
     return current_num
 
-def spider_cq(name="kl8", start=1, end=999999, mode="train"):
+def spider_cq(name="kl8", start=1, end=999999, mode="train", windows_size=0):
     if name == "kl8" and mode == "train":
         url = "https://data.917500.cn/kl81000_cq_asc.txt"
         r = requests.get(url, headers = {'User-agent': 'chrome'})
         data = []
-        for line in r.text.split('\n'):
+        lines = sorted(r.text.split('\n'), reverse=True)
+        for line in lines:
             if len(line) < 10:
                 continue
             item = dict()
@@ -54,13 +55,25 @@ def spider_cq(name="kl8", start=1, end=999999, mode="train"):
             line = line[0].split(' ')
             # item[u"id"] = line[0]
             strdate = line[1].split('-')
-            item[u"期数"] = line[0]
-            item[u"日期"] = strdate[0] + strdate[1] + strdate[2]  
+            item[u"日期"] = strdate[0] + strdate[1] + strdate[2]
+            item[u"期数"] = line[0]  
             for i in range(1, 21):
                 item[u"红球_{}".format(i)] = line[i + 1]
             data.append(item)
         df = pd.DataFrame(data)
         df.to_csv("{}{}".format(name_path[name]["path"], data_cq_file_name), encoding="utf-8",index=False)
+        return pd.DataFrame(data)
+    elif name == "kl8" and mode == "predict":
+        ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_cq_file_name))  
+        data = []
+        if windows_size > 0:
+            ori_data = ori_data[0:windows_size]
+        for i in range(len(ori_data)):
+            item = dict()
+            item[u"期数"] = ori_data.iloc[i, 1]
+            for j in range(20):
+                item[u"红球_{}".format(j+1)] = ori_data.iloc[i, j+2]
+            data.append(item)
         return pd.DataFrame(data)
     else:
         spider(name, start, end, mode)
