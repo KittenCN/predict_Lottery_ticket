@@ -31,7 +31,7 @@ parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮�
 parser.add_argument('--batch_size', default=1, type=int, help="集合数量")
 parser.add_argument('--predict_pro', default=0, type=int, help="更新batch_size")
 parser.add_argument('--epochs', default=1, type=int, help="训练轮数(红蓝球交叉训练)")
-parser.add_argument('--cq', default=1, type=int, help="是否使用出球顺序，0：不使用（即按从小到大排序），1：使用")
+parser.add_argument('--cq', default=0, type=int, help="是否使用出球顺序，0：不使用（即按从小到大排序），1：使用")
 parser.add_argument('--download_data', default=1, type=int, help="是否下载数据")
 args = parser.parse_args()
 
