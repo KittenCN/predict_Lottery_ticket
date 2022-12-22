@@ -386,7 +386,10 @@ def run(name, windows_size):
         for size in windows_size:
             model_args[name]["model_args"]["windows_size"] = int(size)
             action(name)
-    logger.info("总耗时: {:.4f}".format(time.time() - total_start_time))
+    epochs = model_args[args.name]["model_args"]["red_epochs"]
+    if epochs == 0:
+        epochs = model_args[args.name]["model_args"]["blue_epochs"]
+    logger.info("总耗时: {:.4f}, 平均效率：{:.4f}".format(time.time() - total_start_time, epochs / ((time.time() - total_start_time) / 3600)))
 
 if __name__ == '__main__':
     list_windows_size = args.windows_size.split(",")
