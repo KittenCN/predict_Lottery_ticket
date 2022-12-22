@@ -49,8 +49,6 @@ class LstmWithCRFModel(object):
             self._outputs, self._tag_indices, self._sequence_length
         )
         self._loss = tf.reduce_mean(-self._log_likelihood)
-        if self._loss < 0:
-            self._loss = tf.nn.softmax(self._loss, axis=1)
         #  构建预测
         self._pred_sequence, self._viterbi_score = crf_decode(
             self._outputs, self._transition_params, self._sequence_length
@@ -106,7 +104,7 @@ class SignalLstmModel(object):
             final_lstm = LSTM(hidden_size, recurrent_dropout=0.2)(lstm)
         self._outputs = tf.keras.layers.Dense(outputs_size, activation="softmax")(final_lstm)
         # 构建损失函数
-        self._loss = - tf.reduce_sum(self._tag_indices * tf.math.log(self._outputs))
+        self._loss = - tf.reduce_mean(self._tag_indices * tf.math.log(self._outputs))
         # 预测结果
         self._pred_label = tf.argmax(self.outputs, axis=1)
 
