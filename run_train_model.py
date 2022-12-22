@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 import warnings
 from config import *
+from get_data import run as get_data_run
 from modeling import LstmWithCRFModel, SignalLstmModel, tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 from loguru import logger
@@ -46,8 +47,10 @@ def create_train_data(name, windows):
     :return:
     """
     global ori_data
+    print("正在创建【{}】数据集...".format(name_path[name]["name"]))
+    get_data_run(name=name)
     if ori_data is None:
-        if args.cq == 1 and args.name == "kl8":
+        if args.cq == 1 and name == "kl8":
             ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_cq_file_name))
         else:
             ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
