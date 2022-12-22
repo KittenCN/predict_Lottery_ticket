@@ -31,7 +31,8 @@ parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮�
 parser.add_argument('--batch_size', default=1, type=int, help="集合数量")
 parser.add_argument('--predict_pro', default=0, type=int, help="更新batch_size")
 parser.add_argument('--epochs', default=1, type=int, help="训练轮数(红蓝球交叉训练)")
-parser.add_argument('--cq', default=0, type=int, help="是否使用出球顺序，0：不使用（即按从小到大排序），1：使用")
+parser.add_argument('--cq', default=1, type=int, help="是否使用出球顺序，0：不使用（即按从小到大排序），1：使用")
+parser.add_argument('--download_data', default=1, type=int, help="是否下载数据")
 args = parser.parse_args()
 
 pred_key = {}
@@ -47,8 +48,6 @@ def create_train_data(name, windows):
     :return:
     """
     global ori_data
-    print("正在创建【{}】数据集...".format(name_path[name]["name"]))
-    get_data_run(name=name)
     if ori_data is None:
         if args.cq == 1 and name == "kl8":
             ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_cq_file_name))
@@ -401,6 +400,9 @@ if __name__ == '__main__':
     elif not args.windows_size:
         raise Exception("窗口大小不能为空！")
     else:
+        if args.download_data == 1:
+            print("正在创建【{}】数据集...".format(name_path[args.name]["name"]))
+            get_data_run(name=args.name, cq=args.cq)
         model_args[args.name]["model_args"]["red_epochs"] = int(args.red_epochs)
         model_args[args.name]["model_args"]["blue_epochs"] = int(args.blue_epochs)
         model_args[args.name]["model_args"]["batch_size"] = int(args.batch_size)
