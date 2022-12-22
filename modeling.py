@@ -48,7 +48,7 @@ class LstmWithCRFModel(object):
         self._log_likelihood, self._transition_params = crf_log_likelihood(
             self._outputs, self._tag_indices, self._sequence_length
         )
-        self._loss = tf.reduce_sum(-self._log_likelihood)
+        self._loss = tf.reduce_mean(-self._log_likelihood)
         if self._loss < 0:
             self._loss = tf.nn.softmax(self._loss, axis=1)
         #  构建预测
