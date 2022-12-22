@@ -10,8 +10,8 @@ import argparse
 import numpy as np
 import pandas as pd
 import warnings
+from common import get_data_run
 from config import *
-from get_data import run as get_data_run
 from modeling import LstmWithCRFModel, SignalLstmModel, tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 from loguru import logger
