@@ -182,7 +182,7 @@ def train_red_ball_model(name, x_data, y_data):
                     #     break
                 if index % epochindex == 0:
                     epoch += 1
-                    logger.info("epoch: {}, cost time: {:.4f}, ETA: {:.4f}, per_loss: {:.4e}".format(epoch, time.time() - epoch_start_time, (time.time() - epoch_start_time) * (m_args["model_args"]["red_epochs"] - epoch - 1), totalloss / perindex / m_args["model_args"]["batch_size"]))
+                    logger.info("epoch: {}, cost time: {:.4f}, ETA: {:.4f}, per_loss: {:.4e}".format(epoch, time.time() - epoch_start_time, (time.time() - epoch_start_time) * (m_args["model_args"]["red_epochs"] - epoch - 1), totalloss / perindex))
                     epoch_start_time = time.time()
                     perindex = 0
                     totalloss = 0.0
@@ -332,7 +332,7 @@ def train_blue_ball_model(name, x_data, y_data):
                         #     break
                 if index % epochindex == 0:
                     epoch += 1
-                    logger.info("epoch: {}, cost time: {:.4f}, ETA: {:.4f}, per_loss: {:.4e}".format(epoch, time.time() - epoch_start_time, (time.time() - epoch_start_time) * (m_args["model_args"]["blue_epochs"] - epoch - 1), totalloss / perindex / m_args["model_args"]["batch_size"]))
+                    logger.info("epoch: {}, cost time: {:.4f}, ETA: {:.4f}, per_loss: {:.4e}".format(epoch, time.time() - epoch_start_time, (time.time() - epoch_start_time) * (m_args["model_args"]["blue_epochs"] - epoch - 1), totalloss / perindex))
                     epoch_start_time = time.time()
                     perindex = 0
                     totalloss = 0.0
