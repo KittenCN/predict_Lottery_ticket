@@ -49,6 +49,8 @@ class LstmWithCRFModel(object):
             self._outputs, self._tag_indices, self._sequence_length
         )
         self._loss = tf.reduce_sum(-self._log_likelihood)
+        if self._loss < 0:
+            self._loss = tf.nn.softmax(self._loss, axis=1)
         #  构建预测
         self._pred_sequence, self._viterbi_score = crf_decode(
             self._outputs, self._transition_params, self._sequence_length
