@@ -400,7 +400,7 @@ if __name__ == '__main__':
     elif not args.windows_size:
         raise Exception("窗口大小不能为空！")
     else:
-        if args.download_data == 1 and args.predict_pro == 0:
+        if args.download_data == 1 and args.predict_pro == 0 and int(time.strftime("%H", time.localtime())) < 20:
             print("正在创建【{}】数据集...".format(name_path[args.name]["name"]))
             get_data_run(name=args.name, cq=args.cq)
         model_args[args.name]["model_args"]["red_epochs"] = int(args.red_epochs)
