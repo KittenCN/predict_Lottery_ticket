@@ -448,6 +448,9 @@ def run(name, windows_size):
                 args.blue_epochs = _tmpBlueEpochs
                 model_args[args.name]["model_args"]["batch_size"] = _tmpBatchSize
                 args.batch_size = _tmpBatchSize
+            if args.download_data == 1 and args.predict_pro == 0 and int(time.strftime("%H", time.localtime())) >=23 and os.path.exists(fileadd):
+                print("正在创建【{}】数据集...".format(name_path[args.name]["name"]))
+                get_data_run(name=args.name, cq=args.cq)
 
     epochs = model_args[args.name]["model_args"]["red_epochs"]
     if epochs == 0:
