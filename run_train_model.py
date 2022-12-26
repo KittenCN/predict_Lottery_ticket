@@ -3,6 +3,7 @@
 Author: BigCat
 Modifier: KittenCN
 """
+import datetime
 import os
 import time
 import json
@@ -10,7 +11,8 @@ import argparse
 import numpy as np
 import pandas as pd
 import warnings
-from common import get_data_run
+from common import get_data_run, setMiniargs, get_current_number, run_predict, predict_run,init, red_graph, blue_graph, pred_key_d, red_sess, blue_sess
+from common import tf as predict_tf
 from config import *
 from modeling import LstmWithCRFModel, SignalLstmModel, tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -25,7 +27,7 @@ if gpus:
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="选择训练数据")
-parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
+parser.add_argument('--windows_size', default='3,5', type=str, help="训练窗口大小,如有多个，用'，'隔开")
 parser.add_argument('--red_epochs', default=1, type=int, help="红球训练轮数")
 parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮数")
 parser.add_argument('--batch_size', default=1, type=int, help="集合数量")
@@ -388,6 +390,65 @@ def run(name, windows_size):
         for size in windows_size:
             model_args[name]["model_args"]["windows_size"] = int(size)
             action(name)
+            filename = datetime.datetime.now().strftime('%Y%m%d')
+            filepath = "{}{}/".format(predict_path, args.name)
+            fileadd = "{}{}{}".format(filepath, filename, ".csv")
+            if args.predict_pro == 0 and int(time.strftime("%H", time.localtime())) >=0 and os.path.exists(fileadd) == False:
+                logger.info("开始预测【{}】...".format(name_path[name]["name"]))
+                _tmpRedEpochs =  model_args[args.name]["model_args"]["red_epochs"]
+                _tmpBlueEpochs = model_args[args.name]["model_args"]["blue_epochs"]
+                _tmpBatchSize = model_args[args.name]["model_args"]["batch_size"]
+                if model_args[args.name]["model_args"]["red_epochs"] >= 1:
+                    model_args[args.name]["model_args"]["red_epochs"] = 1
+                    args.red_eopchs = 1
+                if model_args[args.name]["model_args"]["blue_epochs"] >= 1:
+                    model_args[args.name]["model_args"]["blue_epochs"] = 1
+                    args.blue_epochs = 1
+                model_args[args.name]["model_args"]["batch_size"] = 1
+                args.batch_size = 1
+                init()
+                setMiniargs(args)
+                for w_size in windows_size:
+                    model_args[name]["model_args"]["windows_size"] = int(w_size)
+                    train_data = create_train_data(args.name, model_args[name]["model_args"]["windows_size"])
+                    if model_args[name]["model_args"]["red_epochs"] > 0:
+                        tf.compat.v1.reset_default_graph()  # 重置网络图
+                        logger.info("开始训练【{}】红球模型...".format(name_path[name]["name"]))
+                        start_time = time.time()
+                        train_red_ball_model(name, x_data=train_data["red"]["x_data"], y_data=train_data["red"]["y_data"])
+                        logger.info("训练耗时: {:.4f}".format(time.time() - start_time))
+
+                    if name not in ["pls", "kl8"] and model_args[name]["model_args"]["blue_epochs"] > 0:
+                        tf.compat.v1.reset_default_graph()  # 重置网络图
+
+                        logger.info("开始训练【{}】蓝球模型...".format(name_path[name]["name"]))
+                        start_time = time.time()
+                        train_blue_ball_model(name, x_data=train_data["blue"]["x_data"], y_data=train_data["blue"]["y_data"])
+                        logger.info("训练耗时: {:.4f}".format(time.time() - start_time))
+
+                    # 保存预测关键结点名
+                    with open("{}/{}".format(model_path + model_args[args.name]["pathname"]['name'] + str(model_args[args.name]["model_args"]["windows_size"]), pred_key_name), "w") as f:
+                        json.dump(pred_key, f)
+
+                    predict_tf.compat.v1.reset_default_graph()
+                    red_graph = predict_tf.compat.v1.Graph()
+                    blue_graph = predict_tf.compat.v1.Graph()
+                    pred_key_d = {}
+                    red_sess = predict_tf.compat.v1.Session(graph=red_graph)
+                    blue_sess = predict_tf.compat.v1.Session(graph=blue_graph)
+                    current_number = get_current_number(args.name)
+                    run_predict(int(w_size))
+                    _data, _title = predict_run(args.name)
+                df = pd.DataFrame(_data, columns=_title)
+                df.to_csv(fileadd, encoding="utf-8",index=False)
+
+                model_args[args.name]["model_args"]["red_epochs"] = _tmpRedEpochs
+                args.red_epochs = _tmpRedEpochs
+                model_args[args.name]["model_args"]["blue_epochs"] = _tmpBlueEpochs
+                args.blue_epochs = _tmpBlueEpochs
+                model_args[args.name]["model_args"]["batch_size"] = _tmpBatchSize
+                args.batch_size = _tmpBatchSize
+
     epochs = model_args[args.name]["model_args"]["red_epochs"]
     if epochs == 0:
         epochs = model_args[args.name]["model_args"]["blue_epochs"]

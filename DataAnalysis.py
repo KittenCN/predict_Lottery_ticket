@@ -1,3 +1,8 @@
+# -*- coding:utf-8 -*-
+"""
+Author: KittenCN
+"""
+
 import pandas as pd
 from config import *
 
