@@ -440,6 +440,8 @@ def run(name, windows_size):
                     run_predict(int(w_size))
                     _data, _title = predict_run(args.name)
                 df = pd.DataFrame(_data, columns=_title)
+                if not os.path.exists(filepath):
+                    os.makedirs(filepath)
                 df.to_csv(fileadd, encoding="utf-8",index=False)
 
                 model_args[args.name]["model_args"]["red_epochs"] = _tmpRedEpochs
