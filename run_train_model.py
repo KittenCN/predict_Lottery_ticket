@@ -27,7 +27,7 @@ if gpus:
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="选择训练数据")
-parser.add_argument('--windows_size', default='3,5', type=str, help="训练窗口大小,如有多个，用'，'隔开")
+parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
 parser.add_argument('--red_epochs', default=1, type=int, help="红球训练轮数")
 parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮数")
 parser.add_argument('--batch_size', default=1, type=int, help="集合数量")
@@ -393,7 +393,7 @@ def run(name, windows_size):
             filename = datetime.datetime.now().strftime('%Y%m%d')
             filepath = "{}{}/".format(predict_path, args.name)
             fileadd = "{}{}{}".format(filepath, filename, ".csv")
-            if args.predict_pro == 0 and int(time.strftime("%H", time.localtime())) >=0 and os.path.exists(fileadd) == False:
+            if args.predict_pro == 0 and int(time.strftime("%H", time.localtime())) >=20 and os.path.exists(fileadd) == False:
                 logger.info("开始预测【{}】...".format(name_path[name]["name"]))
                 _tmpRedEpochs =  model_args[args.name]["model_args"]["red_epochs"]
                 _tmpBlueEpochs = model_args[args.name]["model_args"]["blue_epochs"]

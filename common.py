@@ -323,7 +323,10 @@ def try_error(name, predict_features, windows_size):
         max_times = 160
         while len(predict_features) != windows_size:
             # predict_features = spider(name, last_current_year + max_times, get_current_number(name), "predict")[[x[0] for x in ball_name]]
-            predict_features = spider(name, last_current_year + max_times, get_current_number(name), "predict", windows_size)
+            if mini_args.cq == 0:
+                predict_features = spider(name, last_current_year + max_times, get_current_number(name), "predict", windows_size)
+            else:
+                predict_features = spider_cq(name, last_current_year + max_times, get_current_number(name), "predict", windows_size)
             # time.sleep(np.random.random(1).tolist()[0])
             max_times -= 1
         return predict_features
