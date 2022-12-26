@@ -393,7 +393,7 @@ def run(name, windows_size):
             filename = datetime.datetime.now().strftime('%Y%m%d')
             filepath = "{}{}/".format(predict_path, args.name)
             fileadd = "{}{}{}".format(filepath, filename, ".csv")
-            if args.predict_pro == 0 and int(time.strftime("%H", time.localtime())) >=20 and os.path.exists(fileadd) == False:
+            if args.predict_pro == 0 and int(time.strftime("%H", time.localtime())) >=18 and os.path.exists(fileadd) == False:
                 logger.info("开始预测【{}】...".format(name_path[name]["name"]))
                 _tmpRedEpochs =  model_args[args.name]["model_args"]["red_epochs"]
                 _tmpBlueEpochs = model_args[args.name]["model_args"]["blue_epochs"]
