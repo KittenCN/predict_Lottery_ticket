@@ -20,7 +20,7 @@ def BasicAnalysis(oridata):
     dataori = [i for i in range(81)]
     for row in oridata:
         for item in row:
-            datacnt[item] += 1
+            datacnt[int(item)] += 1
     datacnt, dataori = sortcnt(datacnt, dataori, 81)
     lastcnt = -1
     for i in range(81):
