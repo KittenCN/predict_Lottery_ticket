@@ -1,5 +1,8 @@
 # 彩票AI预测（目前支持双色球，大乐透，排列三，快乐8）
 
+##一定要用get_data下载数据，并用train一定次数后，才能使用predict预测，默认没有数据和模型
+##如果train发生错误，请优先检查主目录下是否有data, model, predict三个空目录，没有的话自行建立下，我好想忘记让它自动生成了，也懒得写了
+
 项目思路来自自：https://github.com/zepen/predict_Lottery_ticket
 已将80%的代码重写，并按照我自己的思路进行了强化和修改。
 
