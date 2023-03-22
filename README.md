@@ -2,11 +2,15 @@
 
 ##  -------------------------------------
 ##  一定要用get_data下载数据，并用train一定次数后，才能使用predict预测，默认没有数据和模型
-##  如果train发生错误，请优先检查主目录下是否有data, model, predict三个空目录，没有的话自行建立下，我好想忘记让它自动生成了，也懒得写了
+##  如果train发生错误，请优先检查主目录下是否有data, model, predict三个空目录，没有的话自行建立下，我好像忘记让它自动生成了，也懒得写了
 ##  -------------------------------------
 
 项目思路来自自：https://github.com/zepen/predict_Lottery_ticket
 已将80%的代码重写，并按照我自己的思路进行了强化和修改。
+
+## New
+* 20230322:
+* 1. 增加执行参数开关，针对red_epochs，blue_epochs，batch_size三个参数，如果值为-1，则读取config文件的值，且修改三个参数的默认值为-1
 
 自动选择并同时支持CPU和GPU计算。CPU使用原本的Keras LSTM，GPU使用CudnnLSTM，同等参数下，GPU效率高于CPU，时间窗口越大，batch_size越大，效率差就越明显；建议有好显卡的朋友使用GPU训练.
 目前我正在修改网络结构，并迁移到我比较熟悉的pytorch框架之下: https://github.com/KittenCN/predict_Lottery_ticket_pytorch
