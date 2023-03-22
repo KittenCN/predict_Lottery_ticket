@@ -28,9 +28,9 @@ if gpus:
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="pls", type=str, help="选择训练数据")
 parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
-parser.add_argument('--red_epochs', default=1, type=int, help="红球训练轮数")
-parser.add_argument('--blue_epochs', default=1, type=int, help="蓝球训练轮数")
-parser.add_argument('--batch_size', default=1, type=int, help="集合数量")
+parser.add_argument('--red_epochs', default=-1, type=int, help="红球训练轮数")
+parser.add_argument('--blue_epochs', default=-1, type=int, help="蓝球训练轮数")
+parser.add_argument('--batch_size', default=-1, type=int, help="集合数量")
 parser.add_argument('--predict_pro', default=0, type=int, help="更新batch_size")
 parser.add_argument('--epochs', default=1, type=int, help="训练轮数(红蓝球交叉训练)")
 parser.add_argument('--cq', default=0, type=int, help="是否使用出球顺序，0：不使用（即按从小到大排序），1：使用")
@@ -469,9 +469,12 @@ if __name__ == '__main__':
         if args.download_data == 1 and args.predict_pro == 0 and int(time.strftime("%H", time.localtime())) < 20:
             print("正在创建【{}】数据集...".format(name_path[args.name]["name"]))
             get_data_run(name=args.name, cq=args.cq)
-        model_args[args.name]["model_args"]["red_epochs"] = int(args.red_epochs)
-        model_args[args.name]["model_args"]["blue_epochs"] = int(args.blue_epochs)
-        model_args[args.name]["model_args"]["batch_size"] = int(args.batch_size)
+        if int(args.red_epochs) > 0:
+            model_args[args.name]["model_args"]["red_epochs"] = int(args.red_epochs)
+        if int(args.blue_epochs) > 0:
+            model_args[args.name]["model_args"]["blue_epochs"] = int(args.blue_epochs)
+        if int(args.batch_size) > 0:
+            model_args[args.name]["model_args"]["batch_size"] = int(args.batch_size)
         if args.predict_pro == 1:
             list_windows_size = []
             path = model_path + model_args[args.name]["pathname"]['name']
