@@ -26,7 +26,7 @@ if gpus:
     tf.config.experimental.set_memory_growth(gpus[0],True)
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--name', default="pls", type=str, help="选择训练数据")
+parser.add_argument('--name', default="qxc", type=str, help="选择训练数据")
 parser.add_argument('--windows_size', default='3', type=str, help="训练窗口大小,如有多个，用'，'隔开")
 parser.add_argument('--red_epochs', default=-1, type=int, help="红球训练轮数")
 parser.add_argument('--blue_epochs', default=-1, type=int, help="蓝球训练轮数")
@@ -92,7 +92,7 @@ def train_red_ball_model(name, x_data, y_data):
     """
     global last_save_time
     m_args = model_args[name]
-    if name not in ["pls"]:
+    if name not in ["pls", "qxc", "sd"]:
         x_data = x_data - 1
         y_data = y_data - 1
     data_len = x_data.shape[0]
@@ -168,7 +168,7 @@ def train_red_ball_model(name, x_data, y_data):
                 perindex += 1
                 totalloss += loss_
                 if index % 100 == 0:
-                    if name not in ["pls"]:
+                    if name not in ["pls", "qxc", "sd"]:
                         hotfixed = 1
                     else:
                         hotfixed = 0
@@ -366,7 +366,7 @@ def action(name):
             train_red_ball_model(name, x_data=train_data["red"]["x_data"], y_data=train_data["red"]["y_data"])
             logger.info("训练耗时: {:.4f}".format(time.time() - start_time))
 
-        if name not in ["pls", "kl8"] and model_args[name]["model_args"]["blue_epochs"] > 0:
+        if name not in ["pls", "kl8", "qxc", "sd"] and model_args[name]["model_args"]["blue_epochs"] > 0:
             tf.compat.v1.reset_default_graph()  # 重置网络图
 
             logger.info("开始训练【{}】蓝球模型...".format(name_path[name]["name"]))
@@ -418,7 +418,7 @@ def run(name, windows_size):
                         train_red_ball_model(name, x_data=train_data["red"]["x_data"], y_data=train_data["red"]["y_data"])
                         logger.info("训练耗时: {:.4f}".format(time.time() - start_time))
 
-                    if name not in ["pls", "kl8"] and model_args[name]["model_args"]["blue_epochs"] > 0:
+                    if name not in ["pls", "kl8", "qxc", "sd"] and model_args[name]["model_args"]["blue_epochs"] > 0:
                         tf.compat.v1.reset_default_graph()  # 重置网络图
 
                         logger.info("开始训练【{}】蓝球模型...".format(name_path[name]["name"]))

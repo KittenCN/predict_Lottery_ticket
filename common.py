@@ -40,9 +40,9 @@ def get_url(name):
     """
     url = "https://datachart.500.com/{}/history/".format(name)
     path = "newinc/history.php?start={}&end={}&limit={}"
-    if name == "qxc" or name == "pls":
+    if name in ["qxc", "pls", "sd"]:
         path = "inc/history.php?start={}&end={}&limit={}"
-    elif name == "kl8":
+    elif name in ["kl8"]:
         url = "https://datachart.500.com/{}/zoushi/".format(name)
         path = "newinc/jbzs_redblue.php?from=&to=&shujcount=0&sort=1&expect=-1"
     return url, path
@@ -52,7 +52,7 @@ def get_current_number(name):
     :return: int
     """
     url, _ = get_url(name)
-    if name in ["qxc", "pls"]:
+    if name in ["qxc", "pls", "sd"]:
         r = requests.get("{}{}".format(url, "inc/history.php"), verify=False)
     elif name in ["ssq", "dlt"]:
         r = requests.get("{}{}".format(url, "history.shtml"), verify=False)
@@ -120,7 +120,7 @@ def spider(name="ssq", start=1, end=999999, mode="train", windows_size=0):
         soup = BeautifulSoup(r.text, "lxml")
         if name in ["ssq", "dlt", "kl8"]:
             trs = soup.find("tbody", attrs={"id": "tdata"}).find_all("tr")
-        elif name in ["qxc", "pls"]:
+        elif name in ["qxc", "pls", "sd"]:
             trs = soup.find("div", class_="wrap_datachart").find("table", id="tablelist").find_all("tr")
         data = []
         for tr in trs:
@@ -138,12 +138,17 @@ def spider(name="ssq", start=1, end=999999, mode="train", windows_size=0):
                 for j in range(2):
                     item[u"蓝球_{}".format(j+1)] = tr.find_all("td")[6+j].get_text().strip()
                 data.append(item)
-            elif name == "pls":
+            elif name in ["pls", "sd", "qxc"]:
                 if tr.find_all("td")[0].get_text().strip() == "注数" or tr.find_all("td")[1].get_text().strip() == "中奖号码":
                     continue
                 item[u"期数"] = tr.find_all("td")[0].get_text().strip()
                 numlist = tr.find_all("td")[1].get_text().strip().split(" ")
-                for i in range(3):
+                # if name == "qxc":
+                #     red_nums = 7
+                # elif name in ["pls", "sd"]:
+                #     red_nums = 3
+                red_nums = len(numlist)
+                for i in range(red_nums):
                     item[u"红球_{}".format(i+1)] = numlist[i]
                 data.append(item)
             elif name == "kl8":
@@ -186,9 +191,14 @@ def spider(name="ssq", start=1, end=999999, mode="train", windows_size=0):
                 for k in range(2):
                     item[u"蓝球_{}".format(k+1)] = ori_data.iloc[i, 7+k]
                 data.append(item)
-            elif name == "pls":
+            elif name in ["pls", "sd", "qxc"]:
+                # if name == "qxc":
+                #     red_nums = 7
+                # elif name in ["pls", "sd"]:
+                #     red_nums = 3
+                red_nums = len(ori_data.columns) - 2
                 item[u"期数"] = ori_data.iloc[i, 1]
-                for j in range(3):
+                for j in range(red_nums):
                     item[u"红球_{}".format(j+1)] = ori_data.iloc[i, j+2]
                 data.append(item)
             elif name == "kl8":
@@ -289,7 +299,7 @@ def run_predict(window_size):
         current_number = get_current_number(mini_args.name)
         logger.info("【{}】最近一期:{}".format(name_path[mini_args.name]["name"], current_number))
 
-    elif mini_args.name in ["pls", "kl8"]:
+    elif mini_args.name in ["pls", "kl8", "qxc", "sd"]:
         red_graph = tf.compat.v1.Graph()
         with red_graph.as_default():
             red_saver = tf.compat.v1.train.import_meta_graph(
@@ -337,7 +347,7 @@ def get_red_ball_predict_result(predict_features, sequence_len, windows_size):
     """ 获取红球预测结果
     """
     name_list = [(ball_name[0], i + 1) for i in range(sequence_len)]
-    if mini_args.name not in ["pls"]:
+    if mini_args.name not in ["pls", "qxc", "sd"]:
         hotfixed = 1
     else:
         hotfixed = 0
@@ -394,7 +404,7 @@ def get_final_result(name, predict_features, mode=0):
         return {
             b_name: int(res) + 1 for b_name, res in zip(ball_name_list, pred_result_list)
         }
-    elif name == "pls":
+    elif name in ["pls", "qxc", "sd"]:
         red_pred, red_name_list = get_red_ball_predict_result(predict_features, m_args["red_sequence_len"], m_args["windows_size"])
         ball_name_list = ["{}_{}".format(name[mode], i) for name, i in red_name_list]
         pred_result_list = red_pred[0].tolist()
