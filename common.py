@@ -139,6 +139,8 @@ def spider(name="ssq", start=1, end=999999, mode="train", windows_size=0):
                     item[u"蓝球_{}".format(j+1)] = tr.find_all("td")[6+j].get_text().strip()
                 data.append(item)
             elif name in ["pls", "sd", "qxc"]:
+                if len(tr.find_all("td")) < 2:
+                    continue
                 if tr.find_all("td")[0].get_text().strip() == "注数" or tr.find_all("td")[1].get_text().strip() == "中奖号码":
                     continue
                 item[u"期数"] = tr.find_all("td")[0].get_text().strip()
