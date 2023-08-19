@@ -11,7 +11,8 @@ ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
 # limit_line = len(ori_numpy)
 limit_line = 30
 shifting = [0.02, 0.02, 0.02, 0.02, 0.02]
-total_create = 10
+total_create = 100
+err_nums = 100
 results = []
 err = -1
 prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79]
@@ -352,7 +353,7 @@ if __name__ == "__main__":
             current_result = [0]
             if err_code > -1:
                 err[err_code] += 1
-                if err[err_code] > 10:
+                if err[err_code] > err_nums:
                     shifting[err_code] += 0.01
                     err[err_code] = 0
             ## 按比例插入冷热号
