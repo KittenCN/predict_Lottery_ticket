@@ -10,7 +10,7 @@ ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
 # limit_line = len(ori_numpy)
 limit_line = 30
-shifting = [0.05, 0.05, 0.05, 0.05, 0.05]
+shifting = [0.02, 0.02, 0.02, 0.02, 0.02]
 total_create = 10
 results = []
 err = -1
@@ -344,7 +344,7 @@ if __name__ == "__main__":
     for i in range(total_create):
         current_result = [0]
         err = [0, 0, 0, 0, 0]
-        shifting = [0.05, 0.05, 0.05, 0.05, 0.05]
+        shifting = [0.02, 0.02, 0.02, 0.02, 0.02]
         while True:
             err_code, check_result = check_rate([current_result])
             if check_result:
