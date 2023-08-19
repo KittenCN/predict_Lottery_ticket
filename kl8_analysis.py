@@ -10,7 +10,7 @@ ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
 # limit_line = len(ori_numpy)
 limit_line = 30
-shifting = [0.05, 0.05, 0.05, 0.05]
+shifting = [0.05, 0.05, 0.05, 0.05, 0.05]
 total_create = 10
 results = []
 err = -1
@@ -280,15 +280,24 @@ def check_rate(result_list):
             return 3, False
     
     ## 验证连续号码
-    # his_consecutive_rate = analysis_consecutive_number()
+    his_consecutive_rate = analysis_consecutive_number()
     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
     # for i in range(11):
     #     if abs(his_consecutive_rate[i] - current_consecutive_rate[i]) > shifting:
     #        # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
     #         return False
-    if current_consecutive_rate[2] < 1:
-        # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
-        return -1, False
+    w = 0
+    b = 0
+    for i in range(2, 11):
+        if his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0:
+            # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+            w += 1
+        elif his_consecutive_rate[i] <= 0 and current_consecutive_rate[i] > 0:
+            # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+            b += 1
+            break
+    if w <= 0 or b > 0:
+        return 4, False
     
     return 99, True
 
@@ -310,8 +319,8 @@ if __name__ == "__main__":
 
     for i in range(total_create):
         current_result = [0]
-        err = [0, 0, 0, 0]
-        shifting = [0.05, 0.05, 0.05, 0.05]
+        err = [0, 0, 0, 0, 0]
+        shifting = [0.05, 0.05, 0.05, 0.05, 0.05]
         while True:
             err_code, check_result = check_rate([current_result])
             if check_result:
@@ -349,5 +358,4 @@ if __name__ == "__main__":
             current_result.sort()
         results.append(current_result)
         shifting = [round(num, 2) for num in shifting]
-        print(current_result[1:], shifting)
-    print(results)
+        print(current_result[1:])
