@@ -1,27 +1,46 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import random
 from sklearn.cluster import KMeans
 from collections import defaultdict
 from config import *
 
 name = "kl8"
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
-ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
+ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
 # limit_line = len(ori_numpy)
 limit_line = 30
+shifting = 0.05
+total_create = 10
+results = []
+err = -1
 
 ## 计算往期重复的概率
-def cal_repeat_rate():
+def cal_repeat_rate(limit=limit_line, result_list=None):
     march_cal = [0] * 21
     march_rate = [0.0] * 21
     total_march = 0
-    for i in range(limit_line):
-        for j in range(i + 1, limit_line):
+    if result_list is None:
+        result_list = ori_numpy
+        j_shiftint = 1
+    else:
+        limit = 1
+        j_shiftint = 0
+    for i in range(limit):
+        for j in range(i + j_shiftint, limit_line):
             march_num = 0
             total_march += 1
-            for k in range(1, 21):
-                if ori_numpy[i][k] == ori_numpy[j][k]:
-                    march_num += 1
+            if result_list is None:
+                for k in range(1, 21):
+                    if result_list[i][k] == ori_numpy[j][k]:
+                        march_num += 1
+            else:
+                for x in range(1,11):
+                    for y in range(1,21):
+                        if result_list[i][x] == ori_numpy[j][y]:
+                            march_num += 1
+                        elif result_list[i][x] < ori_numpy[j][y]:
+                            break
             march_cal[march_num] += 1
     for i in range(21):
         march_rate[i] = march_cal[i] / total_march
@@ -31,7 +50,7 @@ def cal_repeat_rate():
     return march_rate
 
 ## 计算前10的冷热号
-def cal_hot_cold(begin, end):
+def cal_hot_cold(begin=0, end=limit_line):
     balls = [0] * 81
     for i in range(begin, end):
         if i >= len(ori_numpy):
@@ -46,17 +65,26 @@ def cal_hot_cold(begin, end):
     return balls[:10], balls[-10:]
 
 ## 计算指定号码组在每期出现的概率
-def cal_ball_rate(limit=limit_line):
+def cal_ball_rate(limit=limit_line, result_list=None):
     hot_rate_times = 0
     cold_rate_times = 0
     times = 0
+    if result_list is None:
+        result_list = ori_numpy
+        i_shiftint = 1
+        length = 21
+    else:
+        limit = 1
+        i_shiftint = 0
+        length = 11
+    
     for i in range(limit):
-        hot_balls, cold_balls = cal_hot_cold(i + 1, i + limit)
-        for j in range(1, 21):
+        hot_balls, cold_balls = cal_hot_cold(i + i_shiftint, i + limit_line)
+        for j in range(1, length):
             times += 1
-            if ori_numpy[i][j] in hot_balls:
+            if result_list[i][j] in hot_balls:
                 hot_rate_times += 1
-            if ori_numpy[i][j] in cold_balls:
+            if result_list[i][j] in cold_balls:
                 cold_rate_times += 1
     hot_ball_rate = hot_rate_times / times
     cold_ball_rate = cold_rate_times / times
@@ -65,12 +93,18 @@ def cal_ball_rate(limit=limit_line):
     return hot_ball_rate, cold_ball_rate
 
 ## 计算奇偶比:
-def cal_ball_parity():
+def cal_ball_parity(limit=limit_line, result_list=None):
     odd = 0
     even = 0
-    for i in range(limit_line):
-        for j in range(1, 21):
-            if ori_numpy[i][j] % 2 == 0:
+    if result_list is None:
+        result_list = ori_numpy
+        length = 21
+    else:
+        limit = 1
+        length = 11
+    for i in range(limit):
+        for j in range(1, length):
+            if result_list[i][j] % 2 == 0:
                 even += 1
             else:
                 odd += 1
@@ -79,27 +113,34 @@ def cal_ball_parity():
     return odd / (odd + even), even / (odd + even)
 
 ## 将80个号码分为8组，计算每组的出现概率
-def cal_ball_group():
+def cal_ball_group(result_list=None):
     group = [0] * 8
-    for i in range(limit_line):
-        for j in range(1, 21):
-            if ori_numpy[i][j] <= 10:
+    if result_list is None:
+        result_list = ori_numpy
+        limit = limit_line
+        length = 21
+    else:
+        limit = 1
+        length = 11
+    for i in range(limit):
+        for j in range(1, length):
+            if result_list[i][j] <= 10:
                 group[0] += 1
-            elif ori_numpy[i][j] <= 20:
+            elif result_list[i][j] <= 20:
                 group[1] += 1
-            elif ori_numpy[i][j] <= 30:
+            elif result_list[i][j] <= 30:
                 group[2] += 1
-            elif ori_numpy[i][j] <= 40:
+            elif result_list[i][j] <= 40:
                 group[3] += 1
-            elif ori_numpy[i][j] <= 50:
+            elif result_list[i][j] <= 50:
                 group[4] += 1
-            elif ori_numpy[i][j] <= 60:
+            elif result_list[i][j] <= 60:
                 group[5] += 1
-            elif ori_numpy[i][j] <= 70:
+            elif result_list[i][j] <= 70:
                 group[6] += 1
             else:
                 group[7] += 1
-    group_rate = [item / sum(group) * 100 for item in group]
+    group_rate = [item / sum(group) for item in group]
     # print(group_rate)
     return group_rate
 
@@ -119,19 +160,31 @@ def find_consecutive_number(numbers):
     return consecutive_group
 
 ## 分析连续号码组合
-def analysis_consecutive_number():
+def analysis_consecutive_number(limit=limit_line, result_list=None):
     consecutive_group = defaultdict(int)
     total_draws = 0
-    for i in range(limit_line):
+    consecutive_rate_list = [0] * 11
+    consecutive_rate = [0.0] * 11
+    if result_list is None:
+        result_list = ori_numpy
+        length = 21
+    else:
+        limit = 1
+        length = 11
+    for i in range(limit):
         total_draws += 1
-        numbers = ori_numpy[i][1:21]
+        numbers = result_list[i][1:length]
         numbers.sort()
         consecutive_group_list = find_consecutive_number(numbers)
         for item in consecutive_group_list:
             consecutive_group[item] += 1
     sorted_consecutive_group = sorted(consecutive_group.items(), key=lambda x: x[1], reverse=True)
     for item, count in sorted_consecutive_group:
-        print(item, count, "{:.2f}%".format(count / total_draws * 100))
+        consecutive_rate_list[len(item)] += count
+    for i in range(11):
+        consecutive_rate[i] = consecutive_rate_list[i] / total_draws
+    # print(consecutive_rate)
+    return consecutive_rate
 
 ## 使用贝叶斯定理分析
 def bayesian_analysis():
@@ -177,6 +230,69 @@ def plot_clusters(ori_numpy, labels, centers):
     plt.scatter(centers[:, 0], centers[:, 1], marker='X', s=200, c='black')
     plt.show()
 
+## 验证各概率是否正常
+def check_rate(result_list):
+    ## 验证总数
+    if len(result_list[0][1:]) != 10:
+        # print("总数异常！",len(result_list[0][1:]),10)
+        return False
+    
+    ## 验证重复
+    for i in range(1,11):
+        for j in range(i + 1, 11):
+            if result_list[0][i] == result_list[0][j]:
+                # print("重复异常！", result_list[0][i], result_list[0][j])
+                return False
+    
+    for item in results:
+        if result_list[0] == item:
+            # print("重复异常！", result_list[0], item)
+            return False
+
+    ## 验证重复率
+    his_repeat_rate = cal_repeat_rate()
+    current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list)
+    for i in range(21):
+        if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting:
+            # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
+            return False
+    
+    ## 验证冷热号
+    his_hot_balls, his_cold_balls = cal_ball_rate(limit_line)
+    current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list)
+    if abs(his_hot_balls - current_hot_balls) > shifting or abs(his_cold_balls - current_cold_balls) > shifting:
+        # print("冷热号异常！", abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls), shifting)
+        return False
+    
+    ## 验证奇偶比
+    his_odd, his_even = cal_ball_parity(limit_line)
+    current_odd, current_even = cal_ball_parity(limit=1, result_list=result_list)
+    if abs(his_odd - current_odd) > shifting or abs(his_even - current_even) > shifting:
+        # print("奇偶比异常！", abs(his_odd - current_odd), abs(his_even - current_even), shifting)
+        return False
+    
+    ## 验证号码组
+    his_group_rate = cal_ball_group()
+    current_group_rate = cal_ball_group(result_list=result_list)
+    for i in range(8):
+        if abs(his_group_rate[i] - current_group_rate[i]) > shifting:
+            # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
+            return False
+    
+    ## 验证连续号码
+    # his_consecutive_rate = analysis_consecutive_number()
+    current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
+    # for i in range(11):
+    #     if abs(his_consecutive_rate[i] - current_consecutive_rate[i]) > shifting:
+    #        # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+    #         return False
+    if current_consecutive_rate[2] < 1:
+        # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+        return False
+    
+    return True
+
+
 if __name__ == "__main__":
     # cal_repeat_rate()
     # cal_ball_rate()
@@ -185,6 +301,46 @@ if __name__ == "__main__":
     # analysis_consecutive_number()
     # bayesian_analysis()
 
-    n_clusters = 10
-    labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
-    plot_clusters(ori_numpy[:limit_line], labels, centers)
+    # n_clusters = 10
+    # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
+    # plot_clusters(ori_numpy[:limit_line], labels, centers)
+
+    for i in range(total_create):
+        current_result = [0]
+        err = 0
+        shifting = 0.05
+        while check_rate([current_result]) is False:
+            current_result = [0]
+            err += 1
+            if err > 10:
+                shifting += 0.01
+                err = 0
+            ## 按比例插入冷热号
+            hot_list, cold_list = cal_hot_cold()
+            hot_rate, cold_rate = cal_ball_rate()
+            hot_selection = random.randint(int((hot_rate - shifting) * 10), int((hot_rate + shifting) * 10))
+            cold_selection = random.randint(int((cold_rate - shifting) * 10), int((cold_rate + shifting) * 10))
+            last_num = 0
+            for i in range(hot_selection):
+                current_num = 0
+                while current_num == last_num:
+                    current_num = hot_list[random.randint(0, 9)]
+                last_num = current_num
+                current_result.append(hot_list[random.randint(0, 9)])
+            last_num = 0
+            for i in range(cold_selection):
+                current_num = 0
+                while current_num == last_num:
+                    current_num = cold_list[random.randint(0, 9)]
+                last_num = current_num
+                current_result.append(cold_list[random.randint(0, 9)])
+            
+            ## 随机插入其他数字
+            for i in range(10 - len(current_result) + 1):
+                current_num = 0
+                while (current_num in current_result or current_num <= 0):
+                    current_num = random.randint(1, 80)
+                current_result.append(current_num)
+            current_result.sort()
+        results.append(current_result)
+        print(current_result[1:], shifting)
