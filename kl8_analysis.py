@@ -14,6 +14,7 @@ shifting = [0.05, 0.05, 0.05, 0.05, 0.05]
 total_create = 10
 results = []
 err = -1
+prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79]
 
 ## 计算往期重复的概率
 def cal_repeat_rate(limit=limit_line, result_list=None):
@@ -186,6 +187,28 @@ def analysis_consecutive_number(limit=limit_line, result_list=None):
     # print(consecutive_rate)
     return consecutive_rate
 
+## 分析质数比
+def analysis_prime_number(limit=limit_line, result_list=None):
+    prime_group = defaultdict(int)
+    total_draws = 0
+    if result_list is None:
+        result_list = ori_numpy
+        length = 21
+    else:
+        limit = 1
+        length = 11
+    for i in range(limit):
+        prime_num = 0
+        numbers = result_list[i][1:length]
+        numbers.sort()
+        for item in result_list[i]:
+            total_draws += 1
+            if item in prime_list:
+                prime_num += 1
+    prime_rate = prime_num / total_draws
+    print(prime_rate)
+    return prime_rate
+
 ## 使用贝叶斯定理分析
 def bayesian_analysis():
     number_counts = defaultdict(int)
@@ -250,7 +273,6 @@ def check_rate(result_list):
             return -1, False
 
     ## 验证重复率
-    his_repeat_rate = cal_repeat_rate()
     current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list)
     for i in range(21):
         if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
@@ -258,21 +280,18 @@ def check_rate(result_list):
             return 0, False
     
     ## 验证冷热号
-    his_hot_balls, his_cold_balls = cal_ball_rate(limit_line)
     current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list)
     if abs(his_hot_balls - current_hot_balls) > shifting[1] or abs(his_cold_balls - current_cold_balls) > shifting[1]:
         # print("冷热号异常！", abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls), shifting)
         return 1, False
     
     ## 验证奇偶比
-    his_odd, his_even = cal_ball_parity(limit_line)
     current_odd, current_even = cal_ball_parity(limit=1, result_list=result_list)
     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
         # print("奇偶比异常！", abs(his_odd - current_odd), abs(his_even - current_even), shifting)
         return 2, False
     
     ## 验证号码组
-    his_group_rate = cal_ball_group()
     current_group_rate = cal_ball_group(result_list=result_list)
     for i in range(8):
         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
@@ -280,7 +299,6 @@ def check_rate(result_list):
             return 3, False
     
     ## 验证连续号码
-    his_consecutive_rate = analysis_consecutive_number()
     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
     # for i in range(11):
     #     if abs(his_consecutive_rate[i] - current_consecutive_rate[i]) > shifting:
@@ -309,13 +327,19 @@ if __name__ == "__main__":
     # cal_ball_group()
     # analysis_consecutive_number()
     # bayesian_analysis()
+    # analysis_prime_number()
 
     # n_clusters = 10
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
 
+    his_repeat_rate = cal_repeat_rate()
     hot_list, cold_list = cal_hot_cold()
     hot_rate, cold_rate = cal_ball_rate()
+    his_hot_balls, his_cold_balls = cal_ball_rate(limit_line)
+    his_odd, his_even = cal_ball_parity(limit_line)
+    his_group_rate = cal_ball_group()
+    his_consecutive_rate = analysis_consecutive_number()
 
     for i in range(total_create):
         current_result = [0]
@@ -352,7 +376,7 @@ if __name__ == "__main__":
             ## 随机插入其他数字
             for i in range(10 - len(current_result) + 1):
                 current_num = 0
-                while (current_num in current_result or current_num <= 0):
+                while (current_num in current_result or current_num <= 0 or current_num in prime_list):
                     current_num = random.randint(1, 80)
                 current_result.append(current_num)
             current_result.sort()
