@@ -383,4 +383,4 @@ if __name__ == "__main__":
             current_result.sort()
         results.append(current_result)
         shifting = [round(num, 2) for num in shifting]
-        print(current_result[1:])
+        print(current_result[1:], shifting)
