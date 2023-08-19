@@ -10,7 +10,7 @@ ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
 # limit_line = len(ori_numpy)
 limit_line = 30
-shifting = 0.05
+shifting = [0.05, 0.05, 0.05, 0.05]
 total_create = 10
 results = []
 err = -1
@@ -235,49 +235,49 @@ def check_rate(result_list):
     ## 验证总数
     if len(result_list[0][1:]) != 10:
         # print("总数异常！",len(result_list[0][1:]),10)
-        return False
+        return -1, False
     
     ## 验证重复
     for i in range(1,11):
         for j in range(i + 1, 11):
             if result_list[0][i] == result_list[0][j]:
                 # print("重复异常！", result_list[0][i], result_list[0][j])
-                return False
+                return -1, False
     
     for item in results:
         if result_list[0] == item:
             # print("重复异常！", result_list[0], item)
-            return False
+            return -1, False
 
     ## 验证重复率
     his_repeat_rate = cal_repeat_rate()
     current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list)
     for i in range(21):
-        if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting:
+        if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
             # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
-            return False
+            return 0, False
     
     ## 验证冷热号
     his_hot_balls, his_cold_balls = cal_ball_rate(limit_line)
     current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list)
-    if abs(his_hot_balls - current_hot_balls) > shifting or abs(his_cold_balls - current_cold_balls) > shifting:
+    if abs(his_hot_balls - current_hot_balls) > shifting[1] or abs(his_cold_balls - current_cold_balls) > shifting[1]:
         # print("冷热号异常！", abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls), shifting)
-        return False
+        return 1, False
     
     ## 验证奇偶比
     his_odd, his_even = cal_ball_parity(limit_line)
     current_odd, current_even = cal_ball_parity(limit=1, result_list=result_list)
-    if abs(his_odd - current_odd) > shifting or abs(his_even - current_even) > shifting:
+    if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
         # print("奇偶比异常！", abs(his_odd - current_odd), abs(his_even - current_even), shifting)
-        return False
+        return 2, False
     
     ## 验证号码组
     his_group_rate = cal_ball_group()
     current_group_rate = cal_ball_group(result_list=result_list)
     for i in range(8):
-        if abs(his_group_rate[i] - current_group_rate[i]) > shifting:
+        if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
             # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
-            return False
+            return 3, False
     
     ## 验证连续号码
     # his_consecutive_rate = analysis_consecutive_number()
@@ -288,9 +288,9 @@ def check_rate(result_list):
     #         return False
     if current_consecutive_rate[2] < 1:
         # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
-        return False
+        return -1, False
     
-    return True
+    return 99, True
 
 
 if __name__ == "__main__":
@@ -305,21 +305,26 @@ if __name__ == "__main__":
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
 
+    hot_list, cold_list = cal_hot_cold()
+    hot_rate, cold_rate = cal_ball_rate()
+
     for i in range(total_create):
         current_result = [0]
-        err = 0
-        shifting = 0.05
-        while check_rate([current_result]) is False:
+        err = [0, 0, 0, 0]
+        shifting = [0.05, 0.05, 0.05, 0.05]
+        while True:
+            err_code, check_result = check_rate([current_result])
+            if check_result:
+                break
             current_result = [0]
-            err += 1
-            if err > 10:
-                shifting += 0.01
-                err = 0
+            if err_code > -1:
+                err[err_code] += 1
+                if err[err_code] > 10:
+                    shifting[err_code] += 0.01
+                    err[err_code] = 0
             ## 按比例插入冷热号
-            hot_list, cold_list = cal_hot_cold()
-            hot_rate, cold_rate = cal_ball_rate()
-            hot_selection = random.randint(int((hot_rate - shifting) * 10), int((hot_rate + shifting) * 10))
-            cold_selection = random.randint(int((cold_rate - shifting) * 10), int((cold_rate + shifting) * 10))
+            hot_selection = random.randint(int((hot_rate - shifting[1]) * 10), int((hot_rate + shifting[1]) * 10))
+            cold_selection = random.randint(int((cold_rate - shifting[1]) * 10), int((cold_rate + shifting[1]) * 10))
             last_num = 0
             for i in range(hot_selection):
                 current_num = 0
@@ -343,4 +348,6 @@ if __name__ == "__main__":
                 current_result.append(current_num)
             current_result.sort()
         results.append(current_result)
+        shifting = [round(num, 2) for num in shifting]
         print(current_result[1:], shifting)
+    print(results)
