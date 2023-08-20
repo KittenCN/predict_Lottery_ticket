@@ -14,7 +14,7 @@ get_data_run(name=name, cq=0)
 
 # limit_line = len(ori_numpy)
 limit_line = 30
-shifting = [0.02, 0.02, 0.02, 0.02, 0.02]
+shifting = [0.02] * 5
 total_create = 50
 err_nums = 100
 results = []
@@ -350,8 +350,8 @@ if __name__ == "__main__":
 
     for i in tqdm(range(1, total_create + 1)):
         current_result = [0]
-        err = [0, 0, 0, 0, 0]
-        shifting = [0.02, 0.02, 0.02, 0.02, 0.02]
+        err = [0] * 5
+        shifting = [0.02] * 5
         while True:
             err_code, check_result = check_rate([current_result])
             if check_result:
