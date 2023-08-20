@@ -1,19 +1,24 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import random
+from tqdm import tqdm
 from sklearn.cluster import KMeans
 from collections import defaultdict
 from config import *
+from common import get_data_run
 
 name = "kl8"
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
+get_data_run(name=name, cq=0)
+
 # limit_line = len(ori_numpy)
 limit_line = 30
 shifting = [0.02, 0.02, 0.02, 0.02, 0.02]
-total_create = 100
+total_create = 50
 err_nums = 100
 results = []
+shiftings = []
 err = -1
 prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79]
 
@@ -342,7 +347,8 @@ if __name__ == "__main__":
     his_group_rate = cal_ball_group()
     his_consecutive_rate = analysis_consecutive_number()
 
-    for i in range(total_create):
+
+    for i in tqdm(range(1, total_create + 1)):
         current_result = [0]
         err = [0, 0, 0, 0, 0]
         shifting = [0.02, 0.02, 0.02, 0.02, 0.02]
@@ -381,6 +387,15 @@ if __name__ == "__main__":
                     current_num = random.randint(1, 80)
                 current_result.append(current_num)
             current_result.sort()
-        results.append(current_result)
+        results.append(current_result[1:])
+        shiftings.append(shifting)
         shifting = [round(num, 2) for num in shifting]
-        print(current_result[1:], shifting)
+        # print(current_result[1:], shifting)
+    sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
+    sorted_results, sorted_shiftings = zip(*sorted_results)
+    sorted_results = list(sorted_results)
+    sorted_shiftings = list(sorted_shiftings)
+    for i in range(total_create):
+        sorted_shiftings[i] = [round(num, 2) for num in sorted_shiftings[i]]
+    for i in range(total_create):
+        print(sorted_results[i], sorted_shiftings[i])
