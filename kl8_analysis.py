@@ -398,4 +398,6 @@ if __name__ == "__main__":
     for i in range(total_create):
         sorted_shiftings[i] = [round(num, 2) for num in sorted_shiftings[i]]
     for i in range(total_create):
-        print(sorted_results[i], sorted_shiftings[i])
+        print(sorted_shiftings[i])
+    for i in range(total_create):
+        print(sorted_results[i])
