@@ -14,7 +14,8 @@ ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
 
 # limit_line = len(ori_numpy)
 limit_line = 30
-shifting = [0.01] * 5
+ori_shiftings = [0.08, 0.07, 0.08, 0.07, 0.01]
+shifting = ori_shiftings
 total_create = 50
 err_nums = 1000
 results = []
@@ -360,7 +361,7 @@ if __name__ == "__main__":
     for i in range(1, total_create + 1):
         current_result = [0]
         err = [0] * 5
-        shifting = [item // 2 for item in shifting]
+        shifting = [int(item * 0.9) for item in shifting]
         err_code_max = -1
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
@@ -378,7 +379,7 @@ if __name__ == "__main__":
                     shifting[err_code] += 0.01
                     err[err_code] = 0
                     for j in range(err_code + 1, len(err)):
-                        shifting[j] = 0.01
+                        shifting[j] = ori_shiftings[j]
                         err[j] = 0
             ## 按比例插入冷热号
             hot_selection = random.randint(int((hot_rate - shifting[1]) * 10), int((hot_rate + shifting[1]) * 10))
@@ -408,7 +409,7 @@ if __name__ == "__main__":
         results.append(current_result[1:])
         shiftings.append(shifting)
         shifting = [round(num, 3) for num in shifting]
-        # print(current_result[1:], shifting)
+        tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
         pbar.update(1)
     pbar.close()
     sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
