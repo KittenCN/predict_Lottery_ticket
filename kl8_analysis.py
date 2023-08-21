@@ -14,9 +14,9 @@ get_data_run(name=name, cq=0)
 
 # limit_line = len(ori_numpy)
 limit_line = 30
-shifting = [0.001] * 5
+shifting = [0.01] * 5
 total_create = 50
-err_nums = 100
+err_nums = 1000
 results = []
 shiftings = []
 err = -1
@@ -290,9 +290,9 @@ def check_rate(result_list):
         if his_repeat_rate[i] > 0 and his_repeat_rate[i] >= 0.1:
             his_index = i + 1
             break
-    if current_repeat_rate[his_index] > 0:
+    if current_repeat_rate[his_index] > his_repeat_rate[his_index]:
         # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
-        return 0, False    
+        return -1, False    
     
     ## 验证冷热号
     current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list)
@@ -360,7 +360,7 @@ if __name__ == "__main__":
     for i in range(1, total_create + 1):
         current_result = [0]
         err = [0] * 5
-        shifting = [0.001] * 5
+        shifting = [0.01] * 5
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
             err_code, check_result = check_rate([current_result])
@@ -372,6 +372,9 @@ if __name__ == "__main__":
                 if err[err_code] > err_nums:
                     shifting[err_code] += 0.001
                     err[err_code] = 0
+                    for j in range(err_code + 1, len(err)):
+                        shifting[j] = 0.01
+                        err[j] = 0
             ## 按比例插入冷热号
             hot_selection = random.randint(int((hot_rate - shifting[1]) * 10), int((hot_rate + shifting[1]) * 10))
             cold_selection = random.randint(int((cold_rate - shifting[1]) * 10), int((cold_rate + shifting[1]) * 10))
