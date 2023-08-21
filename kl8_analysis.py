@@ -6,6 +6,7 @@ from sklearn.cluster import KMeans
 from collections import defaultdict
 from config import *
 from common import get_data_run
+from itertools import combinations
 
 name = "kl8"
 get_data_run(name=name, cq=0)
@@ -21,6 +22,7 @@ err_nums = 1000
 results = []
 shiftings = []
 err = -1
+group_size = 50
 prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79]
 
 ## 计算往期重复的概率
@@ -196,7 +198,7 @@ def analysis_consecutive_number(limit=limit_line, result_list=None):
 
 ## 分析质数比
 def analysis_prime_number(limit=limit_line, result_list=None):
-    prime_group = defaultdict(int)
+    # prime_group = defaultdict(int)
     total_draws = 0
     if result_list is None:
         result_list = ori_numpy
@@ -206,8 +208,8 @@ def analysis_prime_number(limit=limit_line, result_list=None):
         length = 11
     for i in range(limit):
         prime_num = 0
-        numbers = result_list[i][1:length]
-        numbers.sort()
+        # numbers = result_list[i][1:length]
+        # numbers.sort()
         for item in result_list[i]:
             total_draws += 1
             if item in prime_list:
@@ -215,6 +217,29 @@ def analysis_prime_number(limit=limit_line, result_list=None):
     prime_rate = prime_num / total_draws
     print(prime_rate)
     return prime_rate
+
+## 分析和值概率
+def sum_analysis(limit=limit_line, result_list=None):
+    sum_group = defaultdict(int)
+    sum_rate_group = defaultdict(float)
+    total_numbers = 0
+    if result_list is None:
+        result_list = ori_numpy
+        length = 21
+    else:
+        limit = 1
+        length = 11
+    for i in tqdm(range(limit)):
+        result_list_split = combinations(result_list[i][1:length], 10)
+        for item in result_list_split:
+            current_sum = sum(item)
+            group_index = (current_sum - 1) // group_size
+            group_key = f"{group_index * group_size + 1}-{(group_index + 1) * group_size}"
+            sum_group[group_key] += 1
+            total_numbers += 1
+    sum_rate_group = {key: count / total_numbers for key, count in sum_group.items()}
+    # print(sum_rate_group)
+    return sum_rate_group
 
 ## 使用贝叶斯定理分析
 def bayesian_analysis():
@@ -333,6 +358,15 @@ def check_rate(result_list):
     if w <= 0 or b > 0:
         return 4, False
     
+    ## 验证和值
+    current_sum = sum(result_list[0][1:])
+    group_index = (current_sum - 1) // group_size
+    group_key = f"{group_index * group_size + 1}-{(group_index + 1) * group_size}"
+    current_sum_rate = his_sum_rate.get(group_key, 0)
+    if current_sum_rate < 0.1:
+        # print("和值异常！", current_sum_rate, shifting)
+        return -1, False
+    
     return 99, True
 
 
@@ -344,6 +378,7 @@ if __name__ == "__main__":
     # analysis_consecutive_number()
     # bayesian_analysis()
     # analysis_prime_number()
+    # sum_analysis()
 
     # n_clusters = 10
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
@@ -356,6 +391,7 @@ if __name__ == "__main__":
     his_odd, his_even = cal_ball_parity(limit_line)
     his_group_rate = cal_ball_group()
     his_consecutive_rate = analysis_consecutive_number()
+    his_sum_rate = sum_analysis()
 
     pbar = tqdm(total=total_create)
     for i in range(1, total_create + 1):
