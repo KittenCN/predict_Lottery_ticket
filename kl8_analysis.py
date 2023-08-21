@@ -361,7 +361,7 @@ if __name__ == "__main__":
     for i in range(1, total_create + 1):
         current_result = [0]
         err = [0] * 5
-        shifting = [int(item * 0.9) for item in shifting]
+        shifting = [item * 0.9 for item in shifting]
         err_code_max = -1
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
