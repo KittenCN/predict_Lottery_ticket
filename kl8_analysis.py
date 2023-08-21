@@ -361,6 +361,7 @@ if __name__ == "__main__":
         current_result = [0]
         err = [0] * 5
         shifting = [0.01] * 5
+        err_code_max = -1
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
             err_code, check_result = check_rate([current_result])
@@ -368,9 +369,13 @@ if __name__ == "__main__":
                 break
             current_result = [0]
             if err_code > -1:
+                if err_code < err_code_max:
+                    continue
                 err[err_code] += 1
+                if err[err_code] > err_nums // 10:
+                    err_code_max = err_code
                 if err[err_code] > err_nums:
-                    shifting[err_code] += 0.001
+                    shifting[err_code] += 0.01
                     err[err_code] = 0
                     for j in range(err_code + 1, len(err)):
                         shifting[j] = 0.01
