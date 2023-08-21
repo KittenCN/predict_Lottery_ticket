@@ -16,7 +16,7 @@ get_data_run(name=name, cq=0)
 limit_line = 30
 shifting = [0.001] * 5
 total_create = 50
-err_nums = 1000
+err_nums = 100
 results = []
 shiftings = []
 err = -1
@@ -356,12 +356,13 @@ if __name__ == "__main__":
     his_group_rate = cal_ball_group()
     his_consecutive_rate = analysis_consecutive_number()
 
-
-    for i in tqdm(range(1, total_create + 1)):
+    pbar = tqdm(total=total_create)
+    for i in range(1, total_create + 1):
         current_result = [0]
         err = [0] * 5
         shifting = [0.001] * 5
         while True:
+            pbar.set_description("{err} {shifting}".format(err=err, shifting=shifting))
             err_code, check_result = check_rate([current_result])
             if check_result:
                 break
@@ -398,8 +399,10 @@ if __name__ == "__main__":
             current_result.sort()
         results.append(current_result[1:])
         shiftings.append(shifting)
-        shifting = [round(num, 2) for num in shifting]
+        shifting = [round(num, 3) for num in shifting]
         # print(current_result[1:], shifting)
+        pbar.update(1)
+    pbar.close()
     sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
     sorted_results, sorted_shiftings = zip(*sorted_results)
     sorted_results = list(sorted_results)
