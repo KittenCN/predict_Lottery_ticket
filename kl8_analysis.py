@@ -362,7 +362,7 @@ if __name__ == "__main__":
         err = [0] * 5
         shifting = [0.001] * 5
         while True:
-            pbar.set_description("{err} {shifting}".format(err=err, shifting=shifting))
+            pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
             err_code, check_result = check_rate([current_result])
             if check_result:
                 break
@@ -408,7 +408,7 @@ if __name__ == "__main__":
     sorted_results = list(sorted_results)
     sorted_shiftings = list(sorted_shiftings)
     for i in range(total_create):
-        sorted_shiftings[i] = [round(num, 2) for num in sorted_shiftings[i]]
+        sorted_shiftings[i] = [round(num, 3) for num in sorted_shiftings[i]]
     for i in range(total_create):
         print(sorted_shiftings[i])
     for i in range(total_create):
