@@ -8,9 +8,9 @@ from config import *
 from common import get_data_run
 
 name = "kl8"
+get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
-get_data_run(name=name, cq=0)
 
 # limit_line = len(ori_numpy)
 limit_line = 30
