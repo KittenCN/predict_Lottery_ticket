@@ -14,9 +14,9 @@ get_data_run(name=name, cq=0)
 
 # limit_line = len(ori_numpy)
 limit_line = 30
-shifting = [0.02] * 5
+shifting = [0.001] * 5
 total_create = 50
-err_nums = 100
+err_nums = 1000
 results = []
 shiftings = []
 err = -1
@@ -52,8 +52,8 @@ def cal_repeat_rate(limit=limit_line, result_list=None):
     for i in range(21):
         march_rate[i] = march_cal[i] / total_march
 
-    # print(march_cal[:20])
-    # print(["{:.2f}%".format(item*100) for item in  march_rate[:20]])
+    # print(march_cal)
+    # print(["{:.2f}%".format(item*100) for item in  march_rate])
     return march_rate
 
 ## 计算前10的冷热号
@@ -284,6 +284,15 @@ def check_rate(result_list):
         if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
             # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
             return 0, False
+        
+    his_index = 0
+    for i in range(20, 0, -1):
+        if his_repeat_rate[i] > 0 and his_repeat_rate[i] >= 0.1:
+            his_index = i + 1
+            break
+    if current_repeat_rate[his_index] > 0:
+        # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
+        return 0, False    
     
     ## 验证冷热号
     current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list)
@@ -351,7 +360,7 @@ if __name__ == "__main__":
     for i in tqdm(range(1, total_create + 1)):
         current_result = [0]
         err = [0] * 5
-        shifting = [0.02] * 5
+        shifting = [0.001] * 5
         while True:
             err_code, check_result = check_rate([current_result])
             if check_result:
@@ -360,7 +369,7 @@ if __name__ == "__main__":
             if err_code > -1:
                 err[err_code] += 1
                 if err[err_code] > err_nums:
-                    shifting[err_code] += 0.01
+                    shifting[err_code] += 0.001
                     err[err_code] = 0
             ## 按比例插入冷热号
             hot_selection = random.randint(int((hot_rate - shifting[1]) * 10), int((hot_rate + shifting[1]) * 10))
