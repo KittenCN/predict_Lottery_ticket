@@ -373,6 +373,7 @@ def check_rate(result_list):
 
 
 if __name__ == "__main__":
+    # cal_hot_cold()
     # cal_repeat_rate()
     # cal_ball_rate()
     # cal_ball_parity()
@@ -399,7 +400,7 @@ if __name__ == "__main__":
     for i in range(1, total_create + 1):
         current_result = [0]
         err = [0] * 5
-        shifting = [item * 0.9 for item in shifting]
+        shifting = [item * 0.9 for item in ori_shiftings]
         err_code_max = -1
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
