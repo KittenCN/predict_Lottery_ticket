@@ -5,7 +5,7 @@ from tqdm import tqdm
 from sklearn.cluster import KMeans
 from collections import defaultdict
 from config import *
-from common import get_data_run
+from common import get_data_run, datetime
 from itertools import combinations
 
 name = "kl8"
@@ -353,6 +353,13 @@ def check_rate(result_list):
     
     return 99, True
 
+## 写入文件
+def write_file(lst,file_name="result"):
+    current_time = datetime.now().strftime("%Y%m%d%H%M%S")
+    file_name = "{}_{}.txt".format(file_name, current_time)
+    with open(file_name, "w") as f:
+        for item in lst:
+            f.write("{}\n".format(item))
 
 if __name__ == "__main__":
     # cal_hot_cold()
@@ -440,3 +447,5 @@ if __name__ == "__main__":
         print(sorted_shiftings[i])
     for i in range(total_create):
         print(sorted_results[i])
+    write_file(sorted_results, "result")
+    write_file(sorted_shiftings, "shifting")
