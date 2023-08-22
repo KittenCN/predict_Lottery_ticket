@@ -134,22 +134,6 @@ def cal_ball_group(result_list=None):
         length = 11
     for i in range(limit):
         for j in range(1, length):
-            # if result_list[i][j] <= 10:
-            #     group[0] += 1
-            # elif result_list[i][j] <= 20:
-            #     group[1] += 1
-            # elif result_list[i][j] <= 30:
-            #     group[2] += 1
-            # elif result_list[i][j] <= 40:
-            #     group[3] += 1
-            # elif result_list[i][j] <= 50:
-            #     group[4] += 1
-            # elif result_list[i][j] <= 60:
-            #     group[5] += 1
-            # elif result_list[i][j] <= 70:
-            #     group[6] += 1
-            # else:
-            #     group[7] += 1
             group_index = (result_list[i][j] - 1) // 10
             group[group_index] += 1
     group_rate = [item / sum(group) for item in group]
@@ -204,14 +188,10 @@ def analysis_prime_number(limit=limit_line, result_list=None):
     total_draws = 0
     if result_list is None:
         result_list = ori_numpy
-        length = 21
     else:
         limit = 1
-        length = 11
     for i in range(limit):
         prime_num = 0
-        # numbers = result_list[i][1:length]
-        # numbers.sort()
         for item in result_list[i]:
             total_draws += 1
             if item in prime_list:
@@ -295,11 +275,13 @@ def check_rate(result_list):
         return -1, False
     
     ## 验证重复
-    for i in range(1,11):
-        for j in range(i + 1, 11):
-            if result_list[0][i] == result_list[0][j]:
-                # print("重复异常！", result_list[0][i], result_list[0][j])
-                return -1, False
+    # for i in range(1,11):
+    #     for j in range(i + 1, 11):
+    #         if result_list[0][i] == result_list[0][j]:
+    #             # print("重复异常！", result_list[0][i], result_list[0][j])
+    #             return -1, False
+    if len(result_list[0]) != len(set(result_list[0])):
+        return -1, False
     
     for item in results:
         if result_list[0] == item:
