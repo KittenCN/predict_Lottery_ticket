@@ -421,14 +421,18 @@ if __name__ == "__main__":
             while repeat_flag:
                 current_result = temp_result.copy()
                 ## 随机插入其他数字
-                useful_list = [item for item in range(1, 81) if item not in current_result and item not in prime_list]
+                useful_list = [item for item in range(1, 81) \
+                                if item not in current_result \
+                                and item not in prime_list \
+                                and item not in hot_list \
+                                and item not in cold_list]
                 current_result.extend(random.sample(useful_list, 10 - len(current_result) + 1))
                 current_result.sort()
-                # current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result[1:]])
-                # for i in range(21):
-                #     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
-                #         repeat_flag = True
-                #         break
+                current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result])
+                for i in range(21):
+                    if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
+                        repeat_flag = True
+                        break
                 repeat_flag = False
                     
         results.append(current_result[1:])
