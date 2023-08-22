@@ -16,7 +16,7 @@ ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
 # limit_line = len(ori_numpy)
 limit_line = 30
 ori_shiftings = [0.07, 0.08, 0.07, 0.07, 0.01]
-shifting = ori_shiftings
+shifting = ori_shiftings.copy()
 total_create = 50
 err_nums = 1000
 results = []
@@ -383,7 +383,7 @@ if __name__ == "__main__":
         current_result = [0]
         err = [0] * 5
         # shifting = [item * 0.9 for item in ori_shiftings]
-        shifting = ori_shiftings
+        shifting = ori_shiftings.copy()
         err_code_max = -1
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
