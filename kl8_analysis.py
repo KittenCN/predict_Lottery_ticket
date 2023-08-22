@@ -134,22 +134,24 @@ def cal_ball_group(result_list=None):
         length = 11
     for i in range(limit):
         for j in range(1, length):
-            if result_list[i][j] <= 10:
-                group[0] += 1
-            elif result_list[i][j] <= 20:
-                group[1] += 1
-            elif result_list[i][j] <= 30:
-                group[2] += 1
-            elif result_list[i][j] <= 40:
-                group[3] += 1
-            elif result_list[i][j] <= 50:
-                group[4] += 1
-            elif result_list[i][j] <= 60:
-                group[5] += 1
-            elif result_list[i][j] <= 70:
-                group[6] += 1
-            else:
-                group[7] += 1
+            # if result_list[i][j] <= 10:
+            #     group[0] += 1
+            # elif result_list[i][j] <= 20:
+            #     group[1] += 1
+            # elif result_list[i][j] <= 30:
+            #     group[2] += 1
+            # elif result_list[i][j] <= 40:
+            #     group[3] += 1
+            # elif result_list[i][j] <= 50:
+            #     group[4] += 1
+            # elif result_list[i][j] <= 60:
+            #     group[5] += 1
+            # elif result_list[i][j] <= 70:
+            #     group[6] += 1
+            # else:
+            #     group[7] += 1
+            group_index = (result_list[i][j] - 1) // 10
+            group[group_index] += 1
     group_rate = [item / sum(group) for item in group]
     # print(group_rate)
     return group_rate
@@ -420,28 +422,24 @@ if __name__ == "__main__":
             ## 按比例插入冷热号
             hot_selection = random.randint(int((hot_rate - shifting[1]) * 10), int((hot_rate + shifting[1]) * 10))
             cold_selection = random.randint(int((cold_rate - shifting[1]) * 10), int((cold_rate + shifting[1]) * 10))
-            last_num = 0
-            for i in range(hot_selection):
-                current_num = 0
-                while current_num == last_num:
-                    current_num = hot_list[random.randint(0, 9)]
-                last_num = current_num
-                current_result.append(hot_list[random.randint(0, 9)])
-            last_num = 0
-            for i in range(cold_selection):
-                current_num = 0
-                while current_num == last_num:
-                    current_num = cold_list[random.randint(0, 9)]
-                last_num = current_num
-                current_result.append(cold_list[random.randint(0, 9)])
+            current_result.extend(random.sample(hot_list, hot_selection))
+            current_result.extend(random.sample(cold_list, cold_selection))
             
-            ## 随机插入其他数字
-            for i in range(10 - len(current_result) + 1):
-                current_num = 0
-                while (current_num in current_result or current_num <= 0 or current_num in prime_list):
-                    current_num = random.randint(1, 80)
-                current_result.append(current_num)
-            current_result.sort()
+            repeat_flag = True
+            temp_result = current_result.copy()
+            while repeat_flag:
+                current_result = temp_result.copy()
+                ## 随机插入其他数字
+                useful_list = [item for item in range(1, 81) if item not in current_result and item not in prime_list]
+                current_result.extend(random.sample(useful_list, 10 - len(current_result) + 1))
+                current_result.sort()
+                # current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result[1:]])
+                # for i in range(21):
+                #     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
+                #         repeat_flag = True
+                #         break
+                repeat_flag = False
+                    
         results.append(current_result[1:])
         shiftings.append(shifting)
         shifting = [round(num, 3) for num in shifting]
