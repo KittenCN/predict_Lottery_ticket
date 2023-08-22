@@ -15,7 +15,7 @@ ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
 
 # limit_line = len(ori_numpy)
 limit_line = 30
-ori_shiftings = [0.08, 0.07, 0.08, 0.07, 0.01]
+ori_shiftings = [0.05, 0.05, 0.05, 0.05, 0.01]
 shifting = ori_shiftings
 total_create = 50
 err_nums = 1000
@@ -397,7 +397,7 @@ if __name__ == "__main__":
                 if err[err_code] > err_nums // 5:
                     err_code_max = err_code
                 if err[err_code] > err_nums:
-                    shifting[err_code] += shifting[err_code] * 0.1
+                    shifting[err_code] += shifting[err_code] * 0.05
                     err[err_code] = 0
                     for j in range(err_code + 1, len(err)):
                         shifting[j] = ori_shiftings[j]
