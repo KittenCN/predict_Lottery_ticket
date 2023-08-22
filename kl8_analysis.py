@@ -383,7 +383,7 @@ if __name__ == "__main__":
         current_result = [0]
         err = [0] * 5
         # shifting = [item * 0.9 for item in ori_shiftings]
-        shifting - ori_shiftings
+        shifting = ori_shiftings
         err_code_max = -1
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
