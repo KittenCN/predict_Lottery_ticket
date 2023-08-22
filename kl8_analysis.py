@@ -397,7 +397,7 @@ if __name__ == "__main__":
                 if err[err_code] > err_nums // 5:
                     err_code_max = err_code
                 if err[err_code] > err_nums:
-                    shifting[err_code] += 0.01
+                    shifting[err_code] += shifting[err_code] * 0.1
                     err[err_code] = 0
                     for j in range(err_code + 1, len(err)):
                         shifting[j] = ori_shiftings[j]
