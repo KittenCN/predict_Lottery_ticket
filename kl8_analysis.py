@@ -290,7 +290,7 @@ def check_rate(result_list):
 
     ## 验证重复率
     current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list)
-    for i in range(21):
+    for i in range(1, 21):
         if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
             # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
             return 0, False
@@ -419,6 +419,7 @@ if __name__ == "__main__":
             repeat_flag = True
             temp_result = current_result.copy()
             while repeat_flag:
+                repeat_flag = False
                 current_result = temp_result.copy()
                 ## 随机插入其他数字
                 useful_list = [item for item in range(1, 81) \
@@ -429,11 +430,10 @@ if __name__ == "__main__":
                 current_result.extend(random.sample(useful_list, 10 - len(current_result) + 1))
                 current_result.sort()
                 current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result])
-                for i in range(21):
+                for i in range(1, 21):
                     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
                         repeat_flag = True
                         break
-                repeat_flag = False
                     
         results.append(current_result[1:])
         shiftings.append(shifting)
