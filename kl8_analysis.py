@@ -11,7 +11,7 @@ from itertools import combinations
 name = "kl8"
 get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
-ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[1:]
+ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
 
 # limit_line = len(ori_numpy)
 limit_line = 30
@@ -326,10 +326,6 @@ def check_rate(result_list):
     
     ## 验证连续号码
     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
-    # for i in range(11):
-    #     if abs(his_consecutive_rate[i] - current_consecutive_rate[i]) > shifting:
-    #        # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
-    #         return False
     w = 0
     b = 0
     for i in range(2, 11):
