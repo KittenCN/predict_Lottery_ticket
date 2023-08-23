@@ -62,16 +62,17 @@ def cal_repeat_rate(limit=limit_line, result_list=None):
 ## 计算前10的冷热号
 def cal_hot_cold(begin=0, end=limit_line):
     balls = [0] * 81
+    total_balls = 0
     for i in range(begin, end):
         if i >= len(ori_numpy):
             break
         for j in range(1, 21):
+            total_balls += 1
             balls[ori_numpy[i][j]] += 1
-    balls = [(i, balls[i]) for i in range(1, 81)]
+    balls = [(i, round(balls[i] / total_balls, 5)) for i in range(1, 81)]
     balls.sort(key=lambda x: x[1], reverse=True)
+    # print(balls)
     balls = [item[0] for item in balls]
-    # print(balls[:10])
-    # print(balls[-10:])
     return balls[:10], balls[-10:]
 
 ## 计算指定号码组在每期出现的概率
@@ -392,11 +393,13 @@ if __name__ == "__main__":
         # shifting = [item * 0.9 for item in ori_shiftings]
         shifting = ori_shiftings.copy()
         err_code_max = -1
+        err_results = []
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
             err_code, check_result = check_rate([current_result])
             if check_result:
                 break
+            err_results.append(current_result)
             current_result = [0]
             if err_code > -1:
                 if err_code < err_code_max:
@@ -413,6 +416,8 @@ if __name__ == "__main__":
             ## 按比例插入冷热号
             hot_selection = random.randint(int((hot_rate - shifting[1]) * 10), int((hot_rate + shifting[1]) * 10))
             cold_selection = random.randint(int((cold_rate - shifting[1]) * 10), int((cold_rate + shifting[1]) * 10))
+            hot_selection = 1 if hot_selection < 1 else hot_selection
+            cold_selection = 1 if cold_selection < 1 else cold_selection
             current_result.extend(random.sample(hot_list, hot_selection))
             current_result.extend(random.sample(cold_list, cold_selection))
             
@@ -429,11 +434,30 @@ if __name__ == "__main__":
                                 and item not in cold_list]
                 current_result.extend(random.sample(useful_list, 10 - len(current_result) + 1))
                 current_result.sort()
+                if current_result in err_results:
+                    repeat_flag = True
+                    continue
+                ## 验证重复率
                 current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result])
                 for i in range(1, 21):
                     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
                         repeat_flag = True
+                        err_results.append(current_result)
                         break
+                # ## 验证奇偶比
+                # if repeat_flag == False:
+                #     current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
+                #     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
+                #         repeat_flag = True
+                #         err_results.append(current_result)
+                # ## 验证号码组
+                # if repeat_flag == False:
+                #     current_group_rate = cal_ball_group(result_list=[current_result])
+                #     for i in range(8):
+                #         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
+                #             repeat_flag = True
+                #             err_results.append(current_result)
+                #             break
                     
         results.append(current_result[1:])
         shiftings.append(shifting)
