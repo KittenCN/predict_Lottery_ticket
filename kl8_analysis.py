@@ -17,7 +17,7 @@ ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
 limit_line = 30
 ori_shiftings = [0.07, 0.08, 0.07, 0.07, 0.01]
 shifting = ori_shiftings.copy()
-total_create = 50
+total_create = 3
 err_nums = 1000
 results = []
 shiftings = []
@@ -352,7 +352,7 @@ def check_rate(result_list):
 
 ## 写入文件
 def write_file(lst,file_name="result"):
-    current_time = datetime.now().strftime("%Y%m%d%H%M%S")
+    current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     file_name = "{}_{}.txt".format(file_name, current_time)
     with open(file_name, "w") as f:
         for item in lst:
