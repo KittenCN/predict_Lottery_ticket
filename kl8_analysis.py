@@ -353,10 +353,13 @@ def check_rate(result_list):
 ## 写入文件
 def write_file(lst,file_name="result"):
     current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    file_name = "{}_{}.txt".format(file_name, current_time)
+    file_name = "{}_{}.csv".format(file_name, current_time)
     with open(file_name, "w") as f:
+        f.write("b1,b2,b3,b4,b5,b6,b7,b8,b9,b10\n")
         for item in lst:
-            f.write("{}\n".format(item))
+            for index in range(len(item)-1):
+                f.write("{},".format(item[index]))
+            f.write("{}\n".format(item[-1]))
 
 if __name__ == "__main__":
     # cal_hot_cold()

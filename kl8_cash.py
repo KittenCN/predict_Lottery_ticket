@@ -16,14 +16,14 @@ cash_select = [10, 9, 8, 7, 6 ,5 ,0]
 cash_price = [5000000, 8000, 800, 80, 5, 3, 2]
 cash_list = [0] * len(cash_select)
 
-cash_file_name = "test.txt"
+cash_file_name = "result_20230823120804.csv"
 cash_data = pd.read_csv(cash_file_name)
 cash_numpy = cash_data.to_numpy()
 
 for index in  range(len(cash_select)):
     for item in cash_numpy:
-        ori_split = combinations(ori_numpy, cash_select[index])
-        cash_split = combinations(item, cash_select[index])
+        ori_split = list(combinations(ori_numpy, cash_select[index]))
+        cash_split = list(combinations(item, cash_select[index]))
 
         cash_set = set(ori_split) & set(cash_split)
         cash_list[index] += len(cash_set)

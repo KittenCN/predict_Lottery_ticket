@@ -6,6 +6,7 @@ predict/
 *.py[cod]
 *$py.class
 *.csv
+*txt
 
 # C extensions
 *.so
