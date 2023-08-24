@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import random
+import argparse
 from tqdm import tqdm
 from sklearn.cluster import KMeans
 from collections import defaultdict
@@ -8,17 +9,26 @@ from config import *
 from common import get_data_run, datetime
 from itertools import combinations
 
-name = "kl8"
-get_data_run(name=name, cq=0)
+parser = argparse.ArgumentParser()
+parser.add_argument('--name', default="kl8", type=str, help="lottery name")
+parser.add_argument('--download', default=0, type=int, help="download data")
+parser.add_argument('--limit_line', default=30, type=int, help='limit line')
+parser.add_argument('--total_create', default=50, type=int, help='total create')
+parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
+args = parser.parse_args()
+
+name = args.name
+if args.download == 1:
+    get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
 
 # limit_line = len(ori_numpy)
-limit_line = 30
+limit_line = args.limit_line
 ori_shiftings = [0.05, 0.05, 0.05, 0.07, 0.01]
 shifting = ori_shiftings.copy()
-total_create = 50
-err_nums = 1000
+total_create = args.total_create
+err_nums = args.err_nums
 results = []
 shiftings = []
 err = -1
