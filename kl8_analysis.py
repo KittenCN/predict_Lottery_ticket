@@ -15,9 +15,9 @@ ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
 
 # limit_line = len(ori_numpy)
 limit_line = 30
-ori_shiftings = [0.07, 0.08, 0.07, 0.07, 0.01]
+ori_shiftings = [0.05, 0.05, 0.05, 0.05, 0.01]
 shifting = ori_shiftings.copy()
-total_create = 3
+total_create = 50
 err_nums = 1000
 results = []
 shiftings = []
@@ -361,6 +361,17 @@ def write_file(lst,file_name="result"):
                 f.write("{},".format(item[index]))
             f.write("{}\n".format(item[-1]))
 
+## 判断数组中有几个奇数几个偶数
+def check_odd_even(lst):
+    odd = 0
+    even = 0
+    for item in lst:
+        if item % 2 == 0:
+            even += 1
+        else:
+            odd += 1
+    return odd, even
+
 if __name__ == "__main__":
     # cal_hot_cold()
     # cal_repeat_rate()
@@ -413,8 +424,8 @@ if __name__ == "__main__":
                         shifting[j] = ori_shiftings[j]
                         err[j] = 0
             ## 按比例插入冷热号
-            hot_selection = random.randint(int((hot_rate - shifting[1]) * 10), int((hot_rate + shifting[1]) * 10))
-            cold_selection = random.randint(int((cold_rate - shifting[1]) * 10), int((cold_rate + shifting[1]) * 10))
+            hot_selection = random.randint(int(round((hot_rate - 0) * 10,0)), int(round((hot_rate + 0) * 10,0)))
+            cold_selection = random.randint(int(round((cold_rate - 0) * 10,0)), int(round((cold_rate + 0) * 10,0)))
             hot_selection = 1 if hot_selection < 1 else hot_selection
             cold_selection = 1 if cold_selection < 1 else cold_selection
             current_result.extend(random.sample(hot_list, hot_selection))
@@ -426,12 +437,21 @@ if __name__ == "__main__":
                 repeat_flag = False
                 current_result = temp_result.copy()
                 ## 随机插入其他数字
-                useful_list = [item for item in range(1, 81) \
-                                if item not in current_result \
-                                and item not in prime_list \
-                                and item not in hot_list \
-                                and item not in cold_list]
-                current_result.extend(random.sample(useful_list, 10 - len(current_result) + 1))
+                useful_list_odd = []
+                useful_list_even = []
+                for item in range(1, 81):
+                    if item not in current_result \
+                        and item not in prime_list \
+                        and item not in hot_list \
+                        and item not in cold_list:
+                        if item % 2 == 1:
+                            useful_list_odd.append(item)
+                        else:
+                            useful_list_even.append(item)
+                current_odd, current_even = check_odd_even(current_result[1:])
+                odd_need = random.randint(int(round((his_odd - shifting[2]) * 10,0)), int(round((his_odd + shifting[2]) * 10,0)))
+                current_result.extend(random.sample(useful_list_odd, odd_need - current_odd))
+                current_result.extend(random.sample(useful_list_even, 10 - len(current_result) + 1))
                 current_result.sort()
                 if current_result in err_results:
                     repeat_flag = True
@@ -443,12 +463,12 @@ if __name__ == "__main__":
                         repeat_flag = True
                         err_results.append(current_result)
                         break
-                # ## 验证奇偶比
-                # if repeat_flag == False:
-                #     current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
-                #     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
-                #         repeat_flag = True
-                #         err_results.append(current_result)
+                ## 验证奇偶比
+                if repeat_flag == False:
+                    current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
+                    if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
+                        repeat_flag = True
+                        err_results.append(current_result)
                 # ## 验证号码组
                 # if repeat_flag == False:
                 #     current_group_rate = cal_ball_group(result_list=[current_result])
