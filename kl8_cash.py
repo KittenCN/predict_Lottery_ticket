@@ -26,8 +26,11 @@ for item in cash_numpy:
             cash_list[index] += len(cash_set)
             if cash_price[index] != 0 and len(cash_set) != 0:
                 print("第{}注, 号码{}中奖。".format(x, cash_set))
+                break
         elif cash_select[index] == 0 and len(cash_set) == 0:
             cash_list[index] += 1
+            print("第{}注, 号码{}中奖。".format(x, cash_set))
+            break
 
 total_cash = 0
 for i in range(len(cash_select)):

@@ -15,7 +15,7 @@ ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
 
 # limit_line = len(ori_numpy)
 limit_line = 30
-ori_shiftings = [0.05, 0.05, 0.05, 0.05, 0.01]
+ori_shiftings = [0.05, 0.05, 0.05, 0.07, 0.01]
 shifting = ori_shiftings.copy()
 total_create = 50
 err_nums = 1000
