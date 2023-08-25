@@ -417,6 +417,7 @@ def analysis_rate():
             print(avg_rate[i], end=" ")
         else:
             print(avg_rate[i], end=" ")
+    print()
     limit_line = args.limit_line
     return avg_rate
 
