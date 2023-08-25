@@ -11,11 +11,12 @@ from itertools import combinations
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
-parser.add_argument('--download', default=1, type=int, help="download data")
+parser.add_argument('--download', default=0, type=int, help="download data")
 parser.add_argument('--limit_line', default=30, type=int, help='limit line')
 parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
+parser.add_argument('--analysis_history', default=1, type=int, help='analysis history')
 args = parser.parse_args()
 
 name = args.name
@@ -35,18 +36,17 @@ shiftings = []
 err = -1
 group_size = 50
 prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79]
+analysis_history = [10, 30, 50, 100]
 
 ## 计算往期重复的概率
-def cal_repeat_rate(limit=limit_line, result_list=None):
+def cal_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
     march_cal = [0] * 21
     march_rate = [0.0] * 21
     total_march = 0
+    length = len(result_list[0])
     if result_list is None:
         result_list = ori_numpy
         j_shiftint = 1
-    else:
-        limit = 1
-        j_shiftint = 0
     for i in range(limit):
         for j in range(i + j_shiftint, limit_line):
             march_num = 0
@@ -56,7 +56,7 @@ def cal_repeat_rate(limit=limit_line, result_list=None):
                     if result_list[i][k] == ori_numpy[j][k]:
                         march_num += 1
             else:
-                for x in range(1,args.cal_nums + 1):
+                for x in range(1,length):
                     for y in range(1,21):
                         if result_list[i][x] == ori_numpy[j][y]:
                             march_num += 1
@@ -87,18 +87,14 @@ def cal_hot_cold(begin=0, end=limit_line):
     return balls[:10], balls[-10:]
 
 ## 计算指定号码组在每期出现的概率
-def cal_ball_rate(limit=limit_line, result_list=None):
+def cal_ball_rate(limit=limit_line, result_list=None, i_shiftint=1):
     hot_rate_times = 0
     cold_rate_times = 0
     times = 0
     if result_list is None:
         result_list = ori_numpy
         i_shiftint = 1
-        length = 21
-    else:
-        limit = 1
-        i_shiftint = 0
-        length = args.cal_nums + 1
+    length = len(result_list[0])
     
     for i in range(limit):
         hot_balls, cold_balls = cal_hot_cold(i + i_shiftint, i + limit_line)
@@ -120,10 +116,7 @@ def cal_ball_parity(limit=limit_line, result_list=None):
     even = 0
     if result_list is None:
         result_list = ori_numpy
-        length = 21
-    else:
-        limit = 1
-        length = args.cal_nums + 1
+    length = len(result_list[0])
     for i in range(limit):
         for j in range(1, length):
             if result_list[i][j] % 2 == 0:
@@ -135,15 +128,11 @@ def cal_ball_parity(limit=limit_line, result_list=None):
     return odd / (odd + even), even / (odd + even)
 
 ## 将80个号码分为8组，计算每组的出现概率
-def cal_ball_group(result_list=None):
+def cal_ball_group(limit=limit_line, result_list=None):
     group = [0] * 8
     if result_list is None:
         result_list = ori_numpy
-        limit = limit_line
-        length = 21
-    else:
-        limit = 1
-        length = args.cal_nums + 1
+    length = len(result_list[0])
     for i in range(limit):
         for j in range(1, length):
             group_index = (result_list[i][j] - 1) // 10
@@ -171,14 +160,11 @@ def find_consecutive_number(numbers):
 def analysis_consecutive_number(limit=limit_line, result_list=None):
     consecutive_group = defaultdict(int)
     total_draws = 0
-    consecutive_rate_list = [0] * args.cal_nums + 1
-    consecutive_rate = [0.0] * args.cal_nums + 1
+    length = len(result_list[0])
+    consecutive_rate_list = [0] * length
+    consecutive_rate = [0.0] * length
     if result_list is None:
         result_list = ori_numpy
-        length = 21
-    else:
-        limit = 1
-        length = args.cal_nums + 1
     for i in range(limit):
         total_draws += 1
         numbers = result_list[i][1:length]
@@ -189,7 +175,7 @@ def analysis_consecutive_number(limit=limit_line, result_list=None):
     sorted_consecutive_group = sorted(consecutive_group.items(), key=lambda x: x[1], reverse=True)
     for item, count in sorted_consecutive_group:
         consecutive_rate_list[len(item)] += count
-    for i in range(args.cal_nums + 1):
+    for i in range(length):
         consecutive_rate[i] = consecutive_rate_list[i] / total_draws
     # print(consecutive_rate)
     return consecutive_rate
@@ -200,8 +186,6 @@ def analysis_prime_number(limit=limit_line, result_list=None):
     total_draws = 0
     if result_list is None:
         result_list = ori_numpy
-    else:
-        limit = 1
     for i in range(limit):
         prime_num = 0
         for item in result_list[i]:
@@ -219,10 +203,7 @@ def sum_analysis(limit=limit_line, result_list=None):
     total_numbers = 0
     if result_list is None:
         result_list = ori_numpy
-        length = 21
-    else:
-        limit = 1
-        length = args.cal_nums + 1
+    length = len(result_list[0])
     for i in tqdm(range(limit)):
         result_list_split = combinations(result_list[i][1:length], 10)
         for item in result_list_split:
@@ -301,7 +282,7 @@ def check_rate(result_list):
             return -1, False
 
     ## 验证重复率
-    current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list)
+    current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
     for i in range(1, 21):
         if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
             # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
@@ -317,7 +298,7 @@ def check_rate(result_list):
         return -1, False    
     
     ## 验证冷热号
-    current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list)
+    current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list, i_shiftint=0)
     if abs(his_hot_balls - current_hot_balls) > shifting[1] or abs(his_cold_balls - current_cold_balls) > shifting[1]:
         # print("冷热号异常！", abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls), shifting)
         return 1, False
@@ -329,7 +310,7 @@ def check_rate(result_list):
         return 2, False
     
     ## 验证号码组
-    current_group_rate = cal_ball_group(result_list=result_list)
+    current_group_rate = cal_ball_group(limit=1, result_list=result_list)
     for i in range(8):
         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
             # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
@@ -383,6 +364,61 @@ def check_odd_even(lst):
             odd += 1
     return odd, even
 
+## 计算list中大于0的元素的平均值
+def cal_average(lst):
+    total = 0
+    count = 0
+    for item in lst:
+        if item > 0:
+            total += item
+            count += 1
+    return total / count
+
+## 分析当前期与历史概率数据的乖离性
+def analysis_rate():
+    global limit_line
+    rate_diff = [] 
+    result_list = [ori_numpy[0]]
+    current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
+    current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list, i_shiftint=0)
+    current_odd, current_even = cal_ball_parity(limit=1, result_list=result_list)
+    current_group_rate = cal_ball_group(limit=1, result_list=result_list)
+    current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
+    pbar = tqdm(total=len(analysis_history))
+    for item in analysis_history:
+        if item == -1:
+            item = len(ori_numpy) - 1
+        ori_numpy_except_last = ori_numpy[1:item+1]
+        limit_line = item
+        his_repeat_rate = cal_repeat_rate(limit=item, result_list=ori_numpy_except_last, j_shiftint=0)
+        his_hot_balls, his_cold_balls = cal_ball_rate(limit=item, result_list=ori_numpy_except_last, i_shiftint=0)
+        his_odd, his_even = cal_ball_parity(limit=item, result_list=ori_numpy_except_last)
+        his_group_rate = cal_ball_group(limit=item, result_list=ori_numpy_except_last)
+        his_consecutive_rate = analysis_consecutive_number(limit=item, result_list=ori_numpy_except_last)
+        rate_diff.append([item, 
+            cal_average([abs(his_repeat_rate[i] - current_repeat_rate[i]) for i in range(1, 21)]), 
+            cal_average([abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls)]),
+            cal_average([abs(his_odd - current_odd), abs(his_even - current_even)]),
+            cal_average([abs(his_group_rate[i] - current_group_rate[i]) for i in range(8)]),
+            cal_average([abs(his_consecutive_rate[i] - current_consecutive_rate[i]) for i in range(2, 11)])])
+        pbar.update(1)
+    pbar.close()
+    avg_rate = [0.0] * len(rate_diff[0])
+    avg_rate[0] = "avg"
+    for item in rate_diff:
+        for i in range(len(item)):
+            print(round(item[i], 5), end=" ")
+            if i > 0:
+                avg_rate[i] += item[i]
+        print()
+    for i in range(len(avg_rate)):
+        if i > 0:
+            avg_rate[i] = round(avg_rate[i] / len(rate_diff), 5)
+            print(avg_rate[i], end=" ")
+        else:
+            print(avg_rate[i], end=" ")
+    return avg_rate
+
 if __name__ == "__main__":
     # cal_hot_cold()
     # cal_repeat_rate()
@@ -397,7 +433,8 @@ if __name__ == "__main__":
     # n_clusters = args.cal_nums
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
-
+    if args.analysis_history == 1:
+        ori_shiftings = analysis_rate()[1:].copy()
     his_repeat_rate = cal_repeat_rate()
     hot_list, cold_list = cal_hot_cold()
     hot_rate, cold_rate = cal_ball_rate()
@@ -468,7 +505,7 @@ if __name__ == "__main__":
                     repeat_flag = True
                     continue
                 ## 验证重复率
-                current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result])
+                current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
                 for i in range(1, 21):
                     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
                         repeat_flag = True
