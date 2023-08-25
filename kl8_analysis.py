@@ -43,10 +43,10 @@ def cal_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
     march_cal = [0] * 21
     march_rate = [0.0] * 21
     total_march = 0
-    length = len(result_list[0])
     if result_list is None:
         result_list = ori_numpy
         j_shiftint = 1
+    length = len(result_list[0])
     for i in range(limit):
         for j in range(i + j_shiftint, limit_line):
             march_num = 0
@@ -160,11 +160,11 @@ def find_consecutive_number(numbers):
 def analysis_consecutive_number(limit=limit_line, result_list=None):
     consecutive_group = defaultdict(int)
     total_draws = 0
+    if result_list is None:
+        result_list = ori_numpy
     length = len(result_list[0])
     consecutive_rate_list = [0] * length
     consecutive_rate = [0.0] * length
-    if result_list is None:
-        result_list = ori_numpy
     for i in range(limit):
         total_draws += 1
         numbers = result_list[i][1:length]
