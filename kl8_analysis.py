@@ -11,7 +11,7 @@ from itertools import combinations
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
-parser.add_argument('--download', default=0, type=int, help="download data")
+parser.add_argument('--download', default=1, type=int, help="download data")
 parser.add_argument('--limit_line', default=30, type=int, help='limit line')
 parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
