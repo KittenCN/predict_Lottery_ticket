@@ -417,6 +417,7 @@ def analysis_rate():
             print(avg_rate[i], end=" ")
         else:
             print(avg_rate[i], end=" ")
+    limit_line = args.limit_line
     return avg_rate
 
 if __name__ == "__main__":
@@ -463,10 +464,10 @@ if __name__ == "__main__":
                 if err_code < err_code_max:
                     continue
                 err[err_code] += 1
-                if err[err_code] > err_nums // 5:
+                if err[err_code] > err_nums // 10:
                     err_code_max = err_code
                 if err[err_code] > err_nums:
-                    shifting[err_code] += shifting[err_code] * 0.05
+                    shifting[err_code] += shifting[err_code] * 0.01
                     err[err_code] = 0
                     for j in range(err_code + 1, len(err)):
                         shifting[j] = ori_shiftings[j]
@@ -504,13 +505,13 @@ if __name__ == "__main__":
                 if current_result in err_results:
                     repeat_flag = True
                     continue
-                ## 验证重复率
-                current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
-                for i in range(1, 21):
-                    if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
-                        repeat_flag = True
-                        err_results.append(current_result)
-                        break
+                # ## 验证重复率
+                # current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
+                # for i in range(1, 21):
+                #     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
+                #         repeat_flag = True
+                #         err_results.append(current_result)
+                #         break
                 ## 验证奇偶比
                 if repeat_flag == False:
                     current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
