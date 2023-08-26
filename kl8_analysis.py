@@ -417,7 +417,7 @@ def analysis_rate():
             print(avg_rate[i], end=" ")
     print()
     limit_line = args.limit_line
-    avg_rate = rate_diff[0]
+    # avg_rate = rate_diff[0]
     return avg_rate
 
 if __name__ == "__main__":
