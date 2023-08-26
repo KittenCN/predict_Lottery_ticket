@@ -464,7 +464,7 @@ if __name__ == "__main__":
                 if err_code < err_code_max:
                     continue
                 err[err_code] += 1
-                if err[err_code] > err_nums // 10:
+                if err[err_code] > err_nums // 5:
                     err_code_max = err_code
                 if err[err_code] > err_nums:
                     shifting[err_code] += shifting[err_code] * 0.01
