@@ -308,7 +308,7 @@ def check_rate(result_list):
             return 3, False
         if his_group_rate[i] == 0 and current_group_rate[i] > 0.1 or his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01 :
             # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
-            return 3, False
+            return -1, False
     
     ## 验证连续号码
     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
