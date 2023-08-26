@@ -306,7 +306,7 @@ def check_rate(result_list):
         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
             # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
             return 3, False
-        if his_group_rate[i] == 0 and current_group_rate[i] > 0:
+        if his_group_rate[i] == 0 and current_group_rate[i] > 0.1 or his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01 :
             # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
             return 3, False
     
@@ -467,7 +467,7 @@ if __name__ == "__main__":
                 if err[err_code] > err_nums // 5:
                     err_code_max = err_code
                 if err[err_code] > err_nums:
-                    shifting[err_code] += shifting[err_code] * 0.01
+                    shifting[err_code] += shifting[err_code] * 0.1
                     err[err_code] = 0
                     for j in range(err_code + 1, len(err)):
                         shifting[j] = ori_shiftings[j]
