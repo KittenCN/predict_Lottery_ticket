@@ -505,19 +505,19 @@ if __name__ == "__main__":
                 if current_result in err_results:
                     repeat_flag = True
                     continue
-                # ## 验证重复率
-                # current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
-                # for i in range(1, 11):
-                #     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
-                #         repeat_flag = True
-                #         err_results.append(current_result)
-                #         break
-                # ## 验证奇偶比
-                # if repeat_flag == False:
-                #     current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
-                #     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
-                #         repeat_flag = True
-                #         err_results.append(current_result)
+                ## 验证重复率
+                current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
+                for i in range(1, 11):
+                    if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
+                        repeat_flag = True
+                        err_results.append(current_result)
+                        break
+                ## 验证奇偶比
+                if repeat_flag == False:
+                    current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
+                    if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
+                        repeat_flag = True
+                        err_results.append(current_result)
                 # ## 验证号码组
                 # if repeat_flag == False:
                 #     current_group_rate = cal_ball_group(result_list=[current_result])
