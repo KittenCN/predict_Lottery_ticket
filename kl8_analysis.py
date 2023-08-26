@@ -306,21 +306,28 @@ def check_rate(result_list):
         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
             # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
             return 3, False
+        if his_group_rate[i] == 0 and current_group_rate[i] > 0:
+            # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
+            return 3, False
     
     ## 验证连续号码
     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
-    w = 0
-    b = 0
+    # w = 0
+    # b = 0
+    # for i in range(2, args.cal_nums + 1):
+    #     if his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0:
+    #         # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+    #         w += 1
+    #     elif his_consecutive_rate[i] <= 0 and current_consecutive_rate[i] > 0:
+    #         # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+    #         b += 1
+    #         break
+    # if w <= 0 or b > 0:
+    #     return 4, False
     for i in range(2, args.cal_nums + 1):
-        if his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0:
+        if abs(his_consecutive_rate[i] - current_consecutive_rate[i]) > shifting[4]:
             # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
-            w += 1
-        elif his_consecutive_rate[i] <= 0 and current_consecutive_rate[i] > 0:
-            # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
-            b += 1
-            break
-    if w <= 0 or b > 0:
-        return 4, False
+            return 4, False
     
     ## 验证和值
     current_sum = sum(result_list[0][1:])
