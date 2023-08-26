@@ -14,7 +14,7 @@ parser.add_argument('--name', default="kl8", type=str, help="lottery name")
 parser.add_argument('--download', default=1, type=int, help="download data")
 parser.add_argument('--limit_line', default=30, type=int, help='limit line')
 parser.add_argument('--total_create', default=50, type=int, help='total create')
-parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
+parser.add_argument('--err_nums', default=10000, type=int, help='err nums')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
 parser.add_argument('--analysis_history', default=1, type=int, help='analysis history')
 args = parser.parse_args()
@@ -40,30 +40,21 @@ analysis_history = [10, 30, 50, 100]
 
 ## 计算往期重复的概率
 def cal_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
-    march_cal = [0] * 21
-    march_rate = [0.0] * 21
+    march_cal = [0] * 11
+    march_rate = [0.0] * 11
     total_march = 0
     if result_list is None:
         result_list = ori_numpy
         j_shiftint = 1
-    length = len(result_list[0])
     for i in range(limit):
         for j in range(i + j_shiftint, limit_line):
             march_num = 0
             total_march += 1
-            if result_list is None:
-                for k in range(1, 21):
-                    if result_list[i][k] == ori_numpy[j][k]:
-                        march_num += 1
-            else:
-                for x in range(1,length):
-                    for y in range(1,21):
-                        if result_list[i][x] == ori_numpy[j][y]:
-                            march_num += 1
-                        elif result_list[i][x] < ori_numpy[j][y]:
-                            break
+            march_num = len(set(result_list[i][1:]) & set(ori_numpy[j][1:]))
+            if len(result_list[i]) > 11:
+                march_num //= 2
             march_cal[march_num] += 1
-    for i in range(21):
+    for i in range(11):
         march_rate[i] = march_cal[i] / total_march
 
     # print(march_cal)
@@ -283,13 +274,13 @@ def check_rate(result_list):
 
     ## 验证重复率
     current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
-    for i in range(1, 21):
+    for i in range(1, 11):
         if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
             # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
             return 0, False
         
     his_index = 0
-    for i in range(20, 0, -1):
+    for i in range(10, 0, -1):
         if his_repeat_rate[i] > 0 and his_repeat_rate[i] >= 0.1:
             his_index = i + 1
             break
@@ -396,7 +387,7 @@ def analysis_rate():
         his_group_rate = cal_ball_group(limit=item, result_list=ori_numpy_except_last)
         his_consecutive_rate = analysis_consecutive_number(limit=item, result_list=ori_numpy_except_last)
         rate_diff.append([item, 
-            cal_average([abs(his_repeat_rate[i] - current_repeat_rate[i]) for i in range(1, 21)]), 
+            cal_average([abs(his_repeat_rate[i] - current_repeat_rate[i]) for i in range(1, 11)]), 
             cal_average([abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls)]),
             cal_average([abs(his_odd - current_odd), abs(his_even - current_even)]),
             cal_average([abs(his_group_rate[i] - current_group_rate[i]) for i in range(8)]),
@@ -405,20 +396,21 @@ def analysis_rate():
     pbar.close()
     avg_rate = [0.0] * len(rate_diff[0])
     avg_rate[0] = "avg"
-    for item in rate_diff:
-        for i in range(len(item)):
-            print(round(item[i], 5), end=" ")
-            if i > 0:
-                avg_rate[i] += item[i]
+    for i in range(len(rate_diff)):
+        for j in range(len(rate_diff[i])):
+            print(round(rate_diff[i][j], 5), end=" ")
+            if j > 0:
+                avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / 10)
         print()
     for i in range(len(avg_rate)):
         if i > 0:
-            avg_rate[i] = round(avg_rate[i] / len(rate_diff), 5)
+            avg_rate[i] = round(avg_rate[i], 5)
             print(avg_rate[i], end=" ")
         else:
             print(avg_rate[i], end=" ")
     print()
     limit_line = args.limit_line
+    avg_rate = rate_diff[0]
     return avg_rate
 
 if __name__ == "__main__":
@@ -508,17 +500,17 @@ if __name__ == "__main__":
                     continue
                 # ## 验证重复率
                 # current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
-                # for i in range(1, 21):
+                # for i in range(1, 11):
                 #     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
                 #         repeat_flag = True
                 #         err_results.append(current_result)
                 #         break
-                ## 验证奇偶比
-                if repeat_flag == False:
-                    current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
-                    if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
-                        repeat_flag = True
-                        err_results.append(current_result)
+                # ## 验证奇偶比
+                # if repeat_flag == False:
+                #     current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
+                #     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
+                #         repeat_flag = True
+                #         err_results.append(current_result)
                 # ## 验证号码组
                 # if repeat_flag == False:
                 #     current_group_rate = cal_ball_group(result_list=[current_result])
