@@ -17,6 +17,7 @@ parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
 parser.add_argument('--analysis_history', default=1, type=int, help='analysis history')
+parser.add_argument('--current_nums', default=2023227, type=int, help='current nums')
 args = parser.parse_args()
 
 name = args.name
@@ -24,6 +25,10 @@ if args.download == 1:
     get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
+
+if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.current_nums <= ori_numpy[0][0]:
+    index_diff = ori_numpy[0][0] - args.current_nums
+    ori_numpy = ori_numpy[index_diff:]
 
 # limit_line = len(ori_numpy)
 limit_line = args.limit_line
@@ -347,10 +352,17 @@ def check_rate(result_list):
     
     return 99, True
 
+## 判断文件夹是否存在，不存在就创建
+def check_dir(path):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 ## 写入文件
 def write_file(lst,file_name="result"):
     current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    file_name = "{}_{}.csv".format(file_name, current_time)
+    file_path = "./results/"
+    check_dir(file_path)
+    file_name = file_path + "{}_{}.csv".format(file_name, current_time)
     with open(file_name, "w") as f:
         f.write("b1,b2,b3,b4,b5,b6,b7,b8,b9,b10\n")
         for item in lst:

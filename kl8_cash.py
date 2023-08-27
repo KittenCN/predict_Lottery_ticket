@@ -8,10 +8,11 @@ from itertools import combinations
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
 parser.add_argument('--download', default=1, type=int, help="download data")
-parser.add_argument('--cash_file_name', default="result_20230823162832", type=str, help='cash_file_name')
+parser.add_argument('--cash_file_name', default="result_20230827122531", type=str, help='cash_file_name')
 parser.add_argument('--index', default=-1, type=int, help='index')
 args = parser.parse_args()
 
+file_path = "./results/"
 name = args.name
 if args.download == 1:
     get_data_run(name=name, cq=0)
@@ -25,7 +26,7 @@ cash_select = [10, 9, 8, 7, 6 ,5 ,4, 3, 2, 1, 0]
 cash_price = [5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2]
 cash_list = [0] * len(cash_select)
 
-cash_file_name = args.cash_file_name + ".csv"
+cash_file_name = file_path + args.cash_file_name + ".csv"
 cash_data = pd.read_csv(cash_file_name)
 cash_numpy = cash_data.to_numpy()
 
