@@ -1,7 +1,6 @@
 import pandas as pd
 import argparse
 from config import *
-from common import get_data_run
 from itertools import combinations
 
 
@@ -15,6 +14,7 @@ args = parser.parse_args()
 file_path = "./results/" 
 name = args.name
 if args.download == 1:
+    from common import get_data_run
     get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][1:]
@@ -22,9 +22,20 @@ if args.index >= 0:
     index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.index
     if index >= 0:
         ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
-cash_select = [10, 9, 8, 7, 6 ,5 ,4, 3, 2, 1, 0]
-cash_price = [5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2]
-cash_list = [0] * len(cash_select)
+cash_select_list = []
+for i in range(0, 11):
+    _t = [element for element in range(i, -1, -1)]
+    cash_select_list.append(_t)
+cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
+                    [300000, 2000, 200, 20, 5, 3, 0, 0, 0, 2], \
+                    [50000, 800, 88, 10, 3, 0, 0, 0, 2], \
+                    [10000, 288, 28, 4, 0, 0, 0, 2], \
+                    [3000, 30, 10, 3, 0, 0, 0], \
+                    [1000, 21, 3, 0, 0, 0], \
+                    [100, 5, 3, 0, 0], \
+                    [53, 3, 0, 0], \
+                    [19, 0, 0], \
+                    [4.6, 0]]
 
 if args.cash_file_name != "-1":
     cash_file_name = file_path + args.cash_file_name + ".csv"
@@ -36,6 +47,9 @@ else:
     cash_file_name = file_path + file_list[-1]   
 cash_data = pd.read_csv(cash_file_name)
 cash_numpy = cash_data.to_numpy()
+cash_select = cash_select_list[cash_numpy.shape[1]]
+cash_price = cash_price_list[10 - (cash_numpy.shape[1])]
+cash_list = [0] * len(cash_select)
 
 x = 0
 for item in cash_numpy:
