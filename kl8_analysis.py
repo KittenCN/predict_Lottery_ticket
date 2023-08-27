@@ -17,7 +17,7 @@ parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
 parser.add_argument('--analysis_history', default=1, type=int, help='analysis history')
-parser.add_argument('--current_nums', default=2023227, type=int, help='current nums')
+parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 args = parser.parse_args()
 
 name = args.name
