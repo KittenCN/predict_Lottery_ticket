@@ -328,6 +328,9 @@ def check_rate(result_list):
         if abs(his_consecutive_rate[i] - current_consecutive_rate[i]) > shifting[4]:
             # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
             return 4, False
+        if his_consecutive_rate[i] == 0 and current_consecutive_rate[i] > 0.1 or his_consecutive_rate[i] > 0.1 and current_consecutive_rate[i] < 0.01 :
+            # print("号码组异常！", abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+            return -1, False
     
     ## 验证和值
     current_sum = sum(result_list[0][1:])
@@ -505,19 +508,19 @@ if __name__ == "__main__":
                 if current_result in err_results:
                     repeat_flag = True
                     continue
-                ## 验证重复率
-                current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
-                for i in range(1, 11):
-                    if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
-                        repeat_flag = True
-                        err_results.append(current_result)
-                        break
-                ## 验证奇偶比
-                if repeat_flag == False:
-                    current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
-                    if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
-                        repeat_flag = True
-                        err_results.append(current_result)
+                # ## 验证重复率
+                # current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
+                # for i in range(1, 11):
+                #     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
+                #         repeat_flag = True
+                #         err_results.append(current_result)
+                #         break
+                # ## 验证奇偶比
+                # if repeat_flag == False:
+                #     current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
+                #     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
+                #         repeat_flag = True
+                #         err_results.append(current_result)
                 # ## 验证号码组
                 # if repeat_flag == False:
                 #     current_group_rate = cal_ball_group(result_list=[current_result])
