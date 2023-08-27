@@ -562,7 +562,7 @@ if __name__ == "__main__":
         results.append(current_result[1:])
         shiftings.append(shifting)
         shifting = [round(num, 3) for num in shifting]
-        tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
+        # tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
         pbar.update(1)
     pbar.close()
     sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
@@ -571,9 +571,9 @@ if __name__ == "__main__":
     sorted_shiftings = list(sorted_shiftings)
     for i in range(total_create):
         sorted_shiftings[i] = [round(num, 3) for num in sorted_shiftings[i]]
-    for i in range(total_create):
-        print(sorted_shiftings[i])
+    # for i in range(total_create):
+    #     print(sorted_shiftings[i])
     for i in range(total_create):
         print(sorted_results[i])
     write_file(sorted_results, "result")
-    write_file(sorted_shiftings, "shifting")
+    # write_file(sorted_shiftings, "shifting")
