@@ -2,11 +2,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import random
 import argparse
+import datetime
 from tqdm import tqdm
 from sklearn.cluster import KMeans
 from collections import defaultdict
 from config import *
-from common import get_data_run, datetime
 from itertools import combinations
 
 parser = argparse.ArgumentParser()
@@ -22,6 +22,7 @@ args = parser.parse_args()
 
 name = args.name
 if args.download == 1:
+    from common import get_data_run
     get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
@@ -433,7 +434,7 @@ def analysis_rate():
         for j in range(len(rate_diff[i])):
             print(round(rate_diff[i][j], 5), end=" ")
             if j > 0:
-                avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / args.cal_nums)
+                avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / 10)
         print()
     for i in range(len(avg_rate)):
         if i > 0:
@@ -445,6 +446,12 @@ def analysis_rate():
     limit_line = args.limit_line
     # avg_rate = rate_diff[0]
     return avg_rate
+
+## 判断list长度是否超过限制
+def check_list_length(lst):
+    if len(lst) > args.cal_nums:
+        return True
+    return False
 
 if __name__ == "__main__":
     # cal_hot_cold()
@@ -525,7 +532,13 @@ if __name__ == "__main__":
                             useful_list_even.append(item)
                 current_odd, current_even = check_odd_even(current_result[1:])
                 odd_need = random.randint(int(round((his_odd - shifting[2]) * args.cal_nums,0)), int(round((his_odd + shifting[2]) * args.cal_nums,0)))
+                if current_odd > odd_need:
+                    odd_need = current_odd
+                even_need = args.cal_nums - odd_need
                 current_result.extend(random.sample(useful_list_odd, odd_need - current_odd))
+                if check_list_length(current_result):
+                    repeat_flag = True
+                    continue
                 current_result.extend(random.sample(useful_list_even, args.cal_nums + 1 - len(current_result)))
                 current_result.sort()
                 if current_result in err_results:

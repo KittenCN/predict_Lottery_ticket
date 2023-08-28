@@ -8,7 +8,9 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
 parser.add_argument('--download', default=1, type=int, help="download data")
 parser.add_argument('--cash_file_name', default="-1", type=str, help='cash_file_name')
-parser.add_argument('--index', default=-1, type=int, help='index')
+parser.add_argument('--total_create', default=50, type=int, help='total create')
+parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
+parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 args = parser.parse_args()
 
 file_path = "./results/" 
@@ -18,8 +20,8 @@ if args.download == 1:
     get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][1:]
-if args.index >= 0:
-    index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.index
+if args.current_nums >= 0:
+    index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
     if index >= 0:
         ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
 cash_select_list = []
