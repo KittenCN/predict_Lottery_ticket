@@ -500,7 +500,8 @@ if __name__ == "__main__":
                 if err[err_code] > err_nums // err_num_rate:
                     err_code_max = err_code
                 if err[err_code] > err_nums:
-                    shifting[err_code] += shifting[err_code] * shifting_rate
+                    shifting[err_code] += 0.01 if shifting[err_code] * shifting_rate > 0.01 else shifting[err_code] * shifting_rate
+
                     err[err_code] = 0
                     for j in range(err_code + 1, len(err)):
                         shifting[j] = ori_shiftings[j]
