@@ -544,53 +544,53 @@ if __name__ == "__main__":
                 if current_result in err_results:
                     repeat_flag = True
                     continue
-                ## 验证重复率
-                current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
-                for i in range(1, args.cal_nums + 1):
-                    if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
-                        repeat_flag = True
-                        err_results.append(current_result)
-                        break
-                ## 验证奇偶比
-                if repeat_flag == False:
-                    current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
-                    if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
-                        repeat_flag = True
-                        err_results.append(current_result)
-                ## 验证号码组
-                if repeat_flag == False:
-                    current_group_rate = cal_ball_group(limit=1, result_list=[current_result])
+                # ## 验证重复率
+                # current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
+                # for i in range(1, args.cal_nums + 1):
+                #     if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
+                #         repeat_flag = True
+                #         err_results.append(current_result)
+                #         break
+                # ## 验证奇偶比
+                # if repeat_flag == False:
+                #     current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
+                #     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
+                #         repeat_flag = True
+                #         err_results.append(current_result)
+                # ## 验证号码组
+                # if repeat_flag == False:
+                #     current_group_rate = cal_ball_group(limit=1, result_list=[current_result])
+                # #     for i in range(8):
+                # #         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
+                # #             repeat_flag = True
+                # #             err_results.append(current_result)
+                # #             break
                 #     for i in range(8):
-                #         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
+                #         if args.cal_nums >= 8:
+                #             if (his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01) or (his_group_rate[i] <= 0.01 and current_group_rate[i] > 0.1):
+                #                 repeat_flag = True
+                #                 err_results.append(current_result)
+                #                 break
+                #         else:
+                #             if (current_group_rate[i] > 0 and his_group_rate[i] < 0.01):
+                #                 repeat_flag = True
+                #                 err_results.append(current_result)
+                #                 break
+                # ## 验证连续号码
+                # if repeat_flag == False:
+                #     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=[current_result])
+                #     correct_flag = False
+                #     for i in range(2, args.cal_nums + 1):
+                #         if (current_consecutive_rate[i] >= 0.1 and his_consecutive_rate[i] <= 0.01):
                 #             repeat_flag = True
                 #             err_results.append(current_result)
                 #             break
-                    for i in range(8):
-                        if args.cal_nums >= 8:
-                            if (his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01) or (his_group_rate[i] <= 0.01 and current_group_rate[i] > 0.1):
-                                repeat_flag = True
-                                err_results.append(current_result)
-                                break
-                        else:
-                            if (current_group_rate[i] > 0 and his_group_rate[i] < 0.01):
-                                repeat_flag = True
-                                err_results.append(current_result)
-                                break
-                ## 验证连续号码
-                if repeat_flag == False:
-                    current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=[current_result])
-                    correct_flag = False
-                    for i in range(2, args.cal_nums + 1):
-                        if (current_consecutive_rate[i] >= 0.1 and his_consecutive_rate[i] <= 0.01):
-                            repeat_flag = True
-                            err_results.append(current_result)
-                            break
-                        if (his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0 ):
-                            correct_flag = True
-                    if correct_flag == False:
-                        repeat_flag = True
-                        err_results.append(current_result)
-                        break
+                #         if (his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0 ):
+                #             correct_flag = True
+                #     if correct_flag == False:
+                #         repeat_flag = True
+                #         err_results.append(current_result)
+                #         break
                     
         results.append(current_result[1:])
         shiftings.append(shifting)
