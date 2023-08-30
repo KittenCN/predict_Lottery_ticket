@@ -33,7 +33,7 @@ if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.curr
 
 # limit_line = len(ori_numpy)
 limit_line = args.limit_line
-ori_shiftings = [0.05, 0.05, 0.05, 0.07, 0.01]
+ori_shiftings = [0.08, 0.08, 0.05, 0.05, 0.01]
 shifting = ori_shiftings.copy()
 total_create = args.total_create
 err_nums = args.err_nums
@@ -558,45 +558,45 @@ if __name__ == "__main__":
                 #     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
                 #         repeat_flag = True
                 #         err_results.append(current_result)
-                # ## 验证号码组
-                # if repeat_flag == False:
-                #     current_group_rate = cal_ball_group(limit=1, result_list=[current_result])
-                # #     for i in range(8):
-                # #         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
-                # #             repeat_flag = True
-                # #             err_results.append(current_result)
-                # #             break
+                ## 验证号码组
+                if repeat_flag == False:
+                    current_group_rate = cal_ball_group(limit=1, result_list=[current_result])
                 #     for i in range(8):
-                #         if args.cal_nums >= 8:
-                #             if (his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01) or (his_group_rate[i] <= 0.01 and current_group_rate[i] > 0.1):
-                #                 repeat_flag = True
-                #                 err_results.append(current_result)
-                #                 break
-                #         else:
-                #             if (current_group_rate[i] > 0 and his_group_rate[i] < 0.01):
-                #                 repeat_flag = True
-                #                 err_results.append(current_result)
-                #                 break
-                # ## 验证连续号码
-                # if repeat_flag == False:
-                #     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=[current_result])
-                #     correct_flag = False
-                #     for i in range(2, args.cal_nums + 1):
-                #         if (current_consecutive_rate[i] >= 0.1 and his_consecutive_rate[i] <= 0.01):
+                #         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
                 #             repeat_flag = True
                 #             err_results.append(current_result)
                 #             break
-                #         if (his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0 ):
-                #             correct_flag = True
-                #     if correct_flag == False:
-                #         repeat_flag = True
-                #         err_results.append(current_result)
-                #         break
+                    for i in range(8):
+                        if args.cal_nums >= 8:
+                            if (his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01) or (his_group_rate[i] <= 0.01 and current_group_rate[i] > 0.1):
+                                repeat_flag = True
+                                err_results.append(current_result)
+                                break
+                        else:
+                            if (current_group_rate[i] > 0 and his_group_rate[i] < 0.01):
+                                repeat_flag = True
+                                err_results.append(current_result)
+                                break
+                ## 验证连续号码
+                if repeat_flag == False:
+                    current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=[current_result])
+                    correct_flag = False
+                    for i in range(2, args.cal_nums + 1):
+                        if (current_consecutive_rate[i] >= 0.1 and his_consecutive_rate[i] <= 0.01):
+                            repeat_flag = True
+                            err_results.append(current_result)
+                            break
+                        if (his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0 ):
+                            correct_flag = True
+                    if correct_flag == False:
+                        repeat_flag = True
+                        err_results.append(current_result)
+                        break
                     
         results.append(current_result[1:])
         shiftings.append(shifting)
         shifting = [round(num, 3) for num in shifting]
-        # tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
+        tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
         pbar.update(1)
     pbar.close()
     sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
