@@ -16,7 +16,7 @@ parser.add_argument('--limit_line', default=30, type=int, help='limit line')
 parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
-parser.add_argument('--analysis_history', default=1, type=int, help='analysis history')
+parser.add_argument('--analysis_history', default=0, type=int, help='analysis history')
 parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 args = parser.parse_args()
 
@@ -33,7 +33,16 @@ if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.curr
 
 # limit_line = len(ori_numpy)
 limit_line = args.limit_line
-ori_shiftings_list = [[0],[0],[0],[0],[0.07, 0.094, 0.074, 0.05, 0.01],[0],[0],[0],[0],[0]]
+ori_shiftings_list = [[0], \
+                        [0], \
+                        [0], \
+                        [0], \
+                        [0.07, 0.094, 0.074, 0.05, 0.01], \
+                        [0.07, 0.061, 0.05, 0.05, 0.01], \
+                        [0.05, 0.05, 0.05, 0.05, 0.01], \
+                        [0], \
+                        [0], \
+                        [0]]
 ori_shiftings = ori_shiftings_list[args.cal_nums - 1]
 if ori_shiftings == [0]:
     ori_shiftings = [0.05, 0.05, 0.05, 0.05, 0.01]
