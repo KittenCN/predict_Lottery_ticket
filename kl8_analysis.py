@@ -446,7 +446,6 @@ def analysis_rate():
         else:
             print(avg_rate[i], end=" ")
     print()
-    limit_line = args.limit_line
     # avg_rate = rate_diff[0]
     return avg_rate
 
@@ -472,6 +471,9 @@ if __name__ == "__main__":
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
     if args.analysis_history == 1:
         ori_shiftings = analysis_rate()[1:].copy()
+    else:
+        analysis_rate()
+    limit_line = args.limit_line
     his_repeat_rate = cal_repeat_rate()
     hot_list, cold_list = cal_hot_cold()
     hot_rate, cold_rate = cal_ball_rate()
