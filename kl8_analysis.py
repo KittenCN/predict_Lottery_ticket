@@ -530,6 +530,7 @@ if __name__ == "__main__":
             
             repeat_flag = True
             temp_result = current_result.copy()
+            start_time = datetime.datetime.now()
             while repeat_flag:
                 repeat_flag = False
                 current_result = temp_result.copy()
@@ -557,6 +558,8 @@ if __name__ == "__main__":
                 current_result.extend(random.sample(useful_list_even, args.cal_nums + 1 - len(current_result)))
                 current_result.sort()
                 if current_result in err_results:
+                    if (datetime.datetime.now() - start_time).seconds > 30:
+                        break
                     repeat_flag = True
                     continue
                 ## 验证重复率
