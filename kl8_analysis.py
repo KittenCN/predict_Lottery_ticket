@@ -558,7 +558,7 @@ if __name__ == "__main__":
                 current_result.extend(random.sample(useful_list_even, args.cal_nums + 1 - len(current_result)))
                 current_result.sort()
                 if current_result in err_results or current_result[1:] in results:
-                    if (datetime.datetime.now() - start_time).seconds > 30:
+                    if (datetime.datetime.now() - start_time).seconds > 5:
                         break
                     repeat_flag = True
                     continue
