@@ -49,7 +49,6 @@ if ori_shiftings == [0]:
 shifting = ori_shiftings.copy()
 total_create = args.total_create
 err_nums = args.err_nums
-results = []
 shiftings = []
 err = -1
 group_size = 50
@@ -493,13 +492,14 @@ if __name__ == "__main__":
     his_sum_rate = sum_analysis()
 
     pbar = tqdm(total=total_create)
+    err_results = []
+    results = []
     for i in range(1, total_create + 1):
         current_result = [0]
         err = [0] * 5
         # shifting = [item * 0.9 for item in ori_shiftings]
         shifting = ori_shiftings.copy()
         err_code_max = -1
-        err_results = []
         while True:
             pbar.set_description("{err} {shifting}".format(err=err, shifting=[round(num, 3) for num in shifting]))
             err_code, check_result = check_rate([current_result])
@@ -557,7 +557,7 @@ if __name__ == "__main__":
                     continue
                 current_result.extend(random.sample(useful_list_even, args.cal_nums + 1 - len(current_result)))
                 current_result.sort()
-                if current_result in err_results:
+                if current_result in err_results or current_result[1:] in results:
                     if (datetime.datetime.now() - start_time).seconds > 30:
                         break
                     repeat_flag = True
