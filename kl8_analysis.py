@@ -21,6 +21,7 @@ parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--check_in_main', default=0, type=int, help='check in main')
 args = parser.parse_args()
 
+current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 name = args.name
 if args.download == 1:
     from common import get_data_run
@@ -377,7 +378,6 @@ def check_dir(path):
 
 ## 写入文件
 def write_file(lst,file_name="result"):
-    current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
     file_path = "./results/"
     check_dir(file_path)
     file_name = file_path + "{}_{}.csv".format(file_name, current_time)
@@ -495,6 +495,7 @@ if __name__ == "__main__":
     pbar = tqdm(total=total_create)
     err_results = []
     results = []
+    start_time = datetime.datetime.now()
     for i in range(1, total_create + 1):
         current_result = [0]
         err = [0] * 5
@@ -531,7 +532,8 @@ if __name__ == "__main__":
             
             repeat_flag = True
             temp_result = current_result.copy()
-            start_time = datetime.datetime.now()
+            repeat_start_time = datetime.datetime.now()
+            last_result_length = 0
             while repeat_flag:
                 repeat_flag = False
                 current_result = temp_result.copy()
@@ -559,7 +561,7 @@ if __name__ == "__main__":
                 current_result.extend(random.sample(useful_list_even, args.cal_nums + 1 - len(current_result)))
                 current_result.sort()
                 if current_result in err_results or current_result[1:] in results:
-                    if (datetime.datetime.now() - start_time).seconds > 5:
+                    if (datetime.datetime.now() - repeat_start_time).seconds > 5:
                         break
                     repeat_flag = True
                     continue
@@ -611,7 +613,13 @@ if __name__ == "__main__":
                             repeat_flag = True
                             err_results.append(current_result)
                             break
-                    
+                if (datetime.datetime.now() - start_time).seconds > 60 and len(results) > last_result_length:
+                    last_result_length = len(results)
+                    start_time = datetime.datetime.now()
+                    sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
+                    sorted_results, sorted_shiftings = zip(*sorted_results)
+                    sorted_results = list(sorted_results)
+                    write_file(sorted_results, "result")
         results.append(current_result[1:])
         shiftings.append(shifting)
         shifting = [round(num, 3) for num in shifting]
@@ -621,12 +629,12 @@ if __name__ == "__main__":
     sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
     sorted_results, sorted_shiftings = zip(*sorted_results)
     sorted_results = list(sorted_results)
-    sorted_shiftings = list(sorted_shiftings)
-    for i in range(total_create):
-        sorted_shiftings[i] = [round(num, 3) for num in sorted_shiftings[i]]
-    # for i in range(total_create):
-    #     print(sorted_shiftings[i])
+    write_file(sorted_results, "result")
     for i in range(total_create):
         print(sorted_results[i])
-    write_file(sorted_results, "result")
+    # sorted_shiftings = list(sorted_shiftings)
+    # for i in range(total_create):
+    #     sorted_shiftings[i] = [round(num, 3) for num in sorted_shiftings[i]]
+    # for i in range(total_create):
+    #     print(sorted_shiftings[i])
     # write_file(sorted_shiftings, "shifting")
