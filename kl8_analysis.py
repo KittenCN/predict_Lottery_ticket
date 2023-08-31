@@ -457,8 +457,8 @@ def analysis_rate():
     print()
     # avg_rate = rate_diff[0]
     for i in range(len(avg_rate[1:])):
-        if shifting[i] > avg_rate[1:][i]:
-            avg_rate[1:][i] = shifting[i]
+        if shifting[i] > avg_rate[i + 1]:
+            avg_rate[i + 1] = shifting[i]
     return avg_rate
 
 ## 判断list长度是否超过限制
