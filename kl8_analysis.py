@@ -38,13 +38,13 @@ limit_line = args.limit_line
 ori_shiftings_list = [[0], \
                         [0], \
                         [0], \
-                        [0], \
+                        [0.3, 0.14, 0.05, 0.05, 0.01], \
                         [0.07, 0.094, 0.074, 0.05, 0.01], \
                         [0.07, 0.061, 0.05, 0.05, 0.01], \
                         [0.05, 0.05, 0.05, 0.05, 0.01], \
                         [0], \
                         [0], \
-                        [0]]
+                        [0.1, 0.05, 0.05, 0.05, 0.01]]
 ori_shiftings = ori_shiftings_list[args.cal_nums - 1]
 if ori_shiftings == [0]:
     ori_shiftings = [0.05, 0.05, 0.05, 0.05, 0.01]
@@ -560,11 +560,11 @@ if __name__ == "__main__":
                     continue
                 current_result.extend(random.sample(useful_list_even, args.cal_nums + 1 - len(current_result)))
                 current_result.sort()
-                if current_result in err_results or current_result[1:] in results:
-                    if (datetime.datetime.now() - repeat_start_time).seconds > 5:
-                        break
-                    repeat_flag = True
-                    continue
+                # if current_result in err_results or current_result[1:] in results:
+                #     if (datetime.datetime.now() - repeat_start_time).seconds > 5:
+                #         break
+                #     repeat_flag = True
+                #     continue
                 if args.check_in_main == 1:
                     ## 验证重复率
                     current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
