@@ -16,7 +16,7 @@ parser.add_argument('--limit_line', default=30, type=int, help='limit line')
 parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
-parser.add_argument('--analysis_history', default=0, type=int, help='analysis history')
+parser.add_argument('--analysis_history', default=1, type=int, help='analysis history')
 parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--check_in_main', default=0, type=int, help='check in main')
 args = parser.parse_args()
@@ -456,6 +456,9 @@ def analysis_rate():
             print(avg_rate[i], end=" ")
     print()
     # avg_rate = rate_diff[0]
+    for i in range(len(avg_rate[1:])):
+        if shifting[i] > avg_rate[1:][i]:
+            avg_rate[1:][i] = shifting[i]
     return avg_rate
 
 ## 判断list长度是否超过限制
