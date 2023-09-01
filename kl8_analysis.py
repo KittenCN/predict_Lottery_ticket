@@ -467,12 +467,16 @@ def analysis_rate():
         pbar.update(1)
     pbar.close()
     avg_rate = [0.0] * len(rate_diff[0])
+    max_rate = [0.0] * len(rate_diff[0])
     avg_rate[0] = "avg"
+    max_rate[0] = "max"
     for i in range(len(rate_diff)):
         for j in range(len(rate_diff[i])):
             print(round(rate_diff[i][j], 5), end=" ")
             if j > 0:
                 avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / 10)
+                if rate_diff[i][j] > max_rate[j]:
+                    max_rate[j] = rate_diff[i][j]
         print()
     for i in range(len(avg_rate)):
         if i > 0:
@@ -481,11 +485,19 @@ def analysis_rate():
         else:
             print(avg_rate[i], end=" ")
     print()
+    for i in range(len(max_rate)):
+        if i > 0:
+            max_rate[i] = round(max_rate[i], 5)
+            print(max_rate[i], end=" ")
+        else:
+            print(max_rate[i], end=" ")
+    print()
     # avg_rate = rate_diff[0]
+    
     for i in range(len(avg_rate[1:])):
         if shifting[i] > avg_rate[i + 1]:
             avg_rate[i + 1] = shifting[i]
-    return avg_rate
+    return max_rate
 
 ## 判断list长度是否超过限制
 def check_list_length(lst):
