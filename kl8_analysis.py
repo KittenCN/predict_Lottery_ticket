@@ -538,7 +538,7 @@ if __name__ == "__main__":
             err_code, check_result = check_rate([current_result])
             if check_result:
                 break
-            err_results.append(current_result)
+            # err_results.append(current_result)
             current_result = [0]
             if err_code > -1:
                 if err_code < err_code_max:
