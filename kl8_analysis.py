@@ -493,11 +493,13 @@ def analysis_rate():
             print(max_rate[i], end=" ")
     print()
     # avg_rate = rate_diff[0]
-    
-    for i in range(len(avg_rate[1:])):
-        if shifting[i] > avg_rate[i + 1]:
-            avg_rate[i + 1] = shifting[i]
-    return max_rate
+    result_rate = len(max_rate[1:]) * [0.0]
+    for i in range(len(max_rate[1:])):
+        if shifting[i] > max_rate[i + 1]:
+            result_rate[i] = shifting[i]
+        else:
+            result_rate[i] = max_rate[i + 1]
+    return result_rate
 
 ## 判断list长度是否超过限制
 def check_list_length(lst):
