@@ -523,7 +523,7 @@ if __name__ == "__main__":
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
     if args.analysis_history == 1:
-        ori_shiftings = analysis_rate()[1:].copy()
+        ori_shiftings = analysis_rate().copy()
     else:
         analysis_rate()
     limit_line = args.limit_line
