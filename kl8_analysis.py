@@ -38,16 +38,16 @@ limit_line = args.limit_line
 ori_shiftings_list = [[0], \
                         [0], \
                         [0], \
-                        [0.3, 0.14, 0.05, 0.05, 0.01], \
-                        [0.07, 0.094, 0.074, 0.05, 0.01], \
-                        [0.07, 0.061, 0.05, 0.05, 0.01], \
-                        [0.05, 0.05, 0.05, 0.05, 0.01], \
+                        [0.3, 0.14, 0.05, 0.05, 0.01, 0.01], \
+                        [0.07, 0.094, 0.074, 0.05, 0.01, 0.01], \
+                        [0.07, 0.061, 0.05, 0.05, 0.01, 0.01], \
+                        [0.05, 0.05, 0.05, 0.05, 0.01, 0.01], \
                         [0], \
                         [0], \
-                        [0.1, 0.05, 0.05, 0.05, 0.01]]
+                        [0.1, 0.05, 0.05, 0.05, 0.01, 0.01]]
 ori_shiftings = ori_shiftings_list[args.cal_nums - 1]
 if ori_shiftings == [0]:
-    ori_shiftings = [0.05, 0.05, 0.05, 0.05, 0.01]
+    ori_shiftings = [0.05, 0.05, 0.05, 0.05, 0.01, 0.01]
 shifting = ori_shiftings.copy()
 total_create = args.total_create
 err_nums = args.err_nums
@@ -58,6 +58,23 @@ prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61
 analysis_history = [10, 30, 50, 100]
 err_num_rate = 5
 shifting_rate = 0.1
+
+## 计算当前与上期不重复元素间间隔为1的概率
+def cal_not_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
+    total_march = 0
+    march_num = 0
+    if result_list is None:
+        result_list = ori_numpy
+        j_shiftint = 1
+    for i in range(limit):
+        ele_diff = list(set(result_list[i][1:]) & set(ori_numpy[i + j_shiftint][1:]))
+        for item in result_list[i][1:]:
+            total_march += 1
+            if item not in ele_diff and (item + 1 in ori_numpy[i + j_shiftint][1:] or item - 1 in ori_numpy[i + j_shiftint][1:]):
+                march_num += 1
+    march_rate = march_num / total_march
+    # print("{:2f}%".format(march_rate * 100))
+    return march_rate
 
 ## 计算往期重复的概率
 def cal_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
@@ -369,6 +386,12 @@ def check_rate(result_list):
         # print("和值异常！", current_sum_rate, shifting)
         return -1, False
     
+    ## 验证非重复元素等差概率:
+    current_march_rate = cal_not_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
+    if abs(current_march_rate - his_not_repeat_rate) > shifting[5]:
+        # print("非重复元素等差概率异常！", abs(current_march_rate - his_not_repeat_rate), shifting)
+        return 5, False    
+    
     return 99, True
 
 ## 判断文件夹是否存在，不存在就创建
@@ -416,28 +439,31 @@ def analysis_rate():
     global limit_line
     rate_diff = [] 
     result_list = [ori_numpy[0]]
-    current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
-    current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list, i_shiftint=0)
+    current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list, j_shiftint=1)
+    current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list, i_shiftint=1)
     current_odd, current_even = cal_ball_parity(limit=1, result_list=result_list)
     current_group_rate = cal_ball_group(limit=1, result_list=result_list)
     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
+    current_march_rate = cal_not_repeat_rate(limit=1, result_list=result_list, j_shiftint=1)
     pbar = tqdm(total=len(analysis_history))
     for item in analysis_history:
         if item == -1:
             item = len(ori_numpy) - 1
         ori_numpy_except_last = ori_numpy[1:item+1]
         limit_line = item
-        his_repeat_rate = cal_repeat_rate(limit=item, result_list=ori_numpy_except_last, j_shiftint=0)
-        his_hot_balls, his_cold_balls = cal_ball_rate(limit=item, result_list=ori_numpy_except_last, i_shiftint=0)
+        his_repeat_rate = cal_repeat_rate(limit=item, result_list=ori_numpy_except_last, j_shiftint=2)
+        his_hot_balls, his_cold_balls = cal_ball_rate(limit=item, result_list=ori_numpy_except_last, i_shiftint=2)
         his_odd, his_even = cal_ball_parity(limit=item, result_list=ori_numpy_except_last)
         his_group_rate = cal_ball_group(limit=item, result_list=ori_numpy_except_last)
         his_consecutive_rate = analysis_consecutive_number(limit=item, result_list=ori_numpy_except_last)
+        hit_march_rate = cal_not_repeat_rate(limit=item, result_list=ori_numpy_except_last, j_shiftint=2)
         rate_diff.append([item, 
             cal_average([abs(his_repeat_rate[i] - current_repeat_rate[i]) for i in range(1, args.cal_nums + 1)]), 
             cal_average([abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls)]),
             cal_average([abs(his_odd - current_odd), abs(his_even - current_even)]),
             cal_average([abs(his_group_rate[i] - current_group_rate[i]) for i in range(8)]),
-            cal_average([abs(his_consecutive_rate[i] - current_consecutive_rate[i]) for i in range(2, args.cal_nums + 1)])])
+            cal_average([abs(his_consecutive_rate[i] - current_consecutive_rate[i]) for i in range(2, args.cal_nums + 1)]),
+            cal_average([abs(hit_march_rate - current_march_rate)])])
         pbar.update(1)
     pbar.close()
     avg_rate = [0.0] * len(rate_diff[0])
@@ -477,6 +503,7 @@ if __name__ == "__main__":
     # bayesian_analysis()
     # analysis_prime_number()
     # sum_analysis()
+    # cal_not_repeat_rate()
 
     # n_clusters = args.cal_nums
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
@@ -494,6 +521,7 @@ if __name__ == "__main__":
     his_group_rate = cal_ball_group()
     his_consecutive_rate = analysis_consecutive_number()
     his_sum_rate = sum_analysis()
+    his_not_repeat_rate = cal_not_repeat_rate()
 
     pbar = tqdm(total=total_create)
     err_results = []
@@ -501,7 +529,7 @@ if __name__ == "__main__":
     start_time = datetime.datetime.now()
     for i in range(1, total_create + 1):
         current_result = [0]
-        err = [0] * 5
+        err = [0] * len(ori_shiftings)
         # shifting = [item * 0.9 for item in ori_shiftings]
         shifting = ori_shiftings.copy()
         err_code_max = -1
