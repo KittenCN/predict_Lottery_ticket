@@ -403,7 +403,7 @@ def check_dir(path):
 def write_file(lst,file_name="result"):
     file_path = "./results/"
     check_dir(file_path)
-    file_name = file_path + "{}_{}.csv".format(file_name, current_time)
+    file_name = file_path + "{}_{}_{}_{}.csv".format(file_name, current_time,args.cal_nums,0 if args.current_nums == -1 else args.current_nums)
     with open(file_name, "w") as f:
         for i in range(args.cal_nums - 1):
             f.write("b" + str(i + 1) + ",")
