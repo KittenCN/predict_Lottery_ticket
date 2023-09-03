@@ -8,6 +8,7 @@ from sklearn.cluster import KMeans
 from collections import defaultdict
 from config import *
 from itertools import combinations
+from loguru import logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
@@ -73,7 +74,7 @@ def cal_not_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
             if item not in ele_diff and (item + 1 in ori_numpy[i + j_shiftint][1:] or item - 1 in ori_numpy[i + j_shiftint][1:]):
                 march_num += 1
     march_rate = march_num / total_march
-    # print("{:2f}%".format(march_rate * 100))
+    # logger.info("{:2f}%".format(march_rate * 100))
     return march_rate
 
 ## 计算往期重复的概率
@@ -95,8 +96,8 @@ def cal_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
     for i in range(args.cal_nums + 1):
         march_rate[i] = march_cal[i] / total_march
 
-    # print(march_cal)
-    # print(["{:.2f}%".format(item*100) for item in  march_rate])
+    # logger.info(march_cal)
+    # logger.info(["{:.2f}%".format(item*100) for item in  march_rate])
     return march_rate
 
 ## 计算前10的冷热号
@@ -111,7 +112,7 @@ def cal_hot_cold(begin=0, end=limit_line):
             balls[ori_numpy[i][j]] += 1
     balls = [(i, round(balls[i] / total_balls, 5)) for i in range(1, 81)]
     balls.sort(key=lambda x: x[1], reverse=True)
-    # print(balls)
+    # logger.info(balls)
     balls = [item[0] for item in balls]
     return balls[:10], balls[-10:]
 
@@ -135,8 +136,8 @@ def cal_ball_rate(limit=limit_line, result_list=None, i_shiftint=1):
                 cold_rate_times += 1
     hot_ball_rate = hot_rate_times / times
     cold_ball_rate = cold_rate_times / times
-    # print("{:.2f}%".format(hot_ball_rate * 100))
-    # print("{:.2f}%".format(cold_ball_rate * 100))
+    # logger.info("{:.2f}%".format(hot_ball_rate * 100))
+    # logger.info("{:.2f}%".format(cold_ball_rate * 100))
     return hot_ball_rate, cold_ball_rate
 
 ## 计算奇偶比:
@@ -152,8 +153,8 @@ def cal_ball_parity(limit=limit_line, result_list=None):
                 even += 1
             else:
                 odd += 1
-    # print("{:.2f}%".format(odd / (odd + even) * 100))
-    # print("{:.2f}%".format(even / (odd + even) * 100))
+    # logger.info("{:.2f}%".format(odd / (odd + even) * 100))
+    # logger.info("{:.2f}%".format(even / (odd + even) * 100))
     return odd / (odd + even), even / (odd + even)
 
 ## 将80个号码分为8组，计算每组的出现概率
@@ -167,7 +168,7 @@ def cal_ball_group(limit=limit_line, result_list=None):
             group_index = (result_list[i][j] - 1) // 10
             group[group_index] += 1
     group_rate = [item / sum(group) for item in group]
-    # print(group_rate)
+    # logger.info(group_rate)
     return group_rate
 
 ## 找出连续号码的组合
@@ -207,7 +208,7 @@ def analysis_consecutive_number(limit=limit_line, result_list=None):
     for i in range(length):
         if total_draws > 0:
             consecutive_rate[i] = consecutive_rate_list[i] / total_draws
-    # print(consecutive_rate)
+    # logger.info(consecutive_rate)
     return consecutive_rate
 
 ## 分析质数比
@@ -223,7 +224,7 @@ def analysis_prime_number(limit=limit_line, result_list=None):
             if item in prime_list:
                 prime_num += 1
     prime_rate = prime_num / total_draws
-    print(prime_rate)
+    logger.info(prime_rate)
     return prime_rate
 
 ## 分析和值概率
@@ -243,7 +244,7 @@ def sum_analysis(limit=limit_line, result_list=None):
             sum_group[group_key] += 1
             total_numbers += 1
     sum_rate_group = {key: count / total_numbers for key, count in sum_group.items()}
-    # print(sum_rate_group)
+    # logger.info(sum_rate_group)
     return sum_rate_group
 
 ## 使用贝叶斯定理分析
@@ -269,7 +270,7 @@ def bayesian_analysis():
 
     # 按后验概率排序
     sorted_probs = sorted(posterior_probs.items(), key=lambda x: x[1], reverse=True)
-    # print(sorted_probs[:args.cal_nums])
+    # logger.info(sorted_probs[:args.cal_nums])
     return sorted_probs
 
 ## 使用K均值聚类算法
@@ -294,28 +295,28 @@ def plot_clusters(ori_numpy, labels, centers):
 def check_rate(result_list):
     ## 验证总数
     if len(result_list[0][1:]) != args.cal_nums:
-        # print("总数异常！",len(result_list[0][1:]),args.cal_nums)
+        # logger.info("总数异常！",len(result_list[0][1:]),args.cal_nums)
         return -1, False
     
     ## 验证重复
     # for i in range(1,args.cal_nums + 1):
     #     for j in range(i + 1, args.cal_nums + 1):
     #         if result_list[0][i] == result_list[0][j]:
-    #             # print("重复异常！", result_list[0][i], result_list[0][j])
+    #             # logger.info("重复异常！", result_list[0][i], result_list[0][j])
     #             return -1, False
     if len(result_list[0]) != len(set(result_list[0])):
         return -1, False
     
     for item in results:
         if result_list[0] == item:
-            # print("重复异常！", result_list[0], item)
+            # logger.info("重复异常！", result_list[0], item)
             return -1, False
 
     ## 验证重复率
     current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
     for i in range(1, args.cal_nums + 1):
         if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
-            # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
+            # logger.info("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
             return 0, False
         
     his_index = 0
@@ -324,38 +325,38 @@ def check_rate(result_list):
             his_index = i + 1
             break
     if current_repeat_rate[his_index] - his_repeat_rate[his_index] > shifting[0]:
-        # print("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
+        # logger.info("重复率异常！",abs(his_repeat_rate[i] - current_repeat_rate[i]), shifting)
         return 0, False    
     
     ## 验证冷热号
     current_hot_balls, current_cold_balls = cal_ball_rate(limit=1, result_list=result_list, i_shiftint=0)
     if abs(his_hot_balls - current_hot_balls) > shifting[1] or abs(his_cold_balls - current_cold_balls) > shifting[1]:
-        # print("冷热号异常！", abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls), shifting)
+        # logger.info("冷热号异常！", abs(his_hot_balls - current_hot_balls), abs(his_cold_balls - current_cold_balls), shifting)
         return 1, False
     
     ## 验证奇偶比
     current_odd, current_even = cal_ball_parity(limit=1, result_list=result_list)
     if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
-        # print("奇偶比异常！", abs(his_odd - current_odd), abs(his_even - current_even), shifting)
+        # logger.info("奇偶比异常！", abs(his_odd - current_odd), abs(his_even - current_even), shifting)
         return 2, False
     
     ## 验证号码组
     current_group_rate = cal_ball_group(limit=1, result_list=result_list)
     # for i in range(8):
         # if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
-        #     # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
+        #     # logger.info("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
         #     return 3, False
         # if his_group_rate[i] == 0 and current_group_rate[i] > 0.1 or his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01 :
-        #     # print("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
+        #     # logger.info("号码组异常！", abs(his_group_rate[i] - current_group_rate[i]), shifting)
         #     return -1, False
     for i in range(8):
         if args.cal_nums >= 8:
             if (his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01) or (his_group_rate[i] <= 0.01 and current_group_rate[i] > 0.1):
-                # print("号码组异常！", i, abs(his_group_rate[i] - current_group_rate[i]), shifting)
+                # logger.info("号码组异常！", i, abs(his_group_rate[i] - current_group_rate[i]), shifting)
                 return 3, False
         else:
             if (current_group_rate[i] > 0 and his_group_rate[i] < 0.01):
-                # print("号码组异常！", i, abs(his_group_rate[i] - current_group_rate[i]), shifting)
+                # logger.info("号码组异常！", i, abs(his_group_rate[i] - current_group_rate[i]), shifting)
                 return 3, False
     
     ## 验证连续号码
@@ -363,7 +364,7 @@ def check_rate(result_list):
     correct_flag = False
     for i in range(2, args.cal_nums + 1):
         if (current_consecutive_rate[i] >= 0.1 and his_consecutive_rate[i] <= 0.01):
-            # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+            # logger.info("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
             return 4, False
         if (his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0 ):
             correct_flag = True
@@ -371,10 +372,10 @@ def check_rate(result_list):
         return 4, False
     # for i in range(2, args.cal_nums + 1):
     #     if abs(his_consecutive_rate[i] - current_consecutive_rate[i]) > shifting[4]:
-    #         # print("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+    #         # logger.info("连续号码异常！", i, abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
     #         return 4, False
     #     if his_consecutive_rate[i] == 0 and current_consecutive_rate[i] > 0.1 or his_consecutive_rate[i] > 0.1 and current_consecutive_rate[i] < 0.01 :
-    #         # print("号码组异常！", abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
+    #         # logger.info("号码组异常！", abs(his_consecutive_rate[i] - current_consecutive_rate[i]), shifting)
     #         return -1, False
     
     ## 验证和值
@@ -383,13 +384,13 @@ def check_rate(result_list):
     group_key = f"{group_index * group_size + 1}-{(group_index + 1) * group_size}"
     current_sum_rate = his_sum_rate.get(group_key, 0)
     if current_sum_rate < 0.1:
-        # print("和值异常！", current_sum_rate, shifting)
+        # logger.info("和值异常！", current_sum_rate, shifting)
         return -1, False
     
     ## 验证非重复元素等差概率:
     current_march_rate = cal_not_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
     if abs(current_march_rate - his_not_repeat_rate) > shifting[5]:
-        # print("非重复元素等差概率异常！", abs(current_march_rate - his_not_repeat_rate), shifting)
+        # logger.info("非重复元素等差概率异常！", abs(current_march_rate - his_not_repeat_rate), shifting)
         return 5, False    
     
     return 99, True
@@ -472,26 +473,26 @@ def analysis_rate():
     max_rate[0] = "max"
     for i in range(len(rate_diff)):
         for j in range(len(rate_diff[i])):
-            print(round(rate_diff[i][j], 5), end=" ")
+            logger.info(round(rate_diff[i][j], 5), end=" ")
             if j > 0:
                 avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / 10)
                 if rate_diff[i][j] > max_rate[j]:
                     max_rate[j] = rate_diff[i][j]
-        print()
+        logger.info()
     for i in range(len(avg_rate)):
         if i > 0:
             avg_rate[i] = round(avg_rate[i], 5)
-            print(avg_rate[i], end=" ")
+            logger.info(avg_rate[i], end=" ")
         else:
-            print(avg_rate[i], end=" ")
-    print()
+            logger.info(avg_rate[i], end=" ")
+    logger.info()
     for i in range(len(max_rate)):
         if i > 0:
             max_rate[i] = round(max_rate[i], 5)
-            print(max_rate[i], end=" ")
+            logger.info(max_rate[i], end=" ")
         else:
-            print(max_rate[i], end=" ")
-    print()
+            logger.info(max_rate[i], end=" ")
+    logger.info()
     # avg_rate = rate_diff[0]
     result_rate = len(max_rate[1:]) * [0.0]
     for i in range(len(max_rate[1:])):
@@ -676,10 +677,10 @@ if __name__ == "__main__":
     sorted_results = list(sorted_results)
     write_file(sorted_results, "result")
     for i in range(total_create):
-        print(sorted_results[i])
+        logger.info(sorted_results[i])
     # sorted_shiftings = list(sorted_shiftings)
     # for i in range(total_create):
     #     sorted_shiftings[i] = [round(num, 3) for num in sorted_shiftings[i]]
     # for i in range(total_create):
-    #     print(sorted_shiftings[i])
+    #     logger.info(sorted_shiftings[i])
     # write_file(sorted_shiftings, "shifting")

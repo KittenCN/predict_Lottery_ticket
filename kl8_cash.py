@@ -2,6 +2,7 @@ import pandas as pd
 import argparse
 from config import *
 from itertools import combinations
+from loguru import logger
 
 
 parser = argparse.ArgumentParser()
@@ -53,8 +54,11 @@ else:
             args.current_nums = int(filename_split[-1].split('.')[0])
 if args.current_nums >= 0:
     index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
+    logger.info("当前期数为{}，计算期数为{}。".format(args.current_nums, args.current_nums + 1))
     if index >= 0:
         ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
+else:
+    logger.info("当前期数为{}，计算期数为{}。".format(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
 cash_data = pd.read_csv(cash_file_name)
 cash_numpy = cash_data.to_numpy()
 cash_select = cash_select_list[cash_numpy.shape[1]]
@@ -71,15 +75,15 @@ for item in cash_numpy:
         if cash_select[index] != 0:
             cash_list[index] += len(cash_set)
             if cash_price[index] != 0 and len(cash_set) != 0:
-                print("第{}注, 号码{}中奖。".format(x, cash_set))
+                logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
                 break
         elif cash_select[index] == 0 and len(cash_set) == 0:
             cash_list[index] += 1
-            print("第{}注, 号码{}中奖。".format(x, cash_set))
+            logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
             break
 
 total_cash = 0
 for i in range(len(cash_select)):
-    print("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
+    logger.info("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
     total_cash += cash_list[i] * cash_price[i]
-print("本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+logger.info("本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
