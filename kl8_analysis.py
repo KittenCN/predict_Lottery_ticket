@@ -473,26 +473,26 @@ def analysis_rate():
     max_rate[0] = "max"
     for i in range(len(rate_diff)):
         for j in range(len(rate_diff[i])):
-            logger.info(round(rate_diff[i][j], 5), end=" ")
+            print(round(rate_diff[i][j], 5), end=" ")
             if j > 0:
                 avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / 10)
                 if rate_diff[i][j] > max_rate[j]:
                     max_rate[j] = rate_diff[i][j]
-        logger.info()
+        print()
     for i in range(len(avg_rate)):
         if i > 0:
             avg_rate[i] = round(avg_rate[i], 5)
-            logger.info(avg_rate[i], end=" ")
+            print(avg_rate[i], end=" ")
         else:
-            logger.info(avg_rate[i], end=" ")
-    logger.info()
+            print(avg_rate[i], end=" ")
+    print()
     for i in range(len(max_rate)):
         if i > 0:
             max_rate[i] = round(max_rate[i], 5)
-            logger.info(max_rate[i], end=" ")
+            print(max_rate[i], end=" ")
         else:
-            logger.info(max_rate[i], end=" ")
-    logger.info()
+            print(max_rate[i], end=" ")
+    print()
     # avg_rate = rate_diff[0]
     result_rate = len(max_rate[1:]) * [0.0]
     for i in range(len(max_rate[1:])):
