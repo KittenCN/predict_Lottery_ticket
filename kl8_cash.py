@@ -64,6 +64,7 @@ if args.current_nums >= 0:
         ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
 else:
     logger.info("当前期数为{}，计算期数为{}。".format(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
+logger.info("中奖号码为:{}".format(ori_numpy))
 cash_data = pd.read_csv(cash_file_name)
 cash_numpy = cash_data.to_numpy()
 cash_select = cash_select_list[cash_numpy.shape[1]]
