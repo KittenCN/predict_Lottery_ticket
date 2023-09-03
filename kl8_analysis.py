@@ -39,7 +39,7 @@ if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.curr
 # limit_line = len(ori_numpy)
 limit_line = args.limit_line
 ori_avg_rate = [0.05, 0.05, 0.05, 0.05, 0.01, 0.05]
-ori_shiftings_list = [ori_avg_rate * 10]
+ori_shiftings_list = [ori_avg_rate] * 10
 rate_file = "./kl8_rate.csv"
 if os.path.exists(rate_file):
     rate_data = pd.read_csv(rate_file)
