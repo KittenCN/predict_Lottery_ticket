@@ -18,7 +18,7 @@ from loguru import logger
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
 parser.add_argument('--download', default=1, type=int, help="download data")
-parser.add_argument('--limit_line', default=30, type=int, help='limit line')
+parser.add_argument('--limit_line', default=10, type=int, help='limit line')
 parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
@@ -485,7 +485,7 @@ def analysis_rate():
                 # if rate_diff[i][j] > max_rate[j]:
                 #     max_rate[j] = rate_diff[i][j]
                 max_rate[j] = max(max_rate[j], rate_diff[i][j])
-                max_rate[j] = max(max_rate[j], shifting[j - 1])
+                # max_rate[j] = max(max_rate[j], shifting[j - 1])
         print()
     for i in range(len(avg_rate)):
         if i > 0:
@@ -502,13 +502,11 @@ def analysis_rate():
             print(max_rate[i], end=" ")
     print()
     # avg_rate = rate_diff[0]
-    # result_rate = len(max_rate[1:]) * [0.0]
-    # for i in range(len(max_rate[1:])):
-    #     if shifting[i] > max_rate[i + 1]:
-    #         result_rate[i] = shifting[i]
-    #     else:
-    #         result_rate[i] = max_rate[i + 1]
-    return max_rate[1:]
+    result_rate = len(avg_rate[1:]) * [0.0]
+    for i in range(len(avg_rate[1:])):
+        result_rate[i] = max(avg_rate[i + 1], shifting[i])
+
+    return result_rate
 
 ## 判断list长度是否超过限制
 def check_list_length(lst):
