@@ -20,10 +20,10 @@ if args.download == 1:
     get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][1:]
-if args.current_nums >= 0:
-    index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
-    if index >= 0:
-        ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
+# if args.current_nums >= 0:
+#     index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
+#     if index >= 0:
+#         ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
 cash_select_list = []
 for i in range(0, 11):
     _t = [element for element in range(i, -1, -1)]
@@ -47,6 +47,14 @@ else:
     file_list = os.listdir(file_path)
     file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
     cash_file_name = file_path + file_list[-1]   
+    filename_split = file_list[-1].split('_')
+    if len(filename_split) == 4:
+        if int(filename_split[-1].split('.')[0]) > 0:
+            args.current_nums = int(filename_split[-1].split('.')[0])
+if args.current_nums >= 0:
+    index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
+    if index >= 0:
+        ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
 cash_data = pd.read_csv(cash_file_name)
 cash_numpy = cash_data.to_numpy()
 cash_select = cash_select_list[cash_numpy.shape[1]]
