@@ -59,7 +59,7 @@ shiftings = []
 err = -1
 group_size = 50
 prime_list = [2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79]
-analysis_history = [10, 30, 50, 100]
+analysis_history = [3, 5, 7, 9]
 err_num_rate = 5
 shifting_rate = 0.1
 
@@ -436,6 +436,8 @@ def cal_average(lst):
         if item > 0:
             total += item
             count += 1
+    if count == 0:
+        return 0
     return total / count
 
 ## 分析当前期与历史概率数据的乖离性
@@ -478,13 +480,16 @@ def analysis_rate():
         for j in range(len(rate_diff[i])):
             print(round(rate_diff[i][j], 5), end=" ")
             if j > 0:
-                avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / 10)
-                if rate_diff[i][j] > max_rate[j]:
-                    max_rate[j] = rate_diff[i][j]
+                # avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / 10)
+                avg_rate[j] += rate_diff[i][j]
+                # if rate_diff[i][j] > max_rate[j]:
+                #     max_rate[j] = rate_diff[i][j]
+                max_rate[j] = max(max_rate[j], rate_diff[i][j])
+                max_rate[j] = max(max_rate[j], shifting[j - 1])
         print()
     for i in range(len(avg_rate)):
         if i > 0:
-            avg_rate[i] = round(avg_rate[i], 5)
+            avg_rate[i] = round(avg_rate[i] / len(analysis_history), 5)
             print(avg_rate[i], end=" ")
         else:
             print(avg_rate[i], end=" ")
@@ -497,13 +502,13 @@ def analysis_rate():
             print(max_rate[i], end=" ")
     print()
     # avg_rate = rate_diff[0]
-    result_rate = len(max_rate[1:]) * [0.0]
-    for i in range(len(max_rate[1:])):
-        if shifting[i] > max_rate[i + 1]:
-            result_rate[i] = shifting[i]
-        else:
-            result_rate[i] = max_rate[i + 1]
-    return result_rate
+    # result_rate = len(max_rate[1:]) * [0.0]
+    # for i in range(len(max_rate[1:])):
+    #     if shifting[i] > max_rate[i + 1]:
+    #         result_rate[i] = shifting[i]
+    #     else:
+    #         result_rate[i] = max_rate[i + 1]
+    return max_rate[1:]
 
 ## 判断list长度是否超过限制
 def check_list_length(lst):
