@@ -16,11 +16,13 @@ parser.add_argument('--download', default=1, type=int, help="download data")
 parser.add_argument('--cash_file_name', default="-1", type=str, help='cash_file_name')
 parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--path', default="", type=str, help='path')
+#--------------------------------------------------------------------------------------------------#
 parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
 parser.add_argument('--cal_nums', default=10, type=int, help='useless')
 parser.add_argument('--multiple', default=1, type=int, help='useless')
 parser.add_argument('--multiple_ratio', default=3, type=int, help='useless')
+parser.add_argument('--repeat', default=1, type=int, help='useless')
 args = parser.parse_args()
 
 file_path = "./results/" 

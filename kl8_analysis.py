@@ -29,6 +29,8 @@ parser.add_argument('--calculate_rate', default=0, type=int, help='calculate rat
 parser.add_argument('--calculate_rate_list', default="5", type=str, help='calculate rate list')
 parser.add_argument('--multiple', default=1, type=int, help='multiple')
 parser.add_argument('--multiple_ratio', default=3, type=int, help='multiple_ratio')
+parser.add_argument('--repeat', default=1, type=int, help='repeat')
+#--------------------------------------------------------------------------------------------------#
 parser.add_argument('--path', default="", type=str, help='useless')
 args = parser.parse_args()
 
@@ -716,7 +718,8 @@ if __name__ == "__main__":
                             f.write("{},".format(item[index]))
                         f.write("{}\n".format(item[-1]))
     else:       
-        for i in range(10):
+        for _i in range(args.repeat):
+            current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             pbar = tqdm(total=total_create)
             err_results = []
             results = []
