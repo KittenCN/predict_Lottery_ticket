@@ -460,7 +460,7 @@ def cal_average(lst):
     return total / count
 
 ## 分析当前期与历史概率数据的乖离性
-def analysis_rate(test=0):
+def analysis_rate(rate_mode=0):
     global limit_line
     rate_diff = [] 
     result_list = [ori_numpy[0]]
@@ -525,9 +525,17 @@ def analysis_rate(test=0):
     for i in range(len(avg_rate[1:])):
         result_rate[i] = max(avg_rate[i + 1], shifting[i])
 
-    if test == 0:
+    if rate_mode == 1:
+        result_rate = len(avg_rate[1:]) * [0.0]
+        for i in range(len(avg_rate[1:])):
+            result_rate[i] = max(avg_rate[i + 1], shifting[i])
         return result_rate
-    else:
+    if rate_mode == 2:
+        result_rate = len(max_rate[1:]) * [0.0]
+        for i in range(len(max_rate[1:])):
+            result_rate[i] = max(max_rate[i + 1], shifting[i])
+        return result_rate
+    elif rate_mode == 0:
         return avg_rate[1:]
 
 ## 判断list长度是否超过限制
@@ -536,12 +544,12 @@ def check_list_length(lst):
         return True
     return False
 
-def init_func(test=0):
+def init_func(rate_mode=1):
     global ori_shiftings, limit_line, his_repeat_rate, hot_list, cold_list, hot_rate, cold_rate, his_hot_balls, his_cold_balls, his_odd, his_even, his_group_rate, his_consecutive_rate, his_sum_rate, his_not_repeat_rate
     if args.analysis_history == 1:
-        ori_shiftings = analysis_rate(test=test).copy()
+        ori_shiftings = analysis_rate(rate_mode=rate_mode).copy()
     else:
-        analysis_rate(test=test)
+        analysis_rate(rate_mode=rate_mode)
     limit_line = args.limit_line
     his_repeat_rate = cal_repeat_rate()
     hot_list, cold_list = cal_hot_cold()
@@ -581,7 +589,7 @@ if __name__ == "__main__":
                 if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.current_nums <= ori_numpy[0][0]:
                     index_diff = ori_numpy[0][0] - args.current_nums
                     ori_numpy = ori_numpy[index_diff:]
-                init_func(test=1)
+                init_func(rate_mode=0)
                 pbar = tqdm(total=total_create)
                 err_results = []
                 results = []
@@ -731,7 +739,7 @@ if __name__ == "__main__":
     else:       
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            init_func()
+            init_func(rate_mode=2)
             pbar = tqdm(total=total_create)
             err_results = []
             results = []
