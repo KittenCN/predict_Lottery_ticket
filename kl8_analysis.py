@@ -27,6 +27,9 @@ parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--check_in_main', default=0, type=int, help='check in main')
 parser.add_argument('--calculate_rate', default=0, type=int, help='calculate rate')
 parser.add_argument('--calculate_rate_list', default="5", type=str, help='calculate rate list')
+parser.add_argument('--multiple', default=1, type=int, help='multiple')
+parser.add_argument('--multiple_ratio', default=3, type=int, help='multiple_ratio')
+parser.add_argument('--path', default="", type=str, help='useless')
 args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -53,7 +56,7 @@ ori_shiftings = ori_shiftings_list[args.cal_nums - 1]
 if len(ori_shiftings) != len(ori_avg_rate):
     ori_shiftings = ori_avg_rate
 shifting = ori_shiftings.copy()
-total_create = args.total_create
+total_create = args.total_create * args.multiple
 err_nums = args.err_nums
 shiftings = []
 err = -1
@@ -412,11 +415,22 @@ def write_file(lst,file_name="result"):
         for i in range(args.cal_nums - 1):
             f.write("b" + str(i + 1) + ",")
         f.write("b" + str(args.cal_nums) + "\n")
+        cnt = 0
+        item_index = 0
         for item in lst:
-            for index in range(len(item)-1):
-                f.write("{},".format(item[index]))
-            f.write("{}\n".format(item[-1]))
-
+            if args.multiple > 1:
+                item_index += 1
+                if item_index % args.multiple_ratio == 0:
+                    cnt += 1
+                    for index in range(len(item)-1):
+                        f.write("{},".format(item[index]))
+                    f.write("{}\n".format(item[-1]))
+                    if cnt >= args.total_create:
+                        break
+            else:
+                for index in range(len(item)-1):
+                    f.write("{},".format(item[index]))
+                f.write("{}\n".format(item[-1]))
 ## 判断数组中有几个奇数几个偶数
 def check_odd_even(lst):
     odd = 0
