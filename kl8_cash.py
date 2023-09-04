@@ -17,6 +17,7 @@ parser.add_argument('--cash_file_name', default="-1", type=str, help='cash_file_
 parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
 parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
+parser.add_argument('--path', default="", type=str, help='path')
 args = parser.parse_args()
 
 file_path = "./results/" 
@@ -45,51 +46,75 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [19, 0, 0], \
                     [4.6, 0]]
 
-if args.cash_file_name != "-1":
-    cash_file_name = file_path + args.cash_file_name + ".csv"
-else:
-    ## 寻找目录下最新的文件
-    import os
-    file_list = os.listdir(file_path)
-    file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
-    cash_file_name = file_path + file_list[-1]   
-    filename_split = file_list[-1].split('_')
-    if len(filename_split) == 4:
-        if int(filename_split[-1].split('.')[0]) > 0:
-            args.current_nums = int(filename_split[-1].split('.')[0])
-if args.current_nums >= 0:
-    index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
-    logger.info("当前期数为{}，计算期数为{}。".format(args.current_nums, args.current_nums + 1))
-    if index >= 0:
-        ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
-else:
-    logger.info("当前期数为{}，计算期数为{}。".format(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
-logger.info("中奖号码为:{}".format(ori_numpy))
-cash_data = pd.read_csv(cash_file_name)
-cash_numpy = cash_data.to_numpy()
-cash_select = cash_select_list[cash_numpy.shape[1]]
-cash_price = cash_price_list[10 - (cash_numpy.shape[1])]
-cash_list = [0] * len(cash_select)
+def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0):
+    if args.current_nums >= 0:
+        index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
+        logger.info("当前期数为{}，计算期数为{}。".format(args.current_nums, args.current_nums + 1))
+        if index >= 0:
+            ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
+    else:
+        logger.info("当前期数为{}，计算期数为{}。".format(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
+    logger.info("中奖号码为:{}".format(ori_numpy))
+    cash_data = pd.read_csv(cash_file_name)
+    cash_numpy = cash_data.to_numpy()
+    cash_select = cash_select_list[cash_numpy.shape[1]]
+    cash_price = cash_price_list[10 - (cash_numpy.shape[1])]
+    cash_list = [0] * len(cash_select)
 
-x = 0
-for item in cash_numpy:
-    x += 1
-    for index in  range(len(cash_select)):
-        ori_split = list(combinations(ori_numpy, cash_select[index]))
-        cash_split = list(combinations(item, cash_select[index]))
-        cash_set = set(ori_split) & set(cash_split)
-        if cash_select[index] != 0:
-            cash_list[index] += len(cash_set)
-            if cash_price[index] != 0 and len(cash_set) != 0:
+    x = 0
+    for item in cash_numpy:
+        x += 1
+        for index in  range(len(cash_select)):
+            ori_split = list(combinations(ori_numpy, cash_select[index]))
+            cash_split = list(combinations(item, cash_select[index]))
+            cash_set = set(ori_split) & set(cash_split)
+            if cash_select[index] != 0:
+                cash_list[index] += len(cash_set)
+                if cash_price[index] != 0 and len(cash_set) != 0:
+                    logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
+                    break
+            elif cash_select[index] == 0 and len(cash_set) == 0:
+                cash_list[index] += 1
                 logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
                 break
-        elif cash_select[index] == 0 and len(cash_set) == 0:
-            cash_list[index] += 1
-            logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
-            break
 
-total_cash = 0
-for i in range(len(cash_select)):
-    logger.info("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
-    total_cash += cash_list[i] * cash_price[i]
-logger.info("本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+    total_cash = 0
+    for i in range(len(cash_select)):
+        logger.info("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
+        total_cash += cash_list[i] * cash_price[i]
+    logger.info("本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+    all_cash += len(cash_numpy) * 2
+    all_lucky += total_cash
+    return all_cash, all_lucky
+
+if __name__ == "__main__":
+    if args.path == "" or args.cash_file_name != "-1":
+        file_path = "./results/" 
+        if args.cash_file_name != "-1":
+            cash_file_name = file_path + args.cash_file_name + ".csv"
+        else:
+            ## 寻找目录下最新的文件
+            import os
+            file_list = os.listdir(file_path)
+            file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
+            cash_file_name = file_path + file_list[-1]   
+            filename_split = file_list[-1].split('_')
+            if len(filename_split) == 4:
+                if int(filename_split[-1].split('.')[0]) > 0:
+                    args.current_nums = int(filename_split[-1].split('.')[0])
+        check_lottery(cash_file_name=cash_file_name, args=args)
+    else:
+        file_path = "./results_" + args.path + "/"
+        all_cash, all_lucky = 0, 0
+        import os
+        file_list = os.listdir(file_path)
+        file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
+        for filename in file_list:
+            cash_file_name = file_path + filename
+            filename_split = filename.split('_')
+            if len(filename_split) == 4:
+                if int(filename_split[-1].split('.')[0]) > 0:
+                    args.current_nums = int(filename_split[-1].split('.')[0])
+            all_cash, all_lucky = check_lottery(cash_file_name=cash_file_name, args=args, all_cash=all_cash, all_lucky=all_lucky)
+        logger.info("总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(all_cash, all_lucky, all_lucky / all_cash * 100))
+    
