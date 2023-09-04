@@ -460,7 +460,7 @@ def cal_average(lst):
     return total / count
 
 ## 分析当前期与历史概率数据的乖离性
-def analysis_rate():
+def analysis_rate(test=0):
     global limit_line
     rate_diff = [] 
     result_list = [ori_numpy[0]]
@@ -525,13 +525,33 @@ def analysis_rate():
     for i in range(len(avg_rate[1:])):
         result_rate[i] = max(avg_rate[i + 1], shifting[i])
 
-    return result_rate
+    if test == 0:
+        return result_rate
+    else:
+        return avg_rate[1:]
 
 ## 判断list长度是否超过限制
 def check_list_length(lst):
     if len(lst) > args.cal_nums + 1:
         return True
     return False
+
+def init_func(test=0):
+    global ori_shiftings, limit_line, his_repeat_rate, hot_list, cold_list, hot_rate, cold_rate, his_hot_balls, his_cold_balls, his_odd, his_even, his_group_rate, his_consecutive_rate, his_sum_rate, his_not_repeat_rate
+    if args.analysis_history == 1:
+        ori_shiftings = analysis_rate(test=test).copy()
+    else:
+        analysis_rate(test=test)
+    limit_line = args.limit_line
+    his_repeat_rate = cal_repeat_rate()
+    hot_list, cold_list = cal_hot_cold()
+    hot_rate, cold_rate = cal_ball_rate()
+    his_hot_balls, his_cold_balls = cal_ball_rate(limit_line)
+    his_odd, his_even = cal_ball_parity(limit_line)
+    his_group_rate = cal_ball_group()
+    his_consecutive_rate = analysis_consecutive_number()
+    his_sum_rate = sum_analysis()
+    his_not_repeat_rate = cal_not_repeat_rate()
 
 if __name__ == "__main__":
     # cal_hot_cold()
@@ -548,31 +568,20 @@ if __name__ == "__main__":
     # n_clusters = args.cal_nums
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
-    if args.analysis_history == 1:
-        ori_shiftings = analysis_rate().copy()
-    else:
-        analysis_rate()
-    limit_line = args.limit_line
-    his_repeat_rate = cal_repeat_rate()
-    hot_list, cold_list = cal_hot_cold()
-    hot_rate, cold_rate = cal_ball_rate()
-    his_hot_balls, his_cold_balls = cal_ball_rate(limit_line)
-    his_odd, his_even = cal_ball_parity(limit_line)
-    his_group_rate = cal_ball_group()
-    his_consecutive_rate = analysis_consecutive_number()
-    his_sum_rate = sum_analysis()
-    his_not_repeat_rate = cal_not_repeat_rate()
 
     if args.calculate_rate == 1:
         cal_rate_list = args.calculate_rate_list.split(",")
         if int(cal_rate_list[0]) > 0:
-            for item in cal_rate_list:
-                args.cal_nums = int(item)
-                last_nums = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]
-                args.current_nums = last_nums - 1
+            for rate_item in cal_rate_list:
+                rate_data = pd.read_csv(rate_file)
+                ori_shiftings_list = rate_data.to_numpy()
+                args.cal_nums = int(rate_item)
+                if args.current_nums == -1:
+                    args.current_nums = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]
                 if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.current_nums <= ori_numpy[0][0]:
                     index_diff = ori_numpy[0][0] - args.current_nums
                     ori_numpy = ori_numpy[index_diff:]
+                init_func(test=1)
                 pbar = tqdm(total=total_create)
                 err_results = []
                 results = []
@@ -707,8 +716,10 @@ if __name__ == "__main__":
                     tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
                     pbar.update(1)
                 pbar.close()
-                avg_rate = [sum(col) / len(col) for col in zip(*shifting)]     
-                ori_shiftings_list[item - 1] = avg_rate  
+                avg_rate = [round(sum(col) / len(col), 3) for col in zip(*shiftings)]     
+                ori_shiftings_list[int(rate_item) - 1] = avg_rate  
+                # for avg_rate_index in range (len(avg_rate)):
+                #     ori_shiftings_list[int(rate_item) - 1][avg_rate_index] = avg_rate[avg_rate_index]
                 with open(rate_file, "w") as f:
                     for i in range(len(ori_avg_rate) - 1):
                         f.write("s" + str(i + 1) + ",")
@@ -720,6 +731,7 @@ if __name__ == "__main__":
     else:       
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            init_func()
             pbar = tqdm(total=total_create)
             err_results = []
             results = []
