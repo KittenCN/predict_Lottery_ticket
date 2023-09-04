@@ -26,6 +26,7 @@ parser.add_argument('--repeat', default=1, type=int, help='useless')
 args = parser.parse_args()
 
 file_path = "./results/" 
+endstring = ["csv"]
 name = args.name
 if args.download == 1:
     from common import get_data_run
@@ -101,7 +102,7 @@ if __name__ == "__main__":
         else:
             ## 寻找目录下最新的文件
             import os
-            file_list = os.listdir(file_path)
+            file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
             file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
             cash_file_name = file_path + file_list[-1]   
             filename_split = file_list[-1].split('_')
@@ -113,7 +114,7 @@ if __name__ == "__main__":
         file_path = "./results_" + args.path + "/"
         all_cash, all_lucky = 0, 0
         import os
-        file_list = os.listdir(file_path)
+        file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
         for filename in file_list:
             cash_file_name = file_path + filename
