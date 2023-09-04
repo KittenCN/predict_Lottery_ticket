@@ -408,7 +408,10 @@ def check_dir(path):
 
 ## 写入文件
 def write_file(lst,file_name="result"):
-    file_path = "./results/"
+    if args.path == "":
+        file_path = "./results/" 
+    else:
+        file_path = "./results_" + args.path + "/"
     check_dir(file_path)
     file_name = file_path + "{}_{}_{}_{}.csv".format(file_name, current_time,args.cal_nums,ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] if args.current_nums == -1 else args.current_nums)
     with open(file_name, "w") as f:
@@ -713,149 +716,150 @@ if __name__ == "__main__":
                             f.write("{},".format(item[index]))
                         f.write("{}\n".format(item[-1]))
     else:       
-        pbar = tqdm(total=total_create)
-        err_results = []
-        results = []
-        start_time = datetime.datetime.now()
-        for i in range(1, total_create + 1):
-            current_result = [0]
-            err = [0] * len(ori_shiftings)
-            # shifting = [item * 0.9 for item in ori_shiftings]
-            shifting = ori_shiftings.copy()
-            err_code_max = -1
-            while True:
-                pbar.set_description("{err_length} {err} {shifting}".format(err_length=[len(err_results)], err=err, shifting=[round(num, 3) for num in shifting]))
-                err_code, check_result = check_rate([current_result])
-                if check_result:
-                    break
-                # err_results.append(current_result)
+        for i in range(10):
+            pbar = tqdm(total=total_create)
+            err_results = []
+            results = []
+            start_time = datetime.datetime.now()
+            for i in range(1, total_create + 1):
                 current_result = [0]
-                if err_code > -1:
-                    if err_code < err_code_max:
-                        continue
-                    err[err_code] += 1
-                    if err[err_code] > err_nums // err_num_rate:
-                        err_code_max = err_code
-                    if err[err_code] > err_nums:
-                        shifting[err_code] += 0.01 if shifting[err_code] * shifting_rate > 0.01 else shifting[err_code] * shifting_rate
+                err = [0] * len(ori_shiftings)
+                # shifting = [item * 0.9 for item in ori_shiftings]
+                shifting = ori_shiftings.copy()
+                err_code_max = -1
+                while True:
+                    pbar.set_description("{err_length} {err} {shifting}".format(err_length=[len(err_results)], err=err, shifting=[round(num, 3) for num in shifting]))
+                    err_code, check_result = check_rate([current_result])
+                    if check_result:
+                        break
+                    # err_results.append(current_result)
+                    current_result = [0]
+                    if err_code > -1:
+                        if err_code < err_code_max:
+                            continue
+                        err[err_code] += 1
+                        if err[err_code] > err_nums // err_num_rate:
+                            err_code_max = err_code
+                        if err[err_code] > err_nums:
+                            shifting[err_code] += 0.01 if shifting[err_code] * shifting_rate > 0.01 else shifting[err_code] * shifting_rate
 
-                        err[err_code] = 0
-                        for j in range(err_code + 1, len(err)):
-                            shifting[j] = ori_shiftings[j]
-                            err[j] = 0
-                ## 按比例插入冷热号
-                hot_selection = random.randint(int(round((hot_rate - 0) * args.cal_nums,0)), int(round((hot_rate + 0) * args.cal_nums,0)))
-                cold_selection = random.randint(int(round((cold_rate - 0) * args.cal_nums,0)), int(round((cold_rate + 0) * args.cal_nums,0)))
-                hot_selection = 1 if hot_selection < 1 else hot_selection
-                cold_selection = 1 if cold_selection < 1 else cold_selection
-                current_result.extend(random.sample(hot_list, hot_selection))
-                current_result.extend(random.sample(cold_list, cold_selection))
-                
-                repeat_flag = True
-                temp_result = current_result.copy()
-                repeat_start_time = datetime.datetime.now()
-                last_result_length = 0
-                while repeat_flag:
-                    repeat_flag = False
-                    current_result = temp_result.copy()
-                    ## 随机插入其他数字
-                    useful_list_odd = []
-                    useful_list_even = []
-                    for item in range(1, 81):
-                        if item not in current_result \
-                            and item not in hot_list \
-                            and item not in cold_list \
-                            and item not in prime_list:
-                            if item % 2 == 1:
-                                useful_list_odd.append(item)
-                            else:
-                                useful_list_even.append(item)
-                    current_odd, current_even = check_odd_even(current_result[1:])
-                    odd_need = random.randint(int(round((his_odd - shifting[2]) * args.cal_nums,0)), int(round((his_odd + shifting[2]) * args.cal_nums,0)))
-                    if current_odd > odd_need:
-                        odd_need = current_odd
-                    even_need = args.cal_nums - odd_need
-                    current_result.extend(random.sample(useful_list_odd, odd_need - current_odd))
-                    if check_list_length(current_result):
-                        repeat_flag = True
-                        continue
-                    current_result.extend(random.sample(useful_list_even, args.cal_nums + 1 - len(current_result)))
-                    current_result.sort()
-                    # if current_result in err_results or current_result[1:] in results:
-                    #     if (datetime.datetime.now() - repeat_start_time).seconds > 5:
-                    #         break
-                    #     repeat_flag = True
-                    #     continue
-                    if args.check_in_main == 1:
-                        ## 验证重复率
-                        current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
-                        for i in range(1, args.cal_nums + 1):
-                            if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
-                                repeat_flag = True
-                                err_results.append(current_result)
-                                break
-                        ## 验证奇偶比
-                        if repeat_flag == False:
-                            current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
-                            if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
-                                repeat_flag = True
-                                err_results.append(current_result)
-                        ## 验证号码组
-                        if repeat_flag == False:
-                            current_group_rate = cal_ball_group(limit=1, result_list=[current_result])
-                        #     for i in range(8):
-                        #         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
-                        #             repeat_flag = True
-                        #             err_results.append(current_result)
-                        #             break
-                            for i in range(8):
-                                if args.cal_nums >= 8:
-                                    if (his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01) or (his_group_rate[i] <= 0.01 and current_group_rate[i] > 0.1):
-                                        repeat_flag = True
-                                        err_results.append(current_result)
-                                        break
+                            err[err_code] = 0
+                            for j in range(err_code + 1, len(err)):
+                                shifting[j] = ori_shiftings[j]
+                                err[j] = 0
+                    ## 按比例插入冷热号
+                    hot_selection = random.randint(int(round((hot_rate - 0) * args.cal_nums,0)), int(round((hot_rate + 0) * args.cal_nums,0)))
+                    cold_selection = random.randint(int(round((cold_rate - 0) * args.cal_nums,0)), int(round((cold_rate + 0) * args.cal_nums,0)))
+                    hot_selection = 1 if hot_selection < 1 else hot_selection
+                    cold_selection = 1 if cold_selection < 1 else cold_selection
+                    current_result.extend(random.sample(hot_list, hot_selection))
+                    current_result.extend(random.sample(cold_list, cold_selection))
+                    
+                    repeat_flag = True
+                    temp_result = current_result.copy()
+                    repeat_start_time = datetime.datetime.now()
+                    last_result_length = 0
+                    while repeat_flag:
+                        repeat_flag = False
+                        current_result = temp_result.copy()
+                        ## 随机插入其他数字
+                        useful_list_odd = []
+                        useful_list_even = []
+                        for item in range(1, 81):
+                            if item not in current_result \
+                                and item not in hot_list \
+                                and item not in cold_list \
+                                and item not in prime_list:
+                                if item % 2 == 1:
+                                    useful_list_odd.append(item)
                                 else:
-                                    if (current_group_rate[i] > 0 and his_group_rate[i] < 0.01):
-                                        repeat_flag = True
-                                        err_results.append(current_result)
-                                        break
-                        ## 验证连续号码
-                        if repeat_flag == False:
-                            current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=[current_result])
-                            correct_flag = False
-                            for i in range(2, args.cal_nums + 1):
-                                if (current_consecutive_rate[i] >= 0.1 and his_consecutive_rate[i] <= 0.01):
+                                    useful_list_even.append(item)
+                        current_odd, current_even = check_odd_even(current_result[1:])
+                        odd_need = random.randint(int(round((his_odd - shifting[2]) * args.cal_nums,0)), int(round((his_odd + shifting[2]) * args.cal_nums,0)))
+                        if current_odd > odd_need:
+                            odd_need = current_odd
+                        even_need = args.cal_nums - odd_need
+                        current_result.extend(random.sample(useful_list_odd, odd_need - current_odd))
+                        if check_list_length(current_result):
+                            repeat_flag = True
+                            continue
+                        current_result.extend(random.sample(useful_list_even, args.cal_nums + 1 - len(current_result)))
+                        current_result.sort()
+                        # if current_result in err_results or current_result[1:] in results:
+                        #     if (datetime.datetime.now() - repeat_start_time).seconds > 5:
+                        #         break
+                        #     repeat_flag = True
+                        #     continue
+                        if args.check_in_main == 1:
+                            ## 验证重复率
+                            current_repeat_rate = cal_repeat_rate(limit=1, result_list=[current_result], j_shiftint=0)
+                            for i in range(1, args.cal_nums + 1):
+                                if abs(his_repeat_rate[i] - current_repeat_rate[i]) > shifting[0]:
                                     repeat_flag = True
                                     err_results.append(current_result)
                                     break
-                                if (his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0 ):
-                                    correct_flag = True
-                            if correct_flag == False:
-                                repeat_flag = True
-                                err_results.append(current_result)
-                                break
-                    if (datetime.datetime.now() - start_time).seconds > 60 and len(results) > last_result_length:
-                        last_result_length = len(results)
-                        start_time = datetime.datetime.now()
-                        sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
-                        sorted_results, sorted_shiftings = zip(*sorted_results)
-                        sorted_results = list(sorted_results)
-                        write_file(sorted_results, "result")
-            results.append(current_result[1:])
-            shiftings.append(shifting)
-            shifting = [round(num, 3) for num in shifting]
-            tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
-            pbar.update(1)
-        pbar.close()
-        sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
-        sorted_results, sorted_shiftings = zip(*sorted_results)
-        sorted_results = list(sorted_results)
-        write_file(sorted_results, "result")
-        for i in range(total_create):
-            logger.info(sorted_results[i])
-        # sorted_shiftings = list(sorted_shiftings)
-        # for i in range(total_create):
-        #     sorted_shiftings[i] = [round(num, 3) for num in sorted_shiftings[i]]
-        # for i in range(total_create):
-        #     logger.info(sorted_shiftings[i])
-        # write_file(sorted_shiftings, "shifting")
+                            ## 验证奇偶比
+                            if repeat_flag == False:
+                                current_odd, current_even = cal_ball_parity(limit=1, result_list=[current_result])
+                                if abs(his_odd - current_odd) > shifting[2] or abs(his_even - current_even) > shifting[2]:
+                                    repeat_flag = True
+                                    err_results.append(current_result)
+                            ## 验证号码组
+                            if repeat_flag == False:
+                                current_group_rate = cal_ball_group(limit=1, result_list=[current_result])
+                            #     for i in range(8):
+                            #         if abs(his_group_rate[i] - current_group_rate[i]) > shifting[3]:
+                            #             repeat_flag = True
+                            #             err_results.append(current_result)
+                            #             break
+                                for i in range(8):
+                                    if args.cal_nums >= 8:
+                                        if (his_group_rate[i] > 0.1 and current_group_rate[i] < 0.01) or (his_group_rate[i] <= 0.01 and current_group_rate[i] > 0.1):
+                                            repeat_flag = True
+                                            err_results.append(current_result)
+                                            break
+                                    else:
+                                        if (current_group_rate[i] > 0 and his_group_rate[i] < 0.01):
+                                            repeat_flag = True
+                                            err_results.append(current_result)
+                                            break
+                            ## 验证连续号码
+                            if repeat_flag == False:
+                                current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=[current_result])
+                                correct_flag = False
+                                for i in range(2, args.cal_nums + 1):
+                                    if (current_consecutive_rate[i] >= 0.1 and his_consecutive_rate[i] <= 0.01):
+                                        repeat_flag = True
+                                        err_results.append(current_result)
+                                        break
+                                    if (his_consecutive_rate[i] > 0 and current_consecutive_rate[i] > 0 ):
+                                        correct_flag = True
+                                if correct_flag == False:
+                                    repeat_flag = True
+                                    err_results.append(current_result)
+                                    break
+                        if (datetime.datetime.now() - start_time).seconds > 60 and len(results) > last_result_length:
+                            last_result_length = len(results)
+                            start_time = datetime.datetime.now()
+                            sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
+                            sorted_results, sorted_shiftings = zip(*sorted_results)
+                            sorted_results = list(sorted_results)
+                            write_file(sorted_results, "result")
+                results.append(current_result[1:])
+                shiftings.append(shifting)
+                shifting = [round(num, 3) for num in shifting]
+                tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
+                pbar.update(1)
+            pbar.close()
+            sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
+            sorted_results, sorted_shiftings = zip(*sorted_results)
+            sorted_results = list(sorted_results)
+            write_file(sorted_results, "result")
+            for i in range(total_create):
+                logger.info(sorted_results[i])
+            # sorted_shiftings = list(sorted_shiftings)
+            # for i in range(total_create):
+            #     sorted_shiftings[i] = [round(num, 3) for num in sorted_shiftings[i]]
+            # for i in range(total_create):
+            #     logger.info(sorted_shiftings[i])
+            # write_file(sorted_shiftings, "shifting")
