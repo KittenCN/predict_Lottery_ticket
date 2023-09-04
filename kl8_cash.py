@@ -52,6 +52,7 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [4.6, 0]]
 
 def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0):
+    global ori_numpy
     if args.current_nums >= 0:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
         logger.info("当前期数为{}，计算期数为{}。".format(args.current_nums, args.current_nums + 1))
