@@ -18,7 +18,7 @@ from loguru import logger
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
 parser.add_argument('--download', default=1, type=int, help="download data")
-parser.add_argument('--limit_line', default=10, type=int, help='limit line')
+parser.add_argument('--limit_line', default=50, type=int, help='limit line')
 parser.add_argument('--total_create', default=50, type=int, help='total create')
 parser.add_argument('--err_nums', default=1000, type=int, help='err nums')
 parser.add_argument('--cal_nums', default=10, type=int, help='cal nums')
@@ -407,7 +407,7 @@ def check_dir(path):
 def write_file(lst,file_name="result"):
     file_path = "./results/"
     check_dir(file_path)
-    file_name = file_path + "{}_{}_{}_{}.csv".format(file_name, current_time,args.cal_nums,0 if args.current_nums == -1 else args.current_nums)
+    file_name = file_path + "{}_{}_{}_{}.csv".format(file_name, current_time,args.cal_nums,ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] if args.current_nums == -1 else args.current_nums)
     with open(file_name, "w") as f:
         for i in range(args.cal_nums - 1):
             f.write("b" + str(i + 1) + ",")
