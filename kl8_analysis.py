@@ -878,8 +878,8 @@ if __name__ == "__main__":
             sorted_results, sorted_shiftings = zip(*sorted_results)
             sorted_results = list(sorted_results)
             write_file(sorted_results, "result")
-            for i in range(total_create):
-                logger.info(sorted_results[i])
+            # for i in range(total_create):
+            #     logger.info(sorted_results[i])
             # sorted_shiftings = list(sorted_shiftings)
             # for i in range(total_create):
             #     sorted_shiftings[i] = [round(num, 3) for num in sorted_shiftings[i]]
