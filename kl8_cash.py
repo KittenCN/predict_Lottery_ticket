@@ -21,7 +21,7 @@ parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
 parser.add_argument('--cal_nums', default=10, type=int, help='useless')
 parser.add_argument('--multiple', default=1, type=int, help='useless')
-parser.add_argument('--multiple_ratio', default=3, type=int, help='useless')
+parser.add_argument('--multiple_ratio', default="1,0", type=str, help='multiple_ratio')
 parser.add_argument('--repeat', default=1, type=int, help='useless')
 args = parser.parse_args()
 

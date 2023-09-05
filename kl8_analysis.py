@@ -28,7 +28,7 @@ parser.add_argument('--check_in_main', default=0, type=int, help='check in main'
 parser.add_argument('--calculate_rate', default=0, type=int, help='calculate rate')
 parser.add_argument('--calculate_rate_list', default="5", type=str, help='calculate rate list')
 parser.add_argument('--multiple', default=1, type=int, help='multiple')
-parser.add_argument('--multiple_ratio', default=3, type=int, help='multiple_ratio')
+parser.add_argument('--multiple_ratio', default="1,0", type=str, help='multiple_ratio')
 parser.add_argument('--repeat', default=1, type=int, help='repeat')
 #--------------------------------------------------------------------------------------------------#
 parser.add_argument('--path', default="", type=str, help='useless')
@@ -425,7 +425,8 @@ def write_file(lst,file_name="result"):
         for item in lst:
             if args.multiple > 1:
                 item_index += 1
-                if item_index % args.multiple_ratio == 0:
+                div_nums = args.multiple_ratio.split(",")
+                if item_index % int(div_nums[0]) == int(div_nums[1]):
                     cnt += 1
                     for index in range(len(item)-1):
                         f.write("{},".format(item[index]))
