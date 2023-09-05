@@ -30,8 +30,7 @@ parser.add_argument('--calculate_rate_list', default="5", type=str, help='calcul
 parser.add_argument('--multiple', default=1, type=int, help='multiple')
 parser.add_argument('--multiple_ratio', default="1,0", type=str, help='multiple_ratio')
 parser.add_argument('--repeat', default=1, type=int, help='repeat')
-#--------------------------------------------------------------------------------------------------#
-parser.add_argument('--path', default="", type=str, help='useless')
+parser.add_argument('--path', default="", type=str, help='path')
 args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
