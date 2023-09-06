@@ -641,8 +641,8 @@ if __name__ == "__main__":
                             for item in range(1, 81):
                                 if item not in current_result \
                                     and item not in hot_list \
-                                    and item not in cold_list \
-                                    and item not in prime_list:
+                                    and item not in cold_list:
+                                    # and item not in prime_list:
                                     if item % 2 == 1:
                                         useful_list_odd.append(item)
                                     else:
@@ -791,8 +791,8 @@ if __name__ == "__main__":
                         for item in range(1, 81):
                             if item not in current_result \
                                 and item not in hot_list \
-                                and item not in cold_list \
-                                and item not in prime_list:
+                                and item not in cold_list:
+                                # and item not in prime_list:
                                 if item % 2 == 1:
                                     useful_list_odd.append(item)
                                 else:
