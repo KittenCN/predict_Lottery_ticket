@@ -42,7 +42,7 @@ ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
 
 if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.current_nums <= ori_numpy[0][0]:
-    index_diff = ori_numpy[0][0] - args.current_nums
+    index_diff = ori_numpy[0][0] - args.current_nums + 1
     ori_numpy = ori_numpy[index_diff:]
 
 # limit_line = len(ori_numpy)
