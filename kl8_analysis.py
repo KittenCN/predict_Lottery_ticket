@@ -414,7 +414,7 @@ def write_file(lst,file_name="result"):
     else:
         file_path = "./results_" + args.path + "/"
     check_dir(file_path)
-    file_name = file_path + "{}_{}_{}_{}.csv".format(file_name, current_time,args.cal_nums,ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] if args.current_nums == -1 else args.current_nums)
+    file_name = file_path + "{}_{}_{}_{}.csv".format(file_name, current_time,args.cal_nums,str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums)
     with open(file_name, "w") as f:
         for i in range(args.cal_nums - 1):
             f.write("b" + str(i + 1) + ",")
@@ -585,7 +585,7 @@ if __name__ == "__main__":
                 ori_shiftings_list = rate_data.to_numpy()
                 args.cal_nums = int(rate_item)
                 if args.current_nums == -1:
-                    args.current_nums = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]
+                    args.current_nums = int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]) + 1
                 if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.current_nums <= ori_numpy[0][0]:
                     index_diff = ori_numpy[0][0] - args.current_nums + 1
                     ori_numpy = ori_numpy[index_diff:]
