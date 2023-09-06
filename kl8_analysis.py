@@ -587,7 +587,7 @@ if __name__ == "__main__":
                 if args.current_nums == -1:
                     args.current_nums = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]
                 if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.current_nums <= ori_numpy[0][0]:
-                    index_diff = ori_numpy[0][0] - args.current_nums
+                    index_diff = ori_numpy[0][0] - args.current_nums + 1
                     ori_numpy = ori_numpy[index_diff:]
                 init_func(rate_mode=0)
                 pbar = tqdm(total=total_create)
