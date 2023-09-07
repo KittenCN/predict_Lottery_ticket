@@ -738,9 +738,9 @@ if __name__ == "__main__":
                         f.write("{}\n".format(item[-1]))
     else: 
         init_func(rate_mode=2)      
+        pbar = tqdm(total=total_create * int(args.repeat))
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            pbar = tqdm(total=total_create)
             err_results = []
             results = []
             start_time = datetime.datetime.now()
@@ -873,7 +873,6 @@ if __name__ == "__main__":
                 shifting = [round(num, 3) for num in shifting]
                 tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
                 pbar.update(1)
-            pbar.close()
             sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
             sorted_results, sorted_shiftings = zip(*sorted_results)
             sorted_results = list(sorted_results)
@@ -886,3 +885,4 @@ if __name__ == "__main__":
             # for i in range(total_create):
             #     logger.info(sorted_shiftings[i])
             # write_file(sorted_shiftings, "shifting")
+        pbar.close()
