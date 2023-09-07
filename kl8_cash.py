@@ -78,7 +78,7 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
 
     x = 0
     if args.simple_mode == 1:
-        sub_bar = tqdm(total=len(cash_numpy))
+        sub_bar = tqdm(total=len(cash_numpy), leave=False)
     for item in cash_numpy:
         if args.simple_mode == 1:
             sub_bar.update(1)
