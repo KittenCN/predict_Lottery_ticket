@@ -77,7 +77,9 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
     cash_list = [0] * len(cash_select)
 
     x = 0
+    sub_bar = tqdm(total=len(cash_numpy))
     for item in cash_numpy:
+        sub_bar.update(1)
         x += 1
         for index in  range(len(cash_select)):
             ori_split = list(combinations(ori_numpy, cash_select[index]))
@@ -94,7 +96,7 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
                 if args.simple_mode == 0:
                     logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
                 break
-
+    sub_bar.close()
     total_cash = 0
     for i in range(len(cash_select)):
         if args.simple_mode == 0:
