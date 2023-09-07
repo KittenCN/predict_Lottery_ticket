@@ -31,6 +31,7 @@ parser.add_argument('--multiple', default=1, type=int, help='multiple')
 parser.add_argument('--multiple_ratio', default="1,0", type=str, help='multiple_ratio')
 parser.add_argument('--repeat', default=1, type=int, help='repeat')
 parser.add_argument('--path', default="", type=str, help='path')
+parser.add_argument('--simple_mode', default=0, type=int, help='simple mode')
 args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -721,7 +722,8 @@ if __name__ == "__main__":
                     results.append(current_result[1:])
                     shiftings.append(shifting)
                     shifting = [round(num, 3) for num in shifting]
-                    tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
+                    if args.simple_mode == 0:
+                        tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
                     pbar.update(1)
                 pbar.close()
                 avg_rate = [round(sum(col) / len(col), 3) for col in zip(*shiftings)]     
@@ -871,7 +873,8 @@ if __name__ == "__main__":
                 results.append(current_result[1:])
                 shiftings.append(shifting)
                 shifting = [round(num, 3) for num in shifting]
-                tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
+                if args.simple_mode == 0:
+                    tqdm.write("{current_result} {shifting}".format(current_result=[num for num in current_result[1:]], shifting=[round(num, 3) for num in shifting]))
                 pbar.update(1)
             sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
             sorted_results, sorted_shiftings = zip(*sorted_results)

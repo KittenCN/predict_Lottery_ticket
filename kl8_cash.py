@@ -16,6 +16,7 @@ parser.add_argument('--download', default=1, type=int, help="download data")
 parser.add_argument('--cash_file_name', default="-1", type=str, help='cash_file_name')
 parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--path', default="", type=str, help='path')
+parser.add_argument('--simple_mode', default=0, type=int, help='simple mode')
 #--------------------------------------------------------------------------------------------------#
 parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
@@ -80,11 +81,13 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0):
             if cash_select[index] != 0:
                 cash_list[index] += len(cash_set)
                 if cash_price[index] != 0 and len(cash_set) != 0:
-                    logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
+                    if args.simple_mode == 0:
+                        logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
                     break
             elif cash_select[index] == 0 and len(cash_set) == 0:
                 cash_list[index] += 1
-                logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
+                if args.simple_mode == 0:
+                    logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
                 break
 
     total_cash = 0
