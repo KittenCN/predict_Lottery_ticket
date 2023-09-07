@@ -736,10 +736,10 @@ if __name__ == "__main__":
                         for index in range(len(item)-1):
                             f.write("{},".format(item[index]))
                         f.write("{}\n".format(item[-1]))
-    else:       
+    else: 
+        init_func(rate_mode=2)      
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-            init_func(rate_mode=2)
             pbar = tqdm(total=total_create)
             err_results = []
             results = []
