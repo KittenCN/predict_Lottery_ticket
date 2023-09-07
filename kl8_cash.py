@@ -5,6 +5,8 @@ Author: KittenCN
 
 import pandas as pd
 import argparse
+
+from tqdm import tqdm
 from config import *
 from itertools import combinations
 from loguru import logger
@@ -92,9 +94,11 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0):
 
     total_cash = 0
     for i in range(len(cash_select)):
-        logger.info("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
+        if args.simple_mode == 0:
+            logger.info("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
         total_cash += cash_list[i] * cash_price[i]
-    logger.info("本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+    if args.simple_mode == 0:
+        logger.info("本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash
     return all_cash, all_lucky
@@ -121,12 +125,15 @@ if __name__ == "__main__":
         import os
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
+        pbar = tqdm(total=len(file_list))
         for filename in file_list:
+            pbar.update(1)
             cash_file_name = file_path + filename
             filename_split = filename.split('_')
             if len(filename_split) == 4:
                 if int(filename_split[-1].split('.')[0]) > 0:
                     args.current_nums = int(filename_split[-1].split('.')[0])
             all_cash, all_lucky = check_lottery(cash_file_name=cash_file_name, args=args, all_cash=all_cash, all_lucky=all_lucky)
+        pbar.close()
         logger.info("总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(all_cash, all_lucky, all_lucky / all_cash * 100))
     
