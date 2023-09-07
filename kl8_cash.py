@@ -77,9 +77,11 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
     cash_list = [0] * len(cash_select)
 
     x = 0
-    sub_bar = tqdm(total=len(cash_numpy))
+    if args.simple_mode == 1:
+        sub_bar = tqdm(total=len(cash_numpy))
     for item in cash_numpy:
-        sub_bar.update(1)
+        if args.simple_mode == 1:
+            sub_bar.update(1)
         x += 1
         for index in  range(len(cash_select)):
             ori_split = list(combinations(ori_numpy, cash_select[index]))
@@ -96,7 +98,8 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
                 if args.simple_mode == 0:
                     logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
                 break
-    sub_bar.close()
+    if args.simple_mode == 1:        
+        sub_bar.close()
     total_cash = 0
     for i in range(len(cash_select)):
         if args.simple_mode == 0:
@@ -130,15 +133,18 @@ if __name__ == "__main__":
         import os
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
-        pbar = tqdm(total=len(file_list))
+        if args.simple_mode == 1:
+            pbar = tqdm(total=len(file_list))
         for filename in file_list:
-            pbar.update(1)
+            if args.simple_mode == 1:
+                pbar.update(1)
             cash_file_name = file_path + filename
             filename_split = filename.split('_')
             if len(filename_split) == 4:
                 if int(filename_split[-1].split('.')[0]) > 0:
                     args.current_nums = int(filename_split[-1].split('.')[0])
             all_cash, all_lucky = check_lottery(cash_file_name=cash_file_name, args=args, all_cash=all_cash, all_lucky=all_lucky, path_mode=1)
-        pbar.close()
+        if args.simple_mode == 1:
+            pbar.close()
         logger.info("总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(all_cash, all_lucky, all_lucky / all_cash * 100))
     
