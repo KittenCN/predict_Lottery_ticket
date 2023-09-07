@@ -57,15 +57,17 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [19, 0, 0], \
                     [4.6, 0]]
 
-def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0):
+def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
     global ori_numpy
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
-        logger.info("当前期数为{}。".format(args.current_nums))
+        if path_mode == 0:
+            logger.info("当前期数为{}。".format(args.current_nums))
         if index >= 0:
             ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
     else:
-        logger.info("当前期数为{}，计算期数为{}。".format(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
+        if path_mode == 0:
+            logger.info("当前期数为{}，计算期数为{}。".format(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
     logger.info("中奖号码为:{}".format(ori_numpy))
     cash_data = pd.read_csv(cash_file_name)
     cash_numpy = cash_data.to_numpy()
@@ -118,7 +120,7 @@ if __name__ == "__main__":
             if len(filename_split) == 4:
                 if int(filename_split[-1].split('.')[0]) > 0:
                     args.current_nums = int(filename_split[-1].split('.')[0])
-        check_lottery(cash_file_name=cash_file_name, args=args)
+        check_lottery(cash_file_name=cash_file_name, args=args, path_mode=0)
     else:
         file_path = "./results_" + args.path + "/"
         all_cash, all_lucky = 0, 0
@@ -133,7 +135,7 @@ if __name__ == "__main__":
             if len(filename_split) == 4:
                 if int(filename_split[-1].split('.')[0]) > 0:
                     args.current_nums = int(filename_split[-1].split('.')[0])
-            all_cash, all_lucky = check_lottery(cash_file_name=cash_file_name, args=args, all_cash=all_cash, all_lucky=all_lucky)
+            all_cash, all_lucky = check_lottery(cash_file_name=cash_file_name, args=args, all_cash=all_cash, all_lucky=all_lucky, path_mode=1)
         pbar.close()
         logger.info("总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(all_cash, all_lucky, all_lucky / all_cash * 100))
     
