@@ -68,7 +68,8 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
     else:
         if path_mode == 0:
             logger.info("当前期数为{}，计算期数为{}。".format(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
-    logger.info("中奖号码为:{}".format(ori_numpy))
+    if path_mode == 0:
+        logger.info("中奖号码为:{}".format(ori_numpy))
     cash_data = pd.read_csv(cash_file_name)
     cash_numpy = cash_data.to_numpy()
     cash_select = cash_select_list[cash_numpy.shape[1]]
