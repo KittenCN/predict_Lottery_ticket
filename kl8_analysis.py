@@ -498,7 +498,8 @@ def analysis_rate(rate_mode=0):
     max_rate[0] = "max"
     for i in range(len(rate_diff)):
         for j in range(len(rate_diff[i])):
-            print(round(rate_diff[i][j], 5), end=" ")
+            if args.simple_mode == 0:
+                print(round(rate_diff[i][j], 5), end=" ")
             if j > 0:
                 # avg_rate[j] += rate_diff[i][j] * ((len(rate_diff) - i) / 10)
                 avg_rate[j] += rate_diff[i][j]
@@ -506,21 +507,28 @@ def analysis_rate(rate_mode=0):
                 #     max_rate[j] = rate_diff[i][j]
                 max_rate[j] = max(max_rate[j], rate_diff[i][j])
                 # max_rate[j] = max(max_rate[j], shifting[j - 1])
-        print()
+        if args.simple_mode == 0:
+            print()
     for i in range(len(avg_rate)):
         if i > 0:
             avg_rate[i] = round(avg_rate[i] / len(analysis_history), 5)
-            print(avg_rate[i], end=" ")
+            if args.simple_mode == 0:
+                print(avg_rate[i], end=" ")
         else:
-            print(avg_rate[i], end=" ")
-    print()
+            if args.simple_mode == 0:
+                print(avg_rate[i], end=" ")
+    if args.simple_mode == 0:
+        print()
     for i in range(len(max_rate)):
         if i > 0:
             max_rate[i] = round(max_rate[i], 5)
-            print(max_rate[i], end=" ")
+            if args.simple_mode == 0:
+                print(max_rate[i], end=" ")
         else:
-            print(max_rate[i], end=" ")
-    print()
+            if args.simple_mode == 0:
+                print(max_rate[i], end=" ")
+    if args.simple_mode == 0:            
+        print()
     # avg_rate = rate_diff[0]
     result_rate = len(avg_rate[1:]) * [0.0]
     for i in range(len(avg_rate[1:])):
