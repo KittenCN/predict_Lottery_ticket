@@ -244,7 +244,11 @@ def sum_analysis(limit=limit_line, result_list=None):
     if result_list is None:
         result_list = ori_numpy
     length = len(result_list[0])
-    for i in tqdm(range(limit)):
+    if args.simple_mode == 0:    
+        bar = tqdm(total=limit)
+    for i in range(limit):
+        if args.simple_mode == 0:
+            bar.update(1)
         result_list_split = combinations(result_list[i][1:length], args.cal_nums)
         for item in result_list_split:
             current_sum = sum(item)
@@ -252,6 +256,8 @@ def sum_analysis(limit=limit_line, result_list=None):
             group_key = f"{group_index * group_size + 1}-{(group_index + 1) * group_size}"
             sum_group[group_key] += 1
             total_numbers += 1
+    if args.simple_mode == 0:
+        bar.close()
     sum_rate_group = {key: count / total_numbers for key, count in sum_group.items()}
     # logger.info(sum_rate_group)
     return sum_rate_group
@@ -472,7 +478,8 @@ def analysis_rate(rate_mode=0):
     current_group_rate = cal_ball_group(limit=1, result_list=result_list)
     current_consecutive_rate = analysis_consecutive_number(limit=1, result_list=result_list)
     current_march_rate = cal_not_repeat_rate(limit=1, result_list=result_list, j_shiftint=1)
-    pbar = tqdm(total=len(analysis_history))
+    if args.simple_mode == 0:
+        pbar = tqdm(total=len(analysis_history))
     for item in analysis_history:
         if item == -1:
             item = len(ori_numpy) - 1
@@ -491,8 +498,10 @@ def analysis_rate(rate_mode=0):
             cal_average([abs(his_group_rate[i] - current_group_rate[i]) for i in range(8)]),
             cal_average([abs(his_consecutive_rate[i] - current_consecutive_rate[i]) for i in range(2, args.cal_nums + 1)]),
             cal_average([abs(hit_march_rate - current_march_rate)])])
-        pbar.update(1)
-    pbar.close()
+        if args.simple_mode == 0:
+            pbar.update(1)
+    if args.simple_mode == 0:
+        pbar.close()
     avg_rate = [0.0] * len(rate_diff[0])
     max_rate = [0.0] * len(rate_diff[0])
     avg_rate[0] = "avg"
