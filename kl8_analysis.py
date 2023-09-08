@@ -554,7 +554,7 @@ def check_list_length(lst):
     return False
 
 def init_func(rate_mode=1):
-    global ori_shiftings, limit_line, his_repeat_rate, hot_list, cold_list, hot_rate, cold_rate, his_hot_balls, his_cold_balls, his_odd, his_even, his_group_rate, his_consecutive_rate, his_sum_rate, his_not_repeat_rate
+    global shifting, ori_shiftings, limit_line, his_repeat_rate, hot_list, cold_list, hot_rate, cold_rate, his_hot_balls, his_cold_balls, his_odd, his_even, his_group_rate, his_consecutive_rate, his_sum_rate, his_not_repeat_rate
     if args.analysis_history == 1:
         ori_shiftings = analysis_rate(rate_mode=rate_mode).copy()
     else:
@@ -599,6 +599,7 @@ if __name__ == "__main__":
                     index_diff = ori_numpy[0][0] - args.current_nums + 1
                     ori_numpy = ori_numpy[index_diff:]
                 init_func(rate_mode=0)
+                shifting = ori_shiftings.copy()
                 pbar = tqdm(total=total_create)
                 err_results = []
                 results = []
@@ -607,7 +608,9 @@ if __name__ == "__main__":
                     current_result = [0]
                     err = [0] * len(ori_shiftings)
                     # shifting = [item * 0.9 for item in ori_shiftings]
-                    shifting = ori_shiftings.copy()
+                    shifting = [item * 0.9 for item in shifting]
+                    for i in range(len(shifting)):
+                        shifting[i] = max(shifting[i], ori_shiftings[i])
                     err_code_max = -1
                     while True:
                         pbar.set_description("{err_length} {err} {shifting}".format(err_length=[len(err_results)], err=err, shifting=[round(num, 3) for num in shifting]))
@@ -748,6 +751,7 @@ if __name__ == "__main__":
                         f.write("{}\n".format(item[-1]))
     else: 
         init_func(rate_mode=2)      
+        shifting = ori_shiftings.copy()
         pbar = tqdm(total=total_create * int(args.repeat))
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -758,7 +762,9 @@ if __name__ == "__main__":
                 current_result = [0]
                 err = [0] * len(ori_shiftings)
                 # shifting = [item * 0.9 for item in ori_shiftings]
-                shifting = ori_shiftings.copy()
+                shifting = [item * 0.9 for item in shifting]
+                for i in range(len(shifting)):
+                    shifting[i] = max(shifting[i], ori_shiftings[i])
                 err_code_max = -1
                 while True:
                     pbar.set_description("{err_length} {err} {shifting}".format(err_length=[len(err_results)], err=err, shifting=[round(num, 3) for num in shifting]))
