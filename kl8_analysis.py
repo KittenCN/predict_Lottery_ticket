@@ -532,17 +532,17 @@ def analysis_rate(rate_mode=0):
     # avg_rate = rate_diff[0]
     result_rate = len(avg_rate[1:]) * [0.0]
     for i in range(len(avg_rate[1:])):
-        result_rate[i] = max(avg_rate[i + 1], shifting[i])
+        result_rate[i] = max(avg_rate[i + 1], ori_shiftings[i])
 
     if rate_mode == 1:
         result_rate = len(avg_rate[1:]) * [0.0]
         for i in range(len(avg_rate[1:])):
-            result_rate[i] = max(avg_rate[i + 1], shifting[i])
+            result_rate[i] = max(avg_rate[i + 1], ori_shiftings[i])
         return result_rate
     if rate_mode == 2:
         result_rate = len(max_rate[1:]) * [0.0]
         for i in range(len(max_rate[1:])):
-            result_rate[i] = max(max_rate[i + 1], shifting[i])
+            result_rate[i] = max(max_rate[i + 1], ori_shiftings[i])
         return result_rate
     elif rate_mode == 0:
         return avg_rate[1:]
@@ -554,9 +554,9 @@ def check_list_length(lst):
     return False
 
 def init_func(rate_mode=1):
-    global shifting, ori_shiftings, limit_line, his_repeat_rate, hot_list, cold_list, hot_rate, cold_rate, his_hot_balls, his_cold_balls, his_odd, his_even, his_group_rate, his_consecutive_rate, his_sum_rate, his_not_repeat_rate
+    global shifting, cal_shiftings, limit_line, his_repeat_rate, hot_list, cold_list, hot_rate, cold_rate, his_hot_balls, his_cold_balls, his_odd, his_even, his_group_rate, his_consecutive_rate, his_sum_rate, his_not_repeat_rate
     if args.analysis_history == 1:
-        ori_shiftings = analysis_rate(rate_mode=rate_mode).copy()
+        cal_shiftings = analysis_rate(rate_mode=rate_mode).copy()
     else:
         analysis_rate(rate_mode=rate_mode)
     limit_line = args.limit_line
@@ -599,15 +599,15 @@ if __name__ == "__main__":
                     index_diff = ori_numpy[0][0] - args.current_nums + 1
                     ori_numpy = ori_numpy[index_diff:]
                 init_func(rate_mode=0)
-                shifting = ori_shiftings.copy()
+                shifting = cal_shiftings.copy()
                 pbar = tqdm(total=total_create)
                 err_results = []
                 results = []
                 start_time = datetime.datetime.now()
                 for i in range(1, total_create + 1):
                     current_result = [0]
-                    err = [0] * len(ori_shiftings)
-                    # shifting = [item * 0.9 for item in ori_shiftings]
+                    err = [0] * len(cal_shiftings)
+                    # shifting = [item * 0.9 for item in cal_shiftings]
                     # shifting = [item * 0.9 for item in shifting]
                     # for i in range(len(shifting)):
                     #     shifting[i] = max(shifting[i], ori_shiftings[i])
@@ -630,7 +630,7 @@ if __name__ == "__main__":
 
                                 err[err_code] = 0
                                 for j in range(err_code + 1, len(err)):
-                                    shifting[j] = ori_shiftings[j]
+                                    shifting[j] = cal_shiftings[j]
                                     err[j] = 0
                         ## 按比例插入冷热号
                         hot_selection = random.randint(int(round((hot_rate - 0) * args.cal_nums,0)), int(round((hot_rate + 0) * args.cal_nums,0)))
@@ -751,7 +751,7 @@ if __name__ == "__main__":
                         f.write("{}\n".format(item[-1]))
     else: 
         init_func(rate_mode=2)      
-        shifting = ori_shiftings.copy()
+        shifting = cal_shiftings.copy()
         pbar = tqdm(total=total_create * int(args.repeat))
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -760,8 +760,8 @@ if __name__ == "__main__":
             start_time = datetime.datetime.now()
             for i in range(1, total_create + 1):
                 current_result = [0]
-                err = [0] * len(ori_shiftings)
-                # shifting = [item * 0.9 for item in ori_shiftings]
+                err = [0] * len(cal_shiftings)
+                # shifting = [item * 0.9 for item in cal_shiftings]
                 # shifting = [item * 0.9 for item in shifting]
                 # for i in range(len(shifting)):
                 #     shifting[i] = max(shifting[i], ori_shiftings[i])
@@ -784,7 +784,7 @@ if __name__ == "__main__":
 
                             err[err_code] = 0
                             for j in range(err_code + 1, len(err)):
-                                shifting[j] = ori_shiftings[j]
+                                shifting[j] = cal_shiftings[j]
                                 err[j] = 0
                     ## 按比例插入冷热号
                     hot_selection = random.randint(int(round((hot_rate - 0) * args.cal_nums,0)), int(round((hot_rate + 0) * args.cal_nums,0)))
