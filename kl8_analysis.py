@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import random
 import argparse
 import datetime
+import time
 from tqdm import tqdm
 from sklearn.cluster import KMeans
 from collections import defaultdict
@@ -585,7 +586,7 @@ if __name__ == "__main__":
     # n_clusters = args.cal_nums
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
-
+    last_time = ""
     if args.calculate_rate == 1:
         cal_rate_list = args.calculate_rate_list.split(",")
         if int(cal_rate_list[0]) > 0:
@@ -755,6 +756,10 @@ if __name__ == "__main__":
         pbar = tqdm(total=total_create * int(args.repeat))
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            while current_time == last_time:
+                time.sleep(0.1)
+                current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            last_time = current_time
             err_results = []
             results = []
             start_time = datetime.datetime.now()
