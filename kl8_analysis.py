@@ -608,9 +608,9 @@ if __name__ == "__main__":
                     current_result = [0]
                     err = [0] * len(ori_shiftings)
                     # shifting = [item * 0.9 for item in ori_shiftings]
-                    shifting = [item * 0.9 for item in shifting]
-                    for i in range(len(shifting)):
-                        shifting[i] = max(shifting[i], ori_shiftings[i])
+                    # shifting = [item * 0.9 for item in shifting]
+                    # for i in range(len(shifting)):
+                    #     shifting[i] = max(shifting[i], ori_shiftings[i])
                     err_code_max = -1
                     while True:
                         pbar.set_description("{err_length} {err} {shifting}".format(err_length=[len(err_results)], err=err, shifting=[round(num, 3) for num in shifting]))
@@ -762,9 +762,9 @@ if __name__ == "__main__":
                 current_result = [0]
                 err = [0] * len(ori_shiftings)
                 # shifting = [item * 0.9 for item in ori_shiftings]
-                shifting = [item * 0.9 for item in shifting]
-                for i in range(len(shifting)):
-                    shifting[i] = max(shifting[i], ori_shiftings[i])
+                # shifting = [item * 0.9 for item in shifting]
+                # for i in range(len(shifting)):
+                #     shifting[i] = max(shifting[i], ori_shiftings[i])
                 err_code_max = -1
                 while True:
                     pbar.set_description("{err_length} {err} {shifting}".format(err_length=[len(err_results)], err=err, shifting=[round(num, 3) for num in shifting]))
