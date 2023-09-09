@@ -623,7 +623,7 @@ if __name__ == "__main__":
                     #     shifting[i] = max(shifting[i], ori_shiftings[i])
                     err_code_max = -1
                     while True:
-                        pbar.set_description("{err_length} {err} {shifting}".format(err_length=[len(err_results)], err=err, shifting=[round(num, 3) for num in shifting]))
+                        pbar.set_description("{current_nums} {err} {shifting}".format(current_nums=[str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums], err=err, shifting=[round(num, 3) for num in shifting]))
                         err_code, check_result = check_rate([current_result])
                         if check_result:
                             break
@@ -781,7 +781,7 @@ if __name__ == "__main__":
                 #     shifting[i] = max(shifting[i], ori_shiftings[i])
                 err_code_max = -1
                 while True:
-                    pbar.set_description("{err_length} {err} {shifting}".format(err_length=[len(err_results)], err=err, shifting=[round(num, 3) for num in shifting]))
+                    pbar.set_description("{current_nums} {err} {shifting}".format(current_nums=[str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums], err=err, shifting=[round(num, 3) for num in shifting]))
                     err_code, check_result = check_rate([current_result])
                     if check_result:
                         break
