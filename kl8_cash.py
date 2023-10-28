@@ -33,6 +33,7 @@ args = parser.parse_args()
 file_path = "./results/" 
 endstring = ["csv"]
 name = args.name
+nums_index = 0
 if args.download == 1:
     from common import get_data_run
     get_data_run(name=name, cq=0)
@@ -58,7 +59,8 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [4.6, 0]]
 
 def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
-    global ori_numpy
+    global ori_numpy, nums_index
+    nums_index += 1
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
         if path_mode == 0:
@@ -105,13 +107,14 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
         if args.simple_mode == 0:
             logger.info("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
         total_cash += cash_list[i] * cash_price[i]
-    if args.simple_mode == 0:
-        logger.info("本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+    if args.simple_mode == 0 or args.simple_mode == 2:
+        logger.info("第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash
     return all_cash, all_lucky
 
 if __name__ == "__main__":
+    nums_index = 0
     if args.path == "" or args.cash_file_name != "-1":
         file_path = "./results/" 
         if args.cash_file_name != "-1":
@@ -139,7 +142,7 @@ if __name__ == "__main__":
             if args.simple_mode == 1:
                 pbar.update(1)
             cash_file_name = file_path + filename
-            filename_split = filename.split('_')
+            filename_split = filename.split('_') 
             if len(filename_split) == 4:
                 if int(filename_split[-1].split('.')[0]) > 0:
                     args.current_nums = int(filename_split[-1].split('.')[0])
