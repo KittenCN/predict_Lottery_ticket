@@ -38,7 +38,7 @@ for t in threads:
 
 for _total_create in total_create_list:
     for _cal_nums in cal_nums_list:
-        for _current_nums in range(begin, end + 1):
+            _current_nums = -1
             t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_cash))
             threads.append(t)
             t.start()
