@@ -64,14 +64,14 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
         if path_mode == 0:
-            logger.info("当前期数为{}。".format(args.current_nums))
+            logger.info("{}, 当前期数为{}。".format(args.path, args.current_nums))
         if index >= 0:
             ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
     else:
         if path_mode == 0:
-            logger.info("当前期数为{}，计算期数为{}。".format(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
+            logger.info("{}, 当前期数为{}，计算期数为{}。".format(args.path, ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
     if path_mode == 0:
-        logger.info("中奖号码为:{}".format(ori_numpy))
+        logger.info("{}, 中奖号码为:{}".format(args.path, ori_numpy))
     cash_data = pd.read_csv(cash_file_name)
     cash_numpy = cash_data.to_numpy()
     cash_select = cash_select_list[cash_numpy.shape[1]]
@@ -93,22 +93,22 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
                 cash_list[index] += len(cash_set)
                 if cash_price[index] != 0 and len(cash_set) != 0:
                     if args.simple_mode == 0:
-                        logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
+                        logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, cash_set))
                     break
             elif cash_select[index] == 0 and len(cash_set) == 0:
                 cash_list[index] += 1
                 if args.simple_mode == 0:
-                    logger.info("第{}注, 号码{}中奖。".format(x, cash_set))
+                    logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, cash_set))
                 break
     if args.simple_mode == 1:        
         sub_bar.close()
     total_cash = 0
     for i in range(len(cash_select)):
         if args.simple_mode == 0:
-            logger.info("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
+            logger.info("{}, 中{}个球，共{}注，奖金为{}元。".format(args.path, cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
         total_cash += cash_list[i] * cash_price[i]
     if args.simple_mode == 0 or (args.simple_mode == 2 and total_cash / (len(cash_numpy) * 2) * 100 >= 100):
-        logger.info("第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+        logger.info("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash
     return all_cash, all_lucky
@@ -149,5 +149,5 @@ if __name__ == "__main__":
             all_cash, all_lucky = check_lottery(cash_file_name=cash_file_name, args=args, all_cash=all_cash, all_lucky=all_lucky, path_mode=1)
         if args.simple_mode == 1:
             pbar.close()
-        logger.info("总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(all_cash, all_lucky, all_lucky / all_cash * 100))
+        logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
     
