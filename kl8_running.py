@@ -28,7 +28,7 @@ begin, end = [int(element) for element in args.nums_range.split(',')]
 threads = []
 for _total_create in total_create_list:
     for _cal_nums in cal_nums_list:
-        for _current_nums in range(begin, end):
+        for _current_nums in range(begin, end + 1):
             t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_analysis))
             threads.append(t)
             t.start()
@@ -38,7 +38,7 @@ for t in threads:
 
 for _total_create in total_create_list:
     for _cal_nums in cal_nums_list:
-        for _current_nums in range(begin, end):
+        for _current_nums in range(begin, end + 1):
             t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_cash))
             threads.append(t)
             t.start()
