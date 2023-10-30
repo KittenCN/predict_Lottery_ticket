@@ -107,7 +107,7 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
         if args.simple_mode == 0:
             logger.info("中{}个球，共{}注，奖金为{}元。".format(cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
         total_cash += cash_list[i] * cash_price[i]
-    if args.simple_mode == 0 or args.simple_mode == 2:
+    if args.simple_mode == 0 or (args.simple_mode == 2 and total_cash / (len(cash_numpy) * 2) * 100 >= 100):
         logger.info("第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash

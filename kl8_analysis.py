@@ -9,6 +9,7 @@ import random
 import argparse
 import datetime
 import time
+import threading
 from tqdm import tqdm
 from sklearn.cluster import KMeans
 from collections import defaultdict
@@ -46,6 +47,11 @@ ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
 if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.current_nums <= ori_numpy[0][0]:
     index_diff = ori_numpy[0][0] - args.current_nums + 1
     ori_numpy = ori_numpy[index_diff:]
+
+if args.path == "":
+        file_path = "./results/" 
+else:
+    file_path = "./results_" + args.path + "/"
 
 # limit_line = len(ori_numpy)
 limit_line = args.limit_line
@@ -415,14 +421,20 @@ def check_dir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-## 写入文件
+## 多线程调用写入文件
 def write_file(lst,file_name="result"):
-    if args.path == "":
-        file_path = "./results/" 
-    else:
-        file_path = "./results_" + args.path + "/"
-    check_dir(file_path)
-    file_name = file_path + "{}_{}_{}_{}.csv".format(file_name, current_time,args.cal_nums,str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums)
+    t = threading.Thread(target=write_file_core, args=(lst,file_name))
+    t.start()
+
+## 写入文件
+def write_file_core(lst,_file_name="result"):
+    random_number = random.randint(0, 999999)
+    current_time_in = str(int(current_time) + random_number)
+    file_name = file_path + "{}_{}_{}_{}.csv".format(_file_name, current_time_in,args.cal_nums,str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums)
+    while os.path.exists(file_name):
+        random_number = random.randint(0, 999999)
+        current_time_in = str(int(current_time) + random_number)
+        file_name = file_path + "{}_{}_{}_{}.csv".format(_file_name, current_time_in,args.cal_nums,str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums) 
     with open(file_name, "w") as f:
         for i in range(args.cal_nums - 1):
             f.write("b" + str(i + 1) + ",")
@@ -595,6 +607,7 @@ if __name__ == "__main__":
     # n_clusters = args.cal_nums
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
+    check_dir(file_path)
     last_time = ""
     if args.calculate_rate == 1:
         cal_rate_list = args.calculate_rate_list.split(",")
@@ -766,8 +779,9 @@ if __name__ == "__main__":
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             while current_time == last_time:
-                time.sleep(0.1)
-                current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                current_time = str(int(current_time) + 1)
+                # time.sleep(0.1)
+                # current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             last_time = current_time
             err_results = []
             results = []
