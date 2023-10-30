@@ -9,9 +9,9 @@ parser.add_argument('--nums_range', default="2023140,2023241", type=str, help='n
 parser.add_argument('--repeat', default=1, type=int, help='repeat')
 args = parser.parse_args()
 
-def _main(_total_create, _cal_nums, begin=2023140, end=2023241):
+def _main(_total_create, _cal_nums, begin=2023140, end=2023241, _process="./kl8_analysis.py"):
     for _current_nums in range(begin, end):
-        subprocess.run(["python", kl8_analysis, "--download", "0", "--total_create", str(_total_create), \
+        subprocess.run(["python", _process, "--download", "0", "--total_create", str(_total_create), \
                         "--cal_nums", str(_cal_nums), "--current_nums", str(_current_nums), "--limit_line", "5", \
                         "--path", str(_total_create) + '_' + str(_cal_nums), "--repeat", str(args.repeat), "--simple_mode", "1"])
 
@@ -24,7 +24,16 @@ begin, end = [int(element) for element in args.nums_range.split(',')]
 threads = []
 for _total_create in total_create_list:
     for _cal_nums in cal_nums_list:
-        t = threading.Thread(target=_main, args=(_total_create, _cal_nums, begin, end))
+        t = threading.Thread(target=_main, args=(_total_create, _cal_nums, begin, end, kl8_analysis))
+        threads.append(t)
+        t.start()
+
+for t in threads:
+    t.join()
+
+for _total_create in total_create_list:
+    for _cal_nums in cal_nums_list:
+        t = threading.Thread(target=_main, args=(_total_create, _cal_nums, begin, end, kl8_cash))
         threads.append(t)
         t.start()
 
