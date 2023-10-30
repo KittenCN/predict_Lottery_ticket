@@ -137,7 +137,7 @@ if __name__ == "__main__":
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
         if args.simple_mode == 1:
-            pbar = tqdm(total=len(file_list))
+            pbar = tqdm(total=len(file_list), leave=True)
         for filename in file_list:
             if args.simple_mode == 1:
                 pbar.update(1)
