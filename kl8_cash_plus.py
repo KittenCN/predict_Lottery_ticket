@@ -38,12 +38,11 @@ if args.download == 1:
     from common import get_data_run
     get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
-df_dropped = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()
-ori_numpy = df_dropped[0][1:]
+ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][1:]
 # if args.current_nums >= 0:
-#     index = df_dropped[0][0] - (args.current_nums + 1)
+#     index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - (args.current_nums + 1)
 #     if index >= 0:
-#         ori_numpy = df_dropped[index][1:]
+#         ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
 cash_select_list = []
 for i in range(0, 11):
     _t = [element for element in range(i, -1, -1)]
@@ -62,15 +61,15 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
 def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
     global ori_numpy, nums_index
     nums_index += 1
-    if args.current_nums >= df_dropped[-1][0] and args.current_nums <= df_dropped[0][0]:
-        index = df_dropped[0][0] - args.current_nums
+    if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
+        index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
         if path_mode == 0:
             logger.info("{}, 当前期数为{}。".format(args.path, args.current_nums))
         if index >= 0:
-            ori_numpy = df_dropped[index][1:]
+            ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
     else:
         if path_mode == 0:
-            logger.info("{}, 当前期数为{}，计算期数为{}。".format(args.path, df_dropped[0][0], df_dropped[0][0]))
+            logger.info("{}, 当前期数为{}，计算期数为{}。".format(args.path, ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
     if path_mode == 0:
         logger.info("{}, 中奖号码为:{}".format(args.path, ori_numpy))
     cash_data = pd.read_csv(cash_file_name)
@@ -79,52 +78,30 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
     cash_price = cash_price_list[10 - (cash_numpy.shape[1])]
     cash_list = [0] * len(cash_select)
 
-    ori_df = pd.DataFrame([list(ori_numpy)])
-    cash_df = pd.DataFrame(cash_data.to_numpy())
-
     x = 0
-    if args.simple_mode == 1:
-        sub_bar = tqdm(total=len(cash_numpy), leave=False)
-    # for item in cash_numpy:
-    #     if args.simple_mode == 1:
-    #         sub_bar.update(1)
-    #     x += 1
-    #     for index in  range(len(cash_select)):
-    #         ori_split = list(combinations(ori_numpy, cash_select[index]))
-    #         cash_split = list(combinations(item, cash_select[index]))
-    #         cash_set = set(ori_split).intersection(set(cash_split))
-    #         if cash_select[index] != 0:
-    #             cash_list[index] += len(cash_set)
-    #             if cash_price[index] != 0 and len(cash_set) != 0:
-    #                 if args.simple_mode == 0:
-    #                     logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, cash_set))
-    #                 break
-    #         elif cash_select[index] == 0 and len(cash_set) == 0:
-    #             cash_list[index] += 1
-    #             if args.simple_mode == 0:
-    #                 logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, cash_set))
-    #             break
-    matched_df = pd.merge(ori_df, cash_df, how='inner')
-    for _, row in matched_df.iterrows():
-        if args.simple_mode == 1:
-            sub_bar.update(1)
+    # if args.simple_mode == 1:
+    #     sub_bar = tqdm(total=len(cash_numpy), leave=False)
+    for item in cash_numpy:
+        # if args.simple_mode == 1:
+        #     sub_bar.update(1)
         x += 1
-        
-        for index in range(len(cash_select)):
-            match_count = row.notna().sum()
-            if cash_select[index] != 0 and match_count != 0:
-                cash_list[index] += match_count
-                if cash_price[index] != 0:
+        for index in  range(len(cash_select)):
+            ori_split = list(combinations(ori_numpy, cash_select[index]))
+            cash_split = list(combinations(item, cash_select[index]))
+            cash_set = set(ori_split) & set(cash_split)
+            if cash_select[index] != 0:
+                cash_list[index] += len(cash_set)
+                if cash_price[index] != 0 and len(cash_set) != 0:
                     if args.simple_mode == 0:
-                        logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, row.dropna().tolist()))
+                        logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, cash_set))
                     break
-            elif cash_select[index] == 0 and match_count == 0:
+            elif cash_select[index] == 0 and len(cash_set) == 0:
                 cash_list[index] += 1
                 if args.simple_mode == 0:
-                    logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, []))
+                    logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, cash_set))
                 break
-    if args.simple_mode == 1:        
-        sub_bar.close()
+    # if args.simple_mode == 1:        
+    #     sub_bar.close()
     total_cash = 0
     for i in range(len(cash_select)):
         if args.simple_mode == 0:
@@ -159,18 +136,13 @@ if __name__ == "__main__":
         import os
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
-        if args.simple_mode == 1:
-            pbar = tqdm(total=len(file_list), leave=True)
-        for filename in file_list:
-            if args.simple_mode == 1:
-                pbar.update(1)
+        for j in tqdm(range(len(file_list)), desc='Thread {}'.format(args.path), leave=True):
+            filename = file_list[j]
             cash_file_name = file_path + filename
             filename_split = filename.split('_') 
             if len(filename_split) == 4:
                 if int(filename_split[-1].split('.')[0]) > 0:
                     args.current_nums = int(filename_split[-1].split('.')[0])
             all_cash, all_lucky = check_lottery(cash_file_name=cash_file_name, args=args, all_cash=all_cash, all_lucky=all_lucky, path_mode=1)
-        if args.simple_mode == 1:
-            pbar.close()
         logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
     

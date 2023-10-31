@@ -20,8 +20,8 @@ def _main(_total_create, _cal_nums, _current_nums, _process="./kl8_analysis.py")
                     "--path", str(_total_create) + '_' + str(_cal_nums), "--repeat", str(args.repeat), "--simple_mode", "1"])
 
 
-kl8_analysis = "./kl8_analysis.py"
-kl8_cash = "./kl8_cash.py"
+kl8_analysis = "./kl8_analysis_plus.py"
+kl8_cash = "./kl8_cash_plus.py"
 cal_nums_list = [int(element) for element in args.cal_nums_list.split(',')]
 total_create_list = [int(element) for element in args.total_create_list.split(',')]
 begin, end = [int(element) for element in args.nums_range.split(',')]
@@ -31,17 +31,18 @@ for _total_create in total_create_list:
         for _current_nums in range(begin, end + 1):
             t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_analysis))
             threads.append(t)
-            t.start()
-
+for t in threads:
+    t.start()
 for t in threads:
     t.join()
 
+threads = []
 for _total_create in total_create_list:
     for _cal_nums in cal_nums_list:
             _current_nums = -1
             t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_cash))
             threads.append(t)
-            t.start()
-
+for t in threads:
+    t.start()
 for t in threads:
     t.join()
