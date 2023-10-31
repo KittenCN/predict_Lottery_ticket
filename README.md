@@ -13,6 +13,8 @@
 目前我正在修改网络结构，并迁移到我比较熟悉的pytorch框架之下: https://github.com/KittenCN/predict_Lottery_ticket_pytorch
 
 ## New
+* 20231031
+* 1. 增加了kl8 plus系列文件，修改了kl8_running, 使其都使用多线程处理数据，加快数据处理速度，正常情况无需使用；特殊需要使用的用户要注意自己cpu的核心数，默认会产生cal_nums_list数量 * total_create_list数量 * nums_range数量个进程， 性能不足，核少的cpu会被卡死，请谨慎使用
 * 20230903
 * 1. 增加了两个kl8_开头的文件，用来测试计算一些数据预处理的公式，以及计算预测号码获奖情况, 正常情况无需使用
 * 20230327
