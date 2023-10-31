@@ -5,7 +5,8 @@ Author: KittenCN
 
 import pandas as pd
 import argparse
-
+import subprocess
+import threading
 from tqdm import tqdm
 from config import *
 from itertools import combinations
@@ -58,8 +59,8 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [19, 0, 0], \
                     [4.6, 0]]
 
-def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
-    global ori_numpy, nums_index
+def check_lottery(cash_file_name, args, path_mode=0):
+    global ori_numpy, nums_index, all_cash, all_lucky
     nums_index += 1
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
@@ -136,6 +137,7 @@ if __name__ == "__main__":
         import os
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
+        threads = []
         for j in tqdm(range(len(file_list)), desc='Thread {}'.format(args.path), leave=True):
             filename = file_list[j]
             cash_file_name = file_path + filename
@@ -143,6 +145,11 @@ if __name__ == "__main__":
             if len(filename_split) == 4:
                 if int(filename_split[-1].split('.')[0]) > 0:
                     args.current_nums = int(filename_split[-1].split('.')[0])
-            all_cash, all_lucky = check_lottery(cash_file_name=cash_file_name, args=args, all_cash=all_cash, all_lucky=all_lucky, path_mode=1)
+            t = threading.Thread(target=check_lottery, args=(cash_file_name, args, 1))
+            threads.append(t)
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
         logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
     
