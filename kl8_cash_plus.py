@@ -15,11 +15,11 @@ from loguru import logger
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
-parser.add_argument('--download', default=1, type=int, help="download data")
+parser.add_argument('--download', default=0, type=int, help="download data")
 parser.add_argument('--cash_file_name', default="-1", type=str, help='cash_file_name')
 parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--path', default="", type=str, help='path')
-parser.add_argument('--simple_mode', default=0, type=int, help='simple mode')
+parser.add_argument('--simple_mode', default=1, type=int, help='simple mode')
 #--------------------------------------------------------------------------------------------------#
 parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
@@ -35,6 +35,7 @@ file_path = "./results/"
 endstring = ["csv"]
 name = args.name
 nums_index = 0
+coontent = []
 if args.download == 1:
     from common import get_data_run
     get_data_run(name=name, cq=0)
@@ -59,8 +60,8 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [19, 0, 0], \
                     [4.6, 0]]
 
-def check_lottery(cash_file_name, args, path_mode=0):
-    global ori_numpy, nums_index, all_cash, all_lucky
+def check_lottery(cash_file_name, args, path_mode=1):
+    global ori_numpy, nums_index, all_cash, all_lucky, content
     nums_index += 1
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
@@ -80,11 +81,7 @@ def check_lottery(cash_file_name, args, path_mode=0):
     cash_list = [0] * len(cash_select)
 
     x = 0
-    # if args.simple_mode == 1:
-    #     sub_bar = tqdm(total=len(cash_numpy), leave=False)
     for item in cash_numpy:
-        # if args.simple_mode == 1:
-        #     sub_bar.update(1)
         x += 1
         for index in  range(len(cash_select)):
             ori_split = list(combinations(ori_numpy, cash_select[index]))
@@ -93,26 +90,30 @@ def check_lottery(cash_file_name, args, path_mode=0):
             if cash_select[index] != 0:
                 cash_list[index] += len(cash_set)
                 if cash_price[index] != 0 and len(cash_set) != 0:
-                    if args.simple_mode == 0:
-                        logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, cash_set))
                     break
             elif cash_select[index] == 0 and len(cash_set) == 0:
                 cash_list[index] += 1
-                if args.simple_mode == 0:
-                    logger.info("{}, 第{}注, 号码{}中奖。".format(args.path, x, cash_set))
                 break
-    # if args.simple_mode == 1:        
-    #     sub_bar.close()
     total_cash = 0
     for i in range(len(cash_select)):
-        if args.simple_mode == 0:
-            logger.info("{}, 中{}个球，共{}注，奖金为{}元。".format(args.path, cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
         total_cash += cash_list[i] * cash_price[i]
     if args.simple_mode == 0 or (args.simple_mode == 2 and total_cash / (len(cash_numpy) * 2) * 100 >= 100):
         logger.info("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+        content.append("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash
     return all_cash, all_lucky
+
+## 多线程调用写入文件
+def write_file(_content,_file_name="./kl8_runnint_results.txt"):
+    t = threading.Thread(target=write_file_core, args=(_content, _file_name))
+    t.start()
+
+## 写入文件
+def write_file_core(_content,_file_name="./kl8_runnint_results.txt"):
+    with open(_file_name, "w") as f:
+        for item in _content:
+            f.write(item + "\n")
 
 if __name__ == "__main__":
     nums_index = 0
@@ -152,4 +153,5 @@ if __name__ == "__main__":
         for t in threads:
             t.join()
         logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
-    
+        coontent.append("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
+    write_file(coontent)
