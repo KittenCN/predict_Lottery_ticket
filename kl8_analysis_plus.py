@@ -717,7 +717,7 @@ if __name__ == "__main__":
                 err_results = []
                 results = []
                 start_time = datetime.datetime.now()
-                for i in tqdm(range(1, total_create + 1), desc='Thread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1), str(args.cal_nums))):
+                for i in tqdm(range(1, total_create + 1), desc='AnalysisThread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1), str(args.cal_nums))):
                     current_result = [0]
                     err = [0] * len(cal_shiftings)
                     err_code_max = -1
@@ -844,7 +844,7 @@ if __name__ == "__main__":
     else: 
         init_func(rate_mode=2)      
         shifting = cal_shiftings.copy()
-        for _i in tqdm(range(args.repeat), desc='Thread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums)), leave=True):
+        for _i in tqdm(range(args.repeat), desc='AnalysisThread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums)), leave=True):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             while current_time == last_time:
                 current_time = str(int(current_time) + 1)

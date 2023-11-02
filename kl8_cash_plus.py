@@ -81,7 +81,7 @@ def check_lottery(cash_file_name, args, path_mode=1):
     cash_list = [0] * len(cash_select)
 
     x = 0
-    for j in tqdm(range(len(cash_numpy)), desc='subThread {}'.format(args.path), leave=True):
+    for j in tqdm(range(len(cash_numpy)), desc='subCashThread {}'.format(args.path), leave=True):
     # for item in cash_numpy:
         item = cash_numpy[j]
         x += 1
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
         threads = []
-        for j in tqdm(range(len(file_list)), desc='Thread {}'.format(args.path), leave=True):
+        for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=True):
             filename = file_list[j]
             cash_file_name = file_path + filename
             filename_split = filename.split('_') 
