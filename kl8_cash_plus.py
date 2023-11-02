@@ -35,7 +35,7 @@ file_path = "./results/"
 endstring = ["csv"]
 name = args.name
 nums_index = 0
-coontent = []
+content = []
 if args.download == 1:
     from common import get_data_run
     get_data_run(name=name, cq=0)
@@ -166,5 +166,5 @@ if __name__ == "__main__":
         for t in threads:
             t.join()
         logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
-        coontent.append("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
-    write_file(coontent)
+        content.append("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
+    write_file(content)
