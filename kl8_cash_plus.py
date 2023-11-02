@@ -81,9 +81,9 @@ def check_lottery(cash_file_name, args, path_mode=1):
     cash_list = [0] * len(cash_select)
 
     x = 0
-    for j in tqdm(range(len(cash_numpy)), desc='subCashThread {}'.format(args.path), leave=True):
-    # for item in cash_numpy:
-        item = cash_numpy[j]
+    # for j in tqdm(range(len(cash_numpy)), desc='subCashThread {}'.format(args.path), leave=True):
+    for item in cash_numpy:
+        # item = cash_numpy[j]
         x += 1
         for index in range(len(cash_select)):
             ori_split = list(combinations(ori_numpy, cash_select[index]))
@@ -152,7 +152,8 @@ if __name__ == "__main__":
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
         threads = []
-        for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=True):
+        # for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=True):
+        for j in range(len(file_list)):
             filename = file_list[j]
             cash_file_name = file_path + filename
             filename_split = filename.split('_') 
@@ -164,6 +165,8 @@ if __name__ == "__main__":
         for t in threads:
             t.start()
         for t in threads:
+        # for t_index in tqdm(range(len(threads)), desc='CashThread {}'.format(args.path), leave=True):
+        #     t = threads[t_index]
             t.join()
         logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
         content.append("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))

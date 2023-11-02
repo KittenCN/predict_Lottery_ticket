@@ -1,6 +1,7 @@
 import argparse
 import subprocess
 import threading
+from tqdm import tqdm
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--cal_nums_list', default="4,5,7,10", type=str, help='cal_nums_list')
@@ -31,9 +32,10 @@ for _total_create in total_create_list:
         for _current_nums in range(begin, end + 1):
             t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_analysis))
             threads.append(t)
-for t in threads:
-    t.start()
-for t in threads:
+            t.start()
+# for t in threads:
+for t_index in tqdm(range(len(threads)), desc='AnalysisThread', leave=True):
+    t = threads[t_index]
     t.join()
 
 threads = []
@@ -42,7 +44,7 @@ for _total_create in total_create_list:
             _current_nums = -1
             t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_cash))
             threads.append(t)
-for t in threads:
-    t.start()
-for t in threads:
+            t.start()
+for t_index in tqdm(range(len(threads)), desc='CashThread', leave=True):
+    t = threads[t_index]
     t.join()
