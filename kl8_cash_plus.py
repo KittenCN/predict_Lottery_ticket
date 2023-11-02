@@ -81,9 +81,11 @@ def check_lottery(cash_file_name, args, path_mode=1):
     cash_list = [0] * len(cash_select)
 
     x = 0
-    for item in cash_numpy:
+    for j in tqdm(range(len(cash_numpy)), desc='subThread {}'.format(args.path), leave=True):
+    # for item in cash_numpy:
+        item = cash_numpy[j]
         x += 1
-        for index in  range(len(cash_select)):
+        for index in range(len(cash_select)):
             ori_split = list(combinations(ori_numpy, cash_select[index]))
             cash_split = list(combinations(item, cash_select[index]))
             cash_set = set(ori_split) & set(cash_split)
