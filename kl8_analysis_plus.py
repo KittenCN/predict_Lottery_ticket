@@ -844,8 +844,8 @@ if __name__ == "__main__":
     else: 
         init_func(rate_mode=2)      
         shifting = cal_shiftings.copy()
-        for _i in tqdm(range(args.repeat), desc='AnalysisThread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums)), leave=False):
-        # for _i in range(args.repeat):
+        # for _i in tqdm(range(args.repeat), desc='AnalysisThread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums)), leave=False):
+        for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             while current_time == last_time:
                 current_time = str(int(current_time) + 1)
@@ -859,9 +859,9 @@ if __name__ == "__main__":
                 threads.append(t)
             for t in threads:
                 t.start()
-            for t in threads:
-            # for t_index in tqdm(range(len(threads)), desc='AnalysisThread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums)), leave=False):
-            #     t = threads[t_index]
+            # for t in threads:
+            for t_index in tqdm(range(len(threads)), desc='AnalysisThread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums)), leave=False):
+                t = threads[t_index]
                 t.join()
             sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
             sorted_results, sorted_shiftings = zip(*sorted_results)
