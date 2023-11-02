@@ -65,15 +65,15 @@ def check_lottery(cash_file_name, args, path_mode=1):
     nums_index += 1
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
-        if path_mode == 0:
-            logger.info("{}, 当前期数为{}。".format(args.path, args.current_nums))
+        # if path_mode == 0:
+        #     logger.info("{}, 当前期数为{}。".format(args.path, args.current_nums))
         if index >= 0:
             ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
-    else:
-        if path_mode == 0:
-            logger.info("{}, 当前期数为{}，计算期数为{}。".format(args.path, ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
-    if path_mode == 0:
-        logger.info("{}, 中奖号码为:{}".format(args.path, ori_numpy))
+    # else:
+    #     if path_mode == 0:
+    #         logger.info("{}, 当前期数为{}，计算期数为{}。".format(args.path, ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
+    # if path_mode == 0:
+    #     logger.info("{}, 中奖号码为:{}".format(args.path, ori_numpy))
     cash_data = pd.read_csv(cash_file_name)
     cash_numpy = cash_data.to_numpy()
     cash_select = cash_select_list[cash_numpy.shape[1]]
@@ -81,7 +81,7 @@ def check_lottery(cash_file_name, args, path_mode=1):
     cash_list = [0] * len(cash_select)
 
     x = 0
-    # for j in tqdm(range(len(cash_numpy)), desc='subCashThread {}'.format(args.path), leave=True):
+    # for j in tqdm(range(len(cash_numpy)), desc='subCashThread {}'.format(args.path), leave=False):
     for item in cash_numpy:
         # item = cash_numpy[j]
         x += 1
@@ -100,7 +100,7 @@ def check_lottery(cash_file_name, args, path_mode=1):
     for i in range(len(cash_select)):
         total_cash += cash_list[i] * cash_price[i]
     if args.simple_mode == 0 or (args.simple_mode == 2 and total_cash / (len(cash_numpy) * 2) * 100 >= 100):
-        logger.info("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+        # logger.info("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
         content.append("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash
@@ -152,7 +152,7 @@ if __name__ == "__main__":
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
         threads = []
-        # for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=True):
+        # for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False):
         for j in range(len(file_list)):
             filename = file_list[j]
             cash_file_name = file_path + filename
@@ -164,10 +164,10 @@ if __name__ == "__main__":
             threads.append(t)
         for t in threads:
             t.start()
-        for t in threads:
-        # for t_index in tqdm(range(len(threads)), desc='CashThread {}'.format(args.path), leave=True):
-        #     t = threads[t_index]
+        # for t in threads:
+        for t_index in tqdm(range(len(threads)), desc='CashThread {}'.format(args.path), leave=False):
+            t = threads[t_index]
             t.join()
-        logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
+        # logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
         content.append("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
     write_file(content)
