@@ -860,7 +860,7 @@ if __name__ == "__main__":
             for t in threads:
                 t.start()
             # for t in threads:
-            for t_index in tqdm(range(len(threads)), desc='AnalysisThread {}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums)), leave=False):
+            for t_index in tqdm(range(len(threads)), desc='AnalysisThread {}-{}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums), _i), leave=False):
                 t = threads[t_index]
                 t.join()
             sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
