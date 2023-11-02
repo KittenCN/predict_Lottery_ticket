@@ -104,6 +104,13 @@ def check_lottery(cash_file_name, args, path_mode=1):
     all_lucky += total_cash
     return all_cash, all_lucky
 
+## 判断文件是否存在
+def check_file(_file_name):
+    if os.path.exists(_file_name):
+        return True
+    else:
+        return False
+
 ## 多线程调用写入文件
 def write_file(_content,_file_name="./kl8_runnint_results.txt"):
     t = threading.Thread(target=write_file_core, args=(_content, _file_name))
@@ -111,7 +118,11 @@ def write_file(_content,_file_name="./kl8_runnint_results.txt"):
 
 ## 写入文件
 def write_file_core(_content,_file_name="./kl8_runnint_results.txt"):
-    with open(_file_name, "w") as f:
+    if check_file(_file_name):
+        write_mode = "a"
+    else:
+        write_mode = "w"
+    with open(_file_name, write_mode) as f:
         for item in _content:
             f.write(item + "\n")
 
