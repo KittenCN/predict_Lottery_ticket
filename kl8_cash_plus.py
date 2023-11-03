@@ -11,6 +11,7 @@ from tqdm import tqdm
 from config import *
 from itertools import combinations
 from loguru import logger
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 parser = argparse.ArgumentParser()
@@ -60,42 +61,52 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [19, 0, 0], \
                     [4.6, 0]]
 
+def sub_check_lottery(item, cash_select, cash_price, cash_list):
+    for index in range(len(cash_select)):
+        ori_split = list(combinations(ori_numpy, cash_select[index]))
+        cash_split = list(combinations(item, cash_select[index]))
+        cash_set = set(ori_split) & set(cash_split)
+        if cash_select[index] != 0:
+            cash_list[index] += len(cash_set)
+            if cash_price[index] != 0 and len(cash_set) != 0:
+                return cash_list
+        elif cash_select[index] == 0 and len(cash_set) == 0:
+            cash_list[index] += 1
+            return cash_list
+
 def check_lottery(cash_file_name, args, path_mode=1):
     global ori_numpy, nums_index, all_cash, all_lucky, content
     nums_index += 1
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
-        # if path_mode == 0:
-        #     logger.info("{}, 当前期数为{}。".format(args.path, args.current_nums))
         if index >= 0:
             ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
-    # else:
-    #     if path_mode == 0:
-    #         logger.info("{}, 当前期数为{}，计算期数为{}。".format(args.path, ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0], ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]))
-    # if path_mode == 0:
-    #     logger.info("{}, 中奖号码为:{}".format(args.path, ori_numpy))
     cash_data = pd.read_csv(cash_file_name)
     cash_numpy = cash_data.to_numpy()
     cash_select = cash_select_list[cash_numpy.shape[1]]
     cash_price = cash_price_list[10 - (cash_numpy.shape[1])]
     cash_list = [0] * len(cash_select)
 
-    x = 0
     # for j in tqdm(range(len(cash_numpy)), desc='subCashThread {}'.format(args.path), leave=False):
-    for item in cash_numpy:
+    # for item in cash_numpy:
         # item = cash_numpy[j]
-        x += 1
-        for index in range(len(cash_select)):
-            ori_split = list(combinations(ori_numpy, cash_select[index]))
-            cash_split = list(combinations(item, cash_select[index]))
-            cash_set = set(ori_split) & set(cash_split)
-            if cash_select[index] != 0:
-                cash_list[index] += len(cash_set)
-                if cash_price[index] != 0 and len(cash_set) != 0:
-                    break
-            elif cash_select[index] == 0 and len(cash_set) == 0:
-                cash_list[index] += 1
-                break
+        # for index in range(len(cash_select)):
+        #     ori_split = list(combinations(ori_numpy, cash_select[index]))
+        #     cash_split = list(combinations(item, cash_select[index]))
+        #     cash_set = set(ori_split) & set(cash_split)
+        #     if cash_select[index] != 0:
+        #         cash_list[index] += len(cash_set)
+        #         if cash_price[index] != 0 and len(cash_set) != 0:
+        #             break
+        #     elif cash_select[index] == 0 and len(cash_set) == 0:
+        #         cash_list[index] += 1
+        #         break
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_url = {executor.submit(sub_check_lottery, item, cash_select, cash_price, cash_list): item for item in cash_numpy}
+        for future in as_completed(future_to_url):
+            data = future.result()
+            if data != None:
+                cash_list = data
     total_cash = 0
     for i in range(len(cash_select)):
         total_cash += cash_list[i] * cash_price[i]
