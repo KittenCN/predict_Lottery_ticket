@@ -36,6 +36,8 @@ parser.add_argument('--repeat', default=1, type=int, help='repeat')
 parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=0, type=int, help='simple mode') 
 parser.add_argument('--random_mode', default=0, type=int, help='random mode')
+#-------------------------------------------------------------------------------------------------------------#
+parser.add_argument('--max_workers', default=10, type=int, help='useless')
 args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")

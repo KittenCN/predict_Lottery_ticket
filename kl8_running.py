@@ -20,7 +20,7 @@ def _main(_total_create, _cal_nums, _current_nums, _process="./kl8_analysis.py")
     subprocess.run(["python", _process, "--download", "0", "--total_create", str(_total_create), \
                     "--cal_nums", str(_cal_nums), "--current_nums", str(_current_nums), "--limit_line", "5", \
                     "--path", str(_total_create) + '_' + str(_cal_nums), "--repeat", str(args.repeat), "--simple_mode", "1", \
-                    "--random_mode", "0"])
+                    "--random_mode", "0", "--max_workers", "32"])
 
 if args.running_mode in [0, 1]:
     kl8_analysis = "./kl8_analysis_plus.py"
@@ -39,7 +39,7 @@ if args.running_mode in [0, 1]:
     for t_index in tqdm(range(len(threads)), desc='AnalysisThread', leave=True):
         t = threads[t_index]
         t.join()
-        
+
 if args.running_mode in [0, 2]:
     threads = []
     for _total_create in total_create_list:
