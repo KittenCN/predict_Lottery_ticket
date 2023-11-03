@@ -73,7 +73,7 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [4.6, 0]]
 
 def sub_check_lottery(item, cash_select, cash_price, cash_list):
-    for index in range(len(cash_select)):
+    for index in tqdm(total=range(len(cash_select)), desc='subCashThread {}'.format(args.path), leave=False):
         ori_split = list(combinations(ori_numpy, cash_select[index]))
         cash_split = list(combinations(item, cash_select[index]))
         cash_set = set(ori_split) & set(cash_split)
