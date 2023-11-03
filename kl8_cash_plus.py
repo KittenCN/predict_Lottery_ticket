@@ -22,6 +22,7 @@ parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=1, type=int, help='simple mode')
 parser.add_argument('--random_mode', default=0, type=int, help='random mode')
+parser.add_argument('--max_workers', default=10, type=int, help='max_workers')
 #--------------------------------------------------------------------------------------------------#
 parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
@@ -111,7 +112,7 @@ def check_lottery(cash_file_name, args, path_mode=1):
         #     elif cash_select[index] == 0 and len(cash_set) == 0:
         #         cash_list[index] += 1
         #         break
-    with ThreadPoolExecutor(max_workers=10) as executor:
+    with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
         future_to_url = {executor.submit(sub_check_lottery, item, cash_select, cash_price, cash_list): item for item in cash_numpy}
         for future in as_completed(future_to_url):
             data = future.result()
