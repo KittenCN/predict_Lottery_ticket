@@ -85,8 +85,13 @@ def sub_check_lottery(item, cash_select, cash_price, cash_list):
             cash_list[index] += 1
             return cash_list
 
-def check_lottery(cash_file_name, args, path_mode=1):
-    global ori_numpy, nums_index, all_cash, all_lucky, content
+def check_lottery(file_path, filename, args, nums_index, all_cash, all_lucky, content):
+    # global ori_numpy, nums_index, all_cash, all_lucky, content
+    cash_file_name = file_path + filename
+    filename_split = filename.split('_') 
+    if len(filename_split) == 4:
+        if int(filename_split[-1].split('.')[0]) > 0:
+            args.current_nums = int(filename_split[-1].split('.')[0])
     nums_index += 1
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
@@ -99,25 +104,25 @@ def check_lottery(cash_file_name, args, path_mode=1):
     cash_list = [0] * len(cash_select)
 
     # for j in tqdm(range(len(cash_numpy)), desc='subCashThread {}'.format(args.path), leave=False):
-    # for item in cash_numpy:
+    for item in cash_numpy:
         # item = cash_numpy[j]
-        # for index in range(len(cash_select)):
-        #     ori_split = list(combinations(ori_numpy, cash_select[index]))
-        #     cash_split = list(combinations(item, cash_select[index]))
-        #     cash_set = set(ori_split) & set(cash_split)
-        #     if cash_select[index] != 0:
-        #         cash_list[index] += len(cash_set)
-        #         if cash_price[index] != 0 and len(cash_set) != 0:
-        #             break
-        #     elif cash_select[index] == 0 and len(cash_set) == 0:
-        #         cash_list[index] += 1
-        #         break
-    with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
-        future_to_url = {executor.submit(sub_check_lottery, item, cash_select, cash_price, cash_list): item for item in cash_numpy}
-        for future in as_completed(future_to_url):
-            data = future.result()
-            if data != None:
-                cash_list = data
+        for index in range(len(cash_select)):
+            ori_split = list(combinations(ori_numpy, cash_select[index]))
+            cash_split = list(combinations(item, cash_select[index]))
+            cash_set = set(ori_split) & set(cash_split)
+            if cash_select[index] != 0:
+                cash_list[index] += len(cash_set)
+                if cash_price[index] != 0 and len(cash_set) != 0:
+                    break
+            elif cash_select[index] == 0 and len(cash_set) == 0:
+                cash_list[index] += 1
+                break
+    # with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
+    #     future_to_url = {executor.submit(sub_check_lottery, item, cash_select, cash_price, cash_list): item for item in cash_numpy}
+    #     for future in as_completed(future_to_url):
+    #         data = future.result()
+    #         if data != None:
+    #             cash_list = data
     total_cash = 0
     for i in range(len(cash_select)):
         total_cash += cash_list[i] * cash_price[i]
@@ -126,7 +131,7 @@ def check_lottery(cash_file_name, args, path_mode=1):
         content.append("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash
-    return all_cash, all_lucky
+    return all_cash, all_lucky, content, args
 
 ## 判断文件是否存在
 def check_file(_file_name):
@@ -193,21 +198,23 @@ if __name__ == "__main__":
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
         threads = []
         # for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False):
-        for j in range(len(file_list)):
-            filename = file_list[j]
-            cash_file_name = file_path + filename
-            filename_split = filename.split('_') 
-            if len(filename_split) == 4:
-                if int(filename_split[-1].split('.')[0]) > 0:
-                    args.current_nums = int(filename_split[-1].split('.')[0])
-            t = threading.Thread(target=check_lottery, args=(cash_file_name, args, 1))
-            threads.append(t)
-        for t in threads:
-            t.start()
+        # for j in range(len(file_list)):
+        #     filename = file_list[j]
+        #     t = threading.Thread(target=check_lottery, args=(file_path, filename, args, 1))
+        #     threads.append(t)
         # for t in threads:
-        for t_index in tqdm(range(len(threads)), desc='CashThread {}'.format(args.path), leave=False):
-            t = threads[t_index]
-            t.join()
+        #     t.start()
+        # # for t in threads:
+        # for t_index in tqdm(range(len(threads)), desc='CashThread {}'.format(args.path), leave=False):
+        #     t = threads[t_index]
+        #     t.join()
+
+        with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
+            future_to_url = {executor.submit(check_lottery, file_path, file_list[filename_index], args, nums_index, all_cash, all_lucky, content): file_list[filename_index] for filename_index in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False)}
+            for future in as_completed(future_to_url):
+                data = future.result()
+                if data != None:
+                    all_cash, all_lucky, content, args = data
         # logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
         content.append("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
     write_file(content)
