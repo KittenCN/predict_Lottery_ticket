@@ -18,7 +18,8 @@ args = parser.parse_args()
 def _main(_total_create, _cal_nums, _current_nums, _process="./kl8_analysis.py"):
     subprocess.run(["python", _process, "--download", "0", "--total_create", str(_total_create), \
                     "--cal_nums", str(_cal_nums), "--current_nums", str(_current_nums), "--limit_line", "5", \
-                    "--path", str(_total_create) + '_' + str(_cal_nums), "--repeat", str(args.repeat), "--simple_mode", "1"])
+                    "--path", str(_total_create) + '_' + str(_cal_nums), "--repeat", str(args.repeat), "--simple_mode", "1", \
+                    "--random_mode", "0"])
 
 
 kl8_analysis = "./kl8_analysis_plus.py"

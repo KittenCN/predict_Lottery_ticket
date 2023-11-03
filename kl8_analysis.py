@@ -34,6 +34,7 @@ parser.add_argument('--multiple_ratio', default="1,0", type=str, help='multiple_
 parser.add_argument('--repeat', default=1, type=int, help='repeat') 
 parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=0, type=int, help='simple mode') 
+parser.add_argument('--random_mode', default=0, type=int, help='random mode')
 args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -48,10 +49,16 @@ if args.current_nums > 0 and args.current_nums >= ori_numpy[-1][0] and args.curr
     index_diff = ori_numpy[0][0] - args.current_nums + 1
     ori_numpy = ori_numpy[index_diff:]
 
-if args.path == "":
-        file_path = "./results/" 
-else:
-    file_path = "./results_" + args.path + "/"
+if args.random_mode == 0:
+    if args.path == "":
+            file_path = "./results/" 
+    else:
+        file_path = "./results_" + args.path + "/"
+elif args.random_mode == 1:
+    if args.path == "":
+        file_path = "./random/"
+    else:
+        file_path = "./random_" + args.path + "/"
 
 # limit_line = len(ori_numpy)
 limit_line = args.limit_line
@@ -592,6 +599,13 @@ def init_func(rate_mode=1):
     his_sum_rate = sum_analysis()
     his_not_repeat_rate = cal_not_repeat_rate()
 
+def generate_random_numbers(num_rows, num_nums_per_row):
+    results = []
+    for _ in range(num_rows):
+        row = sorted(random.sample(range(1, 81), num_nums_per_row))
+        results.append(row)
+    return results
+
 if __name__ == "__main__":
     # cal_hot_cold()
     # cal_repeat_rate()
@@ -607,8 +621,17 @@ if __name__ == "__main__":
     # n_clusters = args.cal_nums
     # labels, centers = kmeans_clustering(ori_numpy[:limit_line], n_clusters)
     # plot_clusters(ori_numpy[:limit_line], labels, centers)
+
     check_dir(file_path)
     last_time = ""
+    if args.simple_mode == 1:
+        for _i in range(args.repeat):
+            current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+            while current_time == last_time:
+                current_time = str(int(current_time) + 1)
+            last_time = current_time
+            write_file(generate_random_numbers(args.total_create, args.cal_nums), "random")
+        exit(0)
     if args.calculate_rate == 1:
         cal_rate_list = args.calculate_rate_list.split(",")
         if int(cal_rate_list[0]) > 0:

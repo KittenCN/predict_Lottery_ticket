@@ -19,6 +19,7 @@ parser.add_argument('--cash_file_name', default="-1", type=str, help='cash_file_
 parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=0, type=int, help='simple mode')
+parser.add_argument('--random_mode', default=0, type=int, help='random mode')
 #--------------------------------------------------------------------------------------------------#
 parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
@@ -30,7 +31,16 @@ parser.add_argument('--calculate_rate', default=0, type=int, help='useless')
 parser.add_argument('--calculate_rate_list', default="5", type=str, help='useless')
 args = parser.parse_args()
 
-file_path = "./results/" 
+if args.random_mode == 0:
+    if args.path == "":
+            file_path = "./results/" 
+    else:
+        file_path = "./results_" + args.path + "/"
+elif args.random_mode == 1:
+    if args.path == "":
+        file_path = "./random/"
+    else:
+        file_path = "./random_" + args.path + "/"
 endstring = ["csv"]
 name = args.name
 nums_index = 0
@@ -116,7 +126,16 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
 if __name__ == "__main__":
     nums_index = 0
     if args.path == "" or args.cash_file_name != "-1":
-        file_path = "./results/" 
+        if args.random_mode == 0:
+            if args.path == "":
+                    file_path = "./results/" 
+            else:
+                file_path = "./results_" + args.path + "/"
+        elif args.random_mode == 1:
+            if args.path == "":
+                file_path = "./random/"
+            else:
+                file_path = "./random_" + args.path + "/" 
         if args.cash_file_name != "-1":
             cash_file_name = file_path + args.cash_file_name + ".csv"
         else:
@@ -131,7 +150,16 @@ if __name__ == "__main__":
                     args.current_nums = int(filename_split[-1].split('.')[0])
         check_lottery(cash_file_name=cash_file_name, args=args, path_mode=0)
     else:
-        file_path = "./results_" + args.path + "/"
+        if args.random_mode == 0:
+            if args.path == "":
+                    file_path = "./results/" 
+            else:
+                file_path = "./results_" + args.path + "/"
+        elif args.random_mode == 1:
+            if args.path == "":
+                file_path = "./random/"
+            else:
+                file_path = "./random_" + args.path + "/" 
         all_cash, all_lucky = 0, 0
         import os
         file_list = [_ for _ in os.listdir(file_path) if _.split('.')[1] in endstring]
