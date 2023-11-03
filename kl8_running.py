@@ -23,12 +23,13 @@ def _main(_total_create, _cal_nums, _current_nums, _process="./kl8_analysis.py")
                     "--path", str(_total_create) + '_' + str(_cal_nums), "--repeat", str(args.repeat), "--simple_mode", "1", \
                     "--random_mode", "0", "--max_workers", str(args.max_workers)])
 
+kl8_analysis = "./kl8_analysis_plus.py"
+kl8_cash = "./kl8_cash_plus.py"
+cal_nums_list = [int(element) for element in args.cal_nums_list.split(',')]
+total_create_list = [int(element) for element in args.total_create_list.split(',')]
+begin, end = [int(element) for element in args.nums_range.split(',')]
+
 if args.running_mode in [0, 1]:
-    kl8_analysis = "./kl8_analysis_plus.py"
-    kl8_cash = "./kl8_cash_plus.py"
-    cal_nums_list = [int(element) for element in args.cal_nums_list.split(',')]
-    total_create_list = [int(element) for element in args.total_create_list.split(',')]
-    begin, end = [int(element) for element in args.nums_range.split(',')]
     threads = []
     for _total_create in total_create_list:
         for _cal_nums in cal_nums_list:
