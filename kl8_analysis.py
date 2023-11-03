@@ -624,7 +624,7 @@ if __name__ == "__main__":
 
     check_dir(file_path)
     last_time = ""
-    if args.simple_mode == 1:
+    if args.random_mode == 1:
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             while current_time == last_time:

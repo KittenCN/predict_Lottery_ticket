@@ -17,6 +17,7 @@ from collections import defaultdict
 from config import *
 from itertools import combinations
 from loguru import logger
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
@@ -36,8 +37,8 @@ parser.add_argument('--repeat', default=1, type=int, help='repeat')
 parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=0, type=int, help='simple mode') 
 parser.add_argument('--random_mode', default=0, type=int, help='random mode')
+parser.add_argument('--max_workers', default=10, type=int, help='max_workers')
 #-------------------------------------------------------------------------------------------------------------#
-parser.add_argument('--max_workers', default=10, type=int, help='useless')
 args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -590,8 +591,8 @@ def init_func(rate_mode=1):
     his_sum_rate = sum_analysis()
     his_not_repeat_rate = cal_not_repeat_rate()
 
-def sub_process(i):
-    global results, shiftings, shifting, start_time
+def sub_process(i, results, shiftings, shifting, start_time):
+    # global results, shiftings, shifting, start_time
     current_result = [0]
     err = [0] * len(cal_shiftings)
     err_code_max = -1
@@ -705,6 +706,7 @@ def sub_process(i):
     results.append(current_result[1:])
     shiftings.append(shifting)
     shifting = [round(num, 3) for num in shifting]
+    return results, shiftings, shifting, start_time
 
 def generate_random_numbers(num_rows, num_nums_per_row):
     results = []
@@ -716,7 +718,7 @@ def generate_random_numbers(num_rows, num_nums_per_row):
 if __name__ == "__main__":
     check_dir(file_path)
     last_time = ""
-    if args.simple_mode == 1:
+    if args.random_mode == 1:
         for _i in range(args.repeat):
             current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
             while current_time == last_time:
@@ -877,16 +879,21 @@ if __name__ == "__main__":
             err_results = []
             results = []
             start_time = datetime.datetime.now()
-            threads = []
-            for i in range(1, total_create + 1):
-                t = threading.Thread(target=sub_process, args=(i,))
-                threads.append(t)
-            for t in threads:
-                t.start()
-            # for t in threads:
-            for t_index in tqdm(range(len(threads)), desc='AnalysisThread {}-{}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums), _i), leave=False):
-                t = threads[t_index]
-                t.join()
+            # threads = []
+            # for i in range(1, total_create + 1):
+            #     t = threading.Thread(target=sub_process, args=(i,))
+            #     threads.append(t)
+            #     t.start()
+            # # for t in threads:
+            # for t_index in tqdm(range(len(threads)), desc='AnalysisThread {}-{}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums), _i), leave=False):
+            #     t = threads[t_index]
+            #     t.join()
+            with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
+                future_to_url = {executor.submit(sub_process, i, results, shiftings, shifting, start_time): i for i in tqdm(range(1, total_create + 1), desc='AnalysisThread {}-{}-{}'.format(str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums, str(args.cal_nums), _i), leave=False)}
+                for future in as_completed(future_to_url):
+                    data = future.result()
+                    if data != None:
+                        results, shiftings, shifting, start_time = data
             sorted_results = sorted(zip(results, shiftings), key=lambda x: x[1])
             sorted_results, sorted_shiftings = zip(*sorted_results)
             sorted_results = list(sorted_results)

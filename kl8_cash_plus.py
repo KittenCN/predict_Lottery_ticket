@@ -113,7 +113,7 @@ def check_lottery(cash_file_name, args, path_mode=1):
         #         cash_list[index] += 1
         #         break
     with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
-        future_to_url = {executor.submit(sub_check_lottery, item, cash_select, cash_price, cash_list): item for item in cash_numpy}
+        future_to_url = {executor.submit(sub_check_lottery, cash_numpy[item_index], cash_select, cash_price, cash_list): cash_numpy[item_index] for item_index in tqdm(range(len(cash_numpy)), desc='subCashThread', leave=False)}
         for future in as_completed(future_to_url):
             data = future.result()
             if data != None:
