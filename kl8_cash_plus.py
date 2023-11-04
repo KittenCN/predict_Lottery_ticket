@@ -85,8 +85,8 @@ def sub_check_lottery(item, cash_select, cash_price, cash_list):
             cash_list[index] += 1
             return cash_list
 
-def check_lottery(file_path, filename, args, nums_index, all_cash, all_lucky, content):
-    # global ori_numpy, nums_index, all_cash, all_lucky, content
+def check_lottery(file_path, filename, args):
+    global ori_numpy, nums_index, all_cash, all_lucky, content
     cash_file_name = file_path + filename
     filename_split = filename.split('_') 
     if len(filename_split) == 4:
@@ -210,11 +210,11 @@ if __name__ == "__main__":
         #     t.join()
 
         with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
-            future_to_url = {executor.submit(check_lottery, file_path, file_list[filename_index], args, nums_index, all_cash, all_lucky, content): file_list[filename_index] for filename_index in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False)}
+            future_to_url = {executor.submit(check_lottery, file_path, file_list[filename_index], args): file_list[filename_index] for filename_index in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False)}
             for future in as_completed(future_to_url):
                 data = future.result()
-                if data != None:
-                    all_cash, all_lucky, content, args = data
+                # if data != None:
+                #     all_cash, all_lucky, content, args = data
         # logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
         content.append("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
     write_file(content)
