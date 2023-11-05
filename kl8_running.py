@@ -10,6 +10,7 @@ parser.add_argument('--nums_range', default="2023140,2023241", type=str, help='n
 parser.add_argument('--repeat', default=1, type=int, help='repeat')
 parser.add_argument('--running_mode', default=0, type=int, help='running_mode')
 parser.add_argument('--max_workers', default=10, type=int, help='max_workers')
+parser.add_argument('--random_mode', default=0, type=int, help='random_mode')
 args = parser.parse_args()
 
 # def _main(_total_create, _cal_nums, begin=2023140, end=2023241, _process="./kl8_analysis.py"):
@@ -21,7 +22,7 @@ def _main(_total_create, _cal_nums, _current_nums, _process="./kl8_analysis.py")
     subprocess.run(["python", _process, "--download", "0", "--total_create", str(_total_create), \
                     "--cal_nums", str(_cal_nums), "--current_nums", str(_current_nums), "--limit_line", "5", \
                     "--path", str(_total_create) + '_' + str(_cal_nums), "--repeat", str(args.repeat), "--simple_mode", "1", \
-                    "--random_mode", "0", "--max_workers", str(args.max_workers)])
+                    "--random_mode", str(args.random_mode), "--max_workers", str(args.max_workers)])
 
 kl8_analysis = "./kl8_analysis_plus.py"
 kl8_cash = "./kl8_cash_plus.py"
