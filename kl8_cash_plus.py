@@ -22,7 +22,7 @@ parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=1, type=int, help='simple mode')
 parser.add_argument('--random_mode', default=0, type=int, help='random mode')
-parser.add_argument('--max_workers', default=10, type=int, help='max_workers')
+parser.add_argument('--max_workers', default=4, type=int, help='max_workers')
 #--------------------------------------------------------------------------------------------------#
 parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
