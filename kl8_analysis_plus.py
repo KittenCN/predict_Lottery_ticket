@@ -881,7 +881,7 @@ if __name__ == "__main__":
             start_time = datetime.datetime.now()
             threads = []
             for i in range(1, total_create + 1):
-                t = threading.Thread(target=sub_process, args=(i,))
+                t = threading.Thread(target=sub_process, args=(i, ))
                 threads.append(t)
                 t.start()
             # for t in threads:

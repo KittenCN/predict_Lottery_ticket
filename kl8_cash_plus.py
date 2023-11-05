@@ -198,21 +198,20 @@ if __name__ == "__main__":
         file_list.sort(key=lambda fn: os.path.getmtime(file_path + fn))
         threads = []
         # for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False):
-        # for j in range(len(file_list)):
-        #     filename = file_list[j]
-        #     t = threading.Thread(target=check_lottery, args=(file_path, filename, args, 1))
-        #     threads.append(t)
+        for j in range(len(file_list)):
+            filename = file_list[j]
+            t = threading.Thread(target=check_lottery, args=(file_path, filename, args, ))
+            threads.append(t)
+            t.start()
         # for t in threads:
-        #     t.start()
-        # # for t in threads:
-        # for t_index in tqdm(range(len(threads)), desc='CashThread {}'.format(args.path), leave=False):
-        #     t = threads[t_index]
-        #     t.join()
+        for t_index in tqdm(range(len(threads)), desc='CashThread {}'.format(args.path), leave=False):
+            t = threads[t_index]
+            t.join()
 
-        with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
-            future_to_url = {executor.submit(check_lottery, file_path, file_list[filename_index], args): file_list[filename_index] for filename_index in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False)}
-            for future in as_completed(future_to_url):
-                data = future.result()
+        # with ThreadPoolExecutor(max_workers=int(args.max_workers)) as executor:
+        #     future_to_url = {executor.submit(check_lottery, file_path, file_list[filename_index], args): file_list[filename_index] for filename_index in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False)}
+        #     for future in as_completed(future_to_url):
+        #         data = future.result()
                 # if data != None:
                 #     all_cash, all_lucky, content, args = data
         # logger.info("{}, 总投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, all_cash, all_lucky, all_lucky / all_cash * 100))
