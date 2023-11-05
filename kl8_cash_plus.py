@@ -200,7 +200,7 @@ if __name__ == "__main__":
         # for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False):
         for j in range(len(file_list)):
             filename = file_list[j]
-            t = threading.Thread(target=check_lottery, args=(file_path, filename, args, ))
+            t = threading.Thread(target=check_lottery, args=(file_path, filename, args))
             threads.append(t)
             t.start()
         # for t in threads:

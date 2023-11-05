@@ -34,7 +34,7 @@ if args.running_mode in [0, 1]:
     for _total_create in total_create_list:
         for _cal_nums in cal_nums_list:
             for _current_nums in range(begin, end + 1):
-                t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_analysis, ))
+                t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_analysis))
                 threads.append(t)
                 t.start()
     # for t in threads:
@@ -47,7 +47,7 @@ if args.running_mode in [0, 2]:
     for _total_create in total_create_list:
         for _cal_nums in cal_nums_list:
                 _current_nums = -1
-                t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_cash, ))
+                t = threading.Thread(target=_main, args=(_total_create, _cal_nums, _current_nums, kl8_cash))
                 threads.append(t)
                 t.start()
     for t_index in tqdm(range(len(threads)), desc='CashThread', leave=True):
