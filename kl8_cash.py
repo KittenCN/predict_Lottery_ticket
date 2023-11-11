@@ -20,10 +20,10 @@ parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=0, type=int, help='simple mode')
 parser.add_argument('--random_mode', default=0, type=int, help='random mode')
+parser.add_argument('--cal_nums', default=10, type=int, help='cal_nums')
 #--------------------------------------------------------------------------------------------------#
 parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
-parser.add_argument('--cal_nums', default=10, type=int, help='useless')
 parser.add_argument('--multiple', default=1, type=int, help='useless')
 parser.add_argument('--multiple_ratio', default="1,0", type=str, help='useless')
 parser.add_argument('--repeat', default=1, type=int, help='useless')
@@ -44,6 +44,7 @@ elif args.random_mode == 1:
 endstring = ["csv"]
 name = args.name
 nums_index = 0
+cal_nums = int(args.cal_nums)
 if args.download == 1:
     from common import get_data_run
     get_data_run(name=name, cq=0)
@@ -69,7 +70,7 @@ cash_price_list = [[5000000, 8000, 800, 80, 5, 3, 0, 0, 0, 0, 2], \
                     [4.6, 0]]
 
 def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
-    global ori_numpy, nums_index
+    global ori_numpy, nums_index, cal_nums
     nums_index += 1
     if args.current_nums >= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[-1][0] and args.current_nums <= ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0]:
         index = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0] - args.current_nums
@@ -84,8 +85,12 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
         logger.info("{}, 中奖号码为:{}".format(args.path, ori_numpy))
     cash_data = pd.read_csv(cash_file_name)
     cash_numpy = cash_data.to_numpy()
-    cash_select = cash_select_list[cash_numpy.shape[1]]
-    cash_price = cash_price_list[10 - (cash_numpy.shape[1])]
+    if cal_nums >= 0:
+        cal_nums = cash_numpy.shape[1]
+    else:
+        cal_nums = abs(cal_nums)
+    cash_select = cash_select_list[cal_nums]
+    cash_price = cash_price_list[10 - (cal_nums)]
     cash_list = [0] * len(cash_select)
 
     x = 0
@@ -118,7 +123,7 @@ def check_lottery(cash_file_name, args, all_cash=0, all_lucky=0, path_mode=0):
             logger.info("{}, 中{}个球，共{}注，奖金为{}元。".format(args.path, cash_select[i], cash_list[i], cash_list[i] * cash_price[i]))
         total_cash += cash_list[i] * cash_price[i]
     if args.simple_mode == 0 or (args.simple_mode == 2 and total_cash / (len(cash_numpy) * 2) * 100 >= 100):
-        logger.info("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+        logger.info("{}, 第{}张，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash
     return all_cash, all_lucky

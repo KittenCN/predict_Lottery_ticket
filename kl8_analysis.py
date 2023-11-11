@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import random
 import argparse
 import datetime
-import time
+# import time
 import threading
 from tqdm import tqdm
 from sklearn.cluster import KMeans
@@ -39,6 +39,8 @@ args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 name = args.name
+if args.cal_nums < 0:
+    args.cal_nums = abs(args.cal_nums) + 1
 if args.download == 1:
     from common import get_data_run
     get_data_run(name=name, cq=0)

@@ -5,28 +5,27 @@ Author: KittenCN
 
 import pandas as pd
 import argparse
-import subprocess
+# import subprocess
 import threading
 from tqdm import tqdm
 from config import *
 from itertools import combinations
-from loguru import logger
-from concurrent.futures import ThreadPoolExecutor, as_completed
+# from loguru import logger
+# from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
-parser.add_argument('--download', default=0, type=int, help="download data")
+parser.add_argument('--download', default=1, type=int, help="download data")
 parser.add_argument('--cash_file_name', default="-1", type=str, help='cash_file_name')
 parser.add_argument('--current_nums', default=-1, type=int, help='current nums')
 parser.add_argument('--path', default="", type=str, help='path')
-parser.add_argument('--simple_mode', default=1, type=int, help='simple mode')
+parser.add_argument('--simple_mode', default=0, type=int, help='simple mode')
 parser.add_argument('--random_mode', default=0, type=int, help='random mode')
-parser.add_argument('--max_workers', default=4, type=int, help='max_workers')
+parser.add_argument('--cal_nums', default=10, type=int, help='cal_nums')
 #--------------------------------------------------------------------------------------------------#
 parser.add_argument('--limit_line', default=0, type=int, help='useless')
 parser.add_argument('--total_create', default=50, type=int, help='useless')
-parser.add_argument('--cal_nums', default=10, type=int, help='useless')
 parser.add_argument('--multiple', default=1, type=int, help='useless')
 parser.add_argument('--multiple_ratio', default="1,0", type=str, help='useless')
 parser.add_argument('--repeat', default=1, type=int, help='useless')
@@ -47,6 +46,7 @@ elif args.random_mode == 1:
 endstring = ["csv"]
 name = args.name
 nums_index = 0
+cal_nums = int(args.cal_nums)
 content = []
 if args.download == 1:
     from common import get_data_run
@@ -86,7 +86,7 @@ def sub_check_lottery(item, cash_select, cash_price, cash_list):
             return cash_list
 
 def check_lottery(file_path, filename, args):
-    global ori_numpy, nums_index, all_cash, all_lucky, content
+    global ori_numpy, nums_index, all_cash, all_lucky, content, cal_nums
     cash_file_name = file_path + filename
     filename_split = filename.split('_') 
     if len(filename_split) == 4:
@@ -99,8 +99,12 @@ def check_lottery(file_path, filename, args):
             ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[index][1:]
     cash_data = pd.read_csv(cash_file_name)
     cash_numpy = cash_data.to_numpy()
-    cash_select = cash_select_list[cash_numpy.shape[1]]
-    cash_price = cash_price_list[10 - (cash_numpy.shape[1])]
+    if cal_nums >= 0:
+        cal_nums = cash_numpy.shape[1]
+    else:
+        cal_nums = abs(cal_nums)
+    cash_select = cash_select_list[cal_nums]
+    cash_price = cash_price_list[10 - (cal_nums)]
     cash_list = [0] * len(cash_select)
 
     # for j in tqdm(range(len(cash_numpy)), desc='subCashThread {}'.format(args.path), leave=False):
@@ -128,7 +132,7 @@ def check_lottery(file_path, filename, args):
         total_cash += cash_list[i] * cash_price[i]
     if args.simple_mode == 0 or (args.simple_mode == 2 and total_cash / (len(cash_numpy) * 2) * 100 >= 100):
         # logger.info("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
-        content.append("{}, 第{}期，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
+        content.append("{}, 第{}张，本期共投入{}元，总奖金为{}元，返奖率{:.2f}%。".format(args.path, nums_index, len(cash_numpy) * 2, total_cash, total_cash / (len(cash_numpy) * 2) * 100))
     all_cash += len(cash_numpy) * 2
     all_lucky += total_cash
     return all_cash, all_lucky, content, args

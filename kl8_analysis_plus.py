@@ -8,16 +8,16 @@ import matplotlib.pyplot as plt
 import random
 import argparse
 import datetime
-import time
+# import time
 import threading
-import subprocess
+# import subprocess
 from tqdm import tqdm
 from sklearn.cluster import KMeans
 from collections import defaultdict
 from config import *
 from itertools import combinations
 from loguru import logger
-from concurrent.futures import ThreadPoolExecutor, as_completed
+# from concurrent.futures import ThreadPoolExecutor, as_completed
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--name', default="kl8", type=str, help="lottery name")
@@ -43,6 +43,8 @@ args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
 name = args.name
+if args.cal_nums < 0:
+    args.cal_nums = abs(args.cal_nums) + 1
 if args.download == 1:
     from common import get_data_run
     get_data_run(name=name, cq=0)
