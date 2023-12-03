@@ -1,19 +1,16 @@
 # 彩票AI预测（目前支持双色球，大乐透，排列三，快乐8, 七星彩，福彩3D）
-
   -------------------------------------
 ##  一定要用get_data下载数据，并用train一定次数后，才能使用predict预测，默认没有数据和模型
 ##  如果train发生错误，请优先检查主目录下是否有data, model, predict三个空目录，没有的话自行建立下，我好像忘记让它自动生成了，也懒得写了
-  -------------------------------------
 ##  现有的模型对于七星彩，福彩3D，排列三等允许重复数字的彩票，效果可能有不好，因为我只是简单的把数字当成了类别，没有更多的考虑到数字之间的关系，而且由于时间原因，我也没有详细测试，所以，如果想要更加准确的预测这些彩票，可以自己修改代码，或者将建议留下，等我有空了再更新
   -------------------------------------
-
 > __有些朋友发消息问我最近（2023.12.03）发生的快8选7中50000倍的可能性，这么说，这个事其实也跟其他朋友问我为啥最近开始研究统计学的应用是同一个原因，因为我早几个月也发现了，纯粹的某些特定的统计学算法，就可以使得快8选7的平均返奖率维持在60%左右，如果再运用热力图，分布律等特殊的策略，还能使得返奖率在一定范围内维持更高。我当时使用这个方法，也获得了一定的收益。当然这个方法是高投入型的，需要长期稳定的高投入，所以不是我想要的算法，也就没有在这里推荐，而是打算作为神经网络的数据预处理算法来用__
 > __至于这次事情的单注50000倍玩法，不管你信不信，我是不信的。__
 
 项目思路来自自 [zepen 大佬的作品](https://github.com/zepen/predict_Lottery_ticket)
 已将80%的代码重写，并按照我自己的思路进行了强化和修改。
 自动选择并同时支持CPU和GPU计算。CPU使用原本的Keras LSTM，GPU使用CudnnLSTM，同等参数下，GPU效率高于CPU，时间窗口越大，batch_size越大，效率差就越明显；建议有好显卡的朋友使用GPU训练.
-目前我正在修改网络结构，并迁移到我比较熟悉的pytorch框架之下: https://github.com/KittenCN/predict_Lottery_ticket_pytorch
+目前我正在修改网络结构，并迁移到[我比较熟悉的pytorch框架](https://github.com/KittenCN/predict_Lottery_ticket_pytorch)之下。
 
 ## New
 * 20231031
@@ -27,7 +24,7 @@
 
 ## Installing
         
-* step1，安装anaconda(可参考https://zhuanlan.zhihu.com/p/32925500)；
+* step1，[安装anaconda](https://zhuanlan.zhihu.com/p/32925500)；
 
 * step2，创建一个conda环境，conda create -n your_env_name python=3.8；
        
@@ -41,7 +38,7 @@
 ```python
 python get_data.py  --name ssq  # 执行获取双色球训练数据
 ```
-如果出现解析错误，应该看看网页 http://datachart.500.com/ssq/history/newinc/history.php 是否可以正常访问
+如果出现解析错误，应该看看[500网](http://datachart.500.com/ssq/history/newinc/history.php)网页是否可以正常访问
 若要大乐透，替换参数 --name dlt 即可
 
 ```python
