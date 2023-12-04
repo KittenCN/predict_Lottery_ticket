@@ -31,6 +31,7 @@ parser.add_argument('--multiple_ratio', default="1,0", type=str, help='useless')
 parser.add_argument('--repeat', default=1, type=int, help='useless')
 parser.add_argument('--calculate_rate', default=0, type=int, help='useless')
 parser.add_argument('--calculate_rate_list', default="5", type=str, help='useless')
+parser.add_argument('--max_workers', default=4, type=int, help='useless')
 args = parser.parse_args()
 
 if args.random_mode == 0:
