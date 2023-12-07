@@ -6,7 +6,8 @@ Author: KittenCN
 import pandas as pd
 import argparse
 # import subprocess
-import threading
+# import threading
+from multiprocessing import Process
 from tqdm import tqdm
 from config import *
 from itertools import combinations
@@ -147,7 +148,8 @@ def check_file(_file_name):
 
 ## 多线程调用写入文件
 def write_file(_content,_file_name="./kl8_runnint_results.txt"):
-    t = threading.Thread(target=write_file_core, args=(_content, _file_name))
+    # t = threading.Thread(target=write_file_core, args=(_content, _file_name))
+    t = Process(target=write_file_core, args=(_content, _file_name))
     t.start()
 
 ## 写入文件
@@ -205,7 +207,8 @@ if __name__ == "__main__":
         # for j in tqdm(range(len(file_list)), desc='CashThread {}'.format(args.path), leave=False):
         for j in range(len(file_list)):
             filename = file_list[j]
-            t = threading.Thread(target=check_lottery, args=(file_path, filename, args))
+            # t = threading.Thread(target=check_lottery, args=(file_path, filename, args))
+            t = Process(target=check_lottery, args=(file_path, filename, args))
             threads.append(t)
             t.start()
         # for t in threads:

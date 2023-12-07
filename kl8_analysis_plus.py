@@ -9,7 +9,7 @@ import random
 import argparse
 import datetime
 # import time
-import threading
+# import threading
 # import subprocess
 from tqdm import tqdm
 from sklearn.cluster import KMeans
@@ -17,6 +17,7 @@ from collections import defaultdict
 from config import *
 from itertools import combinations
 from loguru import logger
+from multiprocessing import Process
 # from concurrent.futures import ThreadPoolExecutor, as_completed
 
 parser = argparse.ArgumentParser()
@@ -430,7 +431,8 @@ def check_dir(path):
 
 ## 多线程调用写入文件
 def write_file(lst,file_name="result"):
-    t = threading.Thread(target=write_file_core, args=(lst,file_name))
+    # t = threading.Thread(target=write_file_core, args=(lst,file_name))
+    t = Process(target=write_file_core, args=(lst,file_name))
     t.start()
 
 ## 写入文件
@@ -883,7 +885,8 @@ if __name__ == "__main__":
             start_time = datetime.datetime.now()
             threads = []
             for i in range(1, total_create + 1):
-                t = threading.Thread(target=sub_process, args=(i, ))
+                # t = threading.Thread(target=sub_process, args=(i, ))
+                t = Process(target=sub_process, args=(i, ))
                 threads.append(t)
                 t.start()
             # for t in threads:
