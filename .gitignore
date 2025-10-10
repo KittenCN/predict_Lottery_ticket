@@ -2,11 +2,11 @@
 __pycache__/
 model/
 data/
-predict/
+data_cache/
+results/
 *.py[cod]
 *$py.class
 *.csv
-*txt
 
 # C extensions
 *.so

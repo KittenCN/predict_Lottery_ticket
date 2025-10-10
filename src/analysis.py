@@ -4,7 +4,7 @@ Author: KittenCN
 """
 
 import pandas as pd
-from config import *
+from .config import *
 
 datacnt = [0] * 81
 dataori = [i for i in range(81)]
