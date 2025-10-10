@@ -10,10 +10,38 @@ from __future__ import annotations
 
 from typing import Dict
 
-import tensorflow as tf
+import importlib
+import warnings
+
+try:
+    import tensorflow as tf
+except Exception as exc:  # pragma: no cover - runtime environment dependent
+    raise ImportError(
+        "TensorFlow import failed. Ensure TensorFlow (e.g. tensorflow or tensorflow-intel) is installed."
+    ) from exc
+
 from loguru import logger
 
-from .config import LotteryModelConfig, SequenceModelSpec
+
+# Ensure tf.keras is available; prefer bundled tf.keras over standalone `keras` package.
+if not hasattr(tf, "keras"):
+    # Some environments may have an incomplete TensorFlow install where `tf.keras` is missing.
+    # Try to import standalone `keras` as a best-effort fallback, but do not fail hard here;
+    # instead emit a clear warning so downstream code that expects tf.keras will see a
+    # friendlier message.
+    try:
+        import keras  # type: ignore
+
+        warnings.warn(
+            "Standalone `keras` was found but `tf.keras` is missing. Using standalone keras may cause incompatibilities.",
+            UserWarning,
+        )
+    except Exception:
+        raise ImportError(
+            "Keras cannot be imported. Check that it is installed or that your TensorFlow installation is complete."
+        )
+
+from src.config import LotteryModelConfig, SequenceModelSpec
 
 
 def _time_distributed_lstm(

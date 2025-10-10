@@ -14,18 +14,18 @@ from pathlib import Path
 
 from loguru import logger
 
-# Ensure the bootstrap shim runs before any other src.* imports
+# Ensure the project root is on sys.path so `src` imports work and the
+# bootstrap shim can be imported early.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# import as early as possible; src.bootstrap is best-effort
 try:
-    # import as early as possible; src.bootstrap is best-effort
     import src.bootstrap  # noqa: F401
 except Exception:
     # If bootstrap fails, continue; the bootstrap shim is non-critical
     pass
-
-
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.common import get_data_run, train_pipeline  # noqa: E402
 from src.config import LOTTERY_CONFIGS  # noqa: E402

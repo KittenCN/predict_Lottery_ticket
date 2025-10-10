@@ -12,6 +12,7 @@ dependencies:
   - matplotlib=3.9.0
   - pillow
   - pip:
+    - keras==2.15.0
     - -r requirements.lock.txt
 
 # Notes:

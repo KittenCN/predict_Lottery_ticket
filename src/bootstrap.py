@@ -61,3 +61,53 @@ def _ensure_ragged_compat() -> None:
 
 
 _ensure_ragged_compat()
+
+
+def _ensure_keras_shim() -> None:
+    """If standalone `keras` is not installed, expose `keras` name pointing to `tf.keras`.
+
+    TensorFlow's lazy loader may attempt `import keras` when accessing `tf.keras`.
+    Creating a best-effort shim avoids ImportError in environments where only
+    `tensorflow` is installed.
+    """
+    try:
+        import importlib
+        import sys
+        import types
+
+        # If keras is already importable, nothing to do
+        if importlib.util.find_spec("keras") is not None:
+            return
+
+        # Try to import tensorflow; if unavailable, skip
+        tf_spec = importlib.util.find_spec("tensorflow")
+        if tf_spec is None:
+            return
+        import tensorflow as tf  # type: ignore
+
+        if not hasattr(tf, "keras"):
+            return
+
+        # Create a lightweight stub module named 'keras' to satisfy import
+        # and basic version checks performed by TensorFlow's lazy loader.
+        # The stub intentionally does NOT delegate into tf.keras to avoid
+        # triggering recursive import logic in environments where tf.keras
+        # initialization itself tries to import `keras`.
+        fake = types.ModuleType("keras")
+        # Use a non-3.x version string to avoid Keras-3 specific branches.
+        fake.__version__ = getattr(tf, "__version__", "0.0.0")
+        fake.__name__ = "keras"
+        # Add a few common submodule placeholders so attribute access succeeds
+        fake.layers = types.ModuleType("keras.layers")
+        fake.models = types.ModuleType("keras.models")
+        fake.utils = types.ModuleType("keras.utils")
+        fake.backend = types.ModuleType("keras.backend")
+
+        sys.modules.setdefault("keras", fake)
+    except Exception:
+        # Best-effort only
+        return
+
+
+# Run the shim early
+_ensure_keras_shim()
