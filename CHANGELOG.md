@@ -1,3 +1,13 @@
+# Changelog
+
+All notable changes to this project should be documented in this file.
+
+## [Unreleased]
+- Add `src.bootstrap.py` compatibility shim to map deprecated TF ragged symbol and avoid import-time crashes.
+- Create `requirements.lock.txt` (portable pip lock) and provide guidance for `environment.yml` (conda) to reproduce binary dependencies.
+- Uninstall standalone `keras` in local environment and prefer `tf.keras`.
+- Update `scripts/train.py` to import `src.bootstrap` early.
+- Update `README.md`, add `ASSUMPTIONS.md` and `docs/` guidance for environment reproducibility and verification.
 # 更新日志 (Changelog)
 
 本项目遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.0.0/) 规范，版本号遵循 [语义化版本](https://semver.org/lang/zh-CN/) 规范。

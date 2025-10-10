@@ -14,6 +14,14 @@ from pathlib import Path
 
 from loguru import logger
 
+# Ensure the bootstrap shim runs before any other src.* imports
+try:
+    # import as early as possible; src.bootstrap is best-effort
+    import src.bootstrap  # noqa: F401
+except Exception:
+    # If bootstrap fails, continue; the bootstrap shim is non-critical
+    pass
+
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:

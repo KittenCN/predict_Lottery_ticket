@@ -1,3 +1,24 @@
+# ASSUMPTIONS & DECISIONS
+
+列出实现过程中所作的重要假设与决策，便于后续维护与审计。
+
+1. 使用 `tf.keras`（随 TensorFlow 一起分发）而非第三方独立 `keras` 包。
+   - 原因：独立 `keras` 版本与 TensorFlow 之间可能存在实现差异，曾导致 `keras.src.engine` 等导入错误。
+   - 操作：在当前环境中卸载了独立的 `keras`（已在本仓库历史中记录）。
+
+2. 二进制包（numpy、mkl、tensorflow-intel、torch 等）通过 conda 管理。
+   - 原因：在 Windows 等平台上，许多科学/深度学习包需要编译好的二进制 wheel；conda 更适合管理这些二进制依赖，避免 pip 在本机编译时出现冲突。
+   - 提供了 `environment.yml` 用于创建可重复的 conda 环境。
+
+3. 为兼容第三方库在导入时检查已弃用的 TF API，添加了 `src/bootstrap.py` shim。
+   - 目标：在程序最早期提供映射（例如将 `tf.ragged.RaggedTensorValue` 映射到 `tf.compat.v1.ragged.RaggedTensorValue`）以避免导入错误。
+   - shim 是 best-effort 且局部抑制弃用警告，不应替代上游修复。
+
+4. 锁定可移植 pip 依赖为 `requirements.lock.txt`（移除本地 file:/// 条目）。
+   - 对于私有或 editable VCS 安装，保留在注释中，用户需自行配置访问权限。
+
+5. 日志与弃用警告策略
+   - shim 在内部临时抑制相关 DeprecationWarning，避免污染用户控制台输出。
 # 项目假设与权衡 (Assumptions & Trade-offs)
 
 本文件记录为了顺利升级到 TensorFlow 2.15.1 及其配套生态而确立的关键假设与权衡。若后续条件发生变化，请优先在此文档更新对应结论。

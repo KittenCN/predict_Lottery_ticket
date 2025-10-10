@@ -26,8 +26,18 @@ cd predict_Lottery_ticket
 conda create -n python311 python=3.11
 conda activate python311
 
-# 3. 安装依赖
-make setup
+# 3. 安装依赖（推荐：使用 conda + pip 锁定方案）
+#  - `environment.yml` 用于通过 conda 安装二进制依赖（numpy、tensorflow-intel、pytorch 等）
+#  - `requirements.lock.txt` 包含可移植的 pip 包精确版本
+# 示例（在仓库根目录运行）:
+conda env create -f environment.yml
+conda activate predict_lottery
+python -m pip install -r requirements.lock.txt
+
+# 兼容性 shim
+# 项目在启动时会自动加载 `src.bootstrap`，该模块在导入第三方库前
+# 为 TensorFlow/Keras 提供必要的兼容映射（例如 RaggedTensorValue），以
+# 减少因环境差异导致的导入/弃用问题。
 ```
 
 ### 2. 数据获取
