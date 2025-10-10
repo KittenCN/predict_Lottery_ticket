@@ -1,0 +1,57 @@
+# 彩票AI预测系统 Docker Compose 配置
+version: '3.8'
+
+services:
+  lottery-predict:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: lottery-predict-app
+    volumes:
+      - ./data:/app/data
+      - ./model:/app/model
+      - ./predict:/app/predict
+      - ./logs:/app/logs
+      - ./config/.env:/app/.env:ro
+    environment:
+      - PYTHONPATH=/app
+      - TF_CPP_MIN_LOG_LEVEL=2
+    networks:
+      - lottery-network
+    restart: unless-stopped
+    
+  # Redis (用于缓存，可选)
+  redis:
+    image: redis:7-alpine
+    container_name: lottery-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - lottery-network
+    restart: unless-stopped
+    
+  # PostgreSQL (用于数据存储，可选)
+  postgres:
+    image: postgres:15-alpine
+    container_name: lottery-postgres
+    environment:
+      POSTGRES_DB: lottery_db
+      POSTGRES_USER: lottery_user
+      POSTGRES_PASSWORD: lottery_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - lottery-network
+    restart: unless-stopped
+
+networks:
+  lottery-network:
+    driver: bridge
+
+volumes:
+  redis_data:
+  postgres_data:

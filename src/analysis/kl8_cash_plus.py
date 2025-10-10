@@ -9,7 +9,7 @@ import argparse
 # import threading
 from multiprocessing import Process
 from tqdm import tqdm
-from config import *
+from ..config import *
 from itertools import combinations
 # from loguru import logger
 # from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -51,7 +51,7 @@ nums_index = 0
 cal_nums = int(args.cal_nums)
 content = []
 if args.download == 1:
-    from common import get_data_run
+    from ..common import get_data_run
     get_data_run(name=name, cq=0)
 ori_data = pd.read_csv("{}{}".format(name_path[name]["path"], data_file_name))
 ori_numpy = ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][1:]

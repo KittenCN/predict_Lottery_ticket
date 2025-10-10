@@ -1,12 +1,21 @@
-tensorflow-cpu==2.3.*
-# tensorflow-gpu==2.3.*
-tensorflow-addons==0.13.*
-requests
-keras
-beautifulsoup4
-pandas==1.0.0
-numpy==1.19.5
-lxml
-loguru
-grpcio
-protobuf
+tensorflow==2.15.1
+keras==2.15.0
+requests==2.32.3
+beautifulsoup4==4.12.3
+pandas==2.2.2
+numpy>=1.24,<2.0
+lxml==5.2.2
+loguru==0.7.2
+scikit-learn==1.5.1
+matplotlib==3.9.0
+tqdm==4.66.4
+pyyaml==6.0.1
+python-dotenv==1.0.1
+responses==0.25.0
+
+# 开发依赖
+black==24.4.2
+ruff==0.5.6
+mypy==1.10.0
+pytest==8.2.2
+pytest-cov==5.0.0

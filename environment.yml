@@ -1,0 +1,25 @@
+name: predict_lottery
+channels:
+  - defaults
+  - conda-forge
+  - pytorch
+dependencies:
+  - python=3.11
+  - pip
+  - numpy=1.24.3
+  - pandas=2.2.2
+  - lxml=5.2.2
+  - matplotlib=3.9.0
+  - pillow
+  - pip:
+    - keras==2.15.0
+    - -r requirements.lock.txt
+
+# Notes:
+# 1) This environment file installs binary packages via conda (numpy, pandas, lxml, matplotlib)
+#    which improves reproducibility on Windows/macOS/Linux. After conda creates the env it will
+#    run pip to install the remaining packages from `requirements.lock.txt`.
+# 2) If you prefer Intel-optimized TensorFlow on Windows, install it after creating the env:
+#    conda activate predict_lottery
+#    python -m pip install tensorflow-intel==2.15.1
+#    (or add it to pip: above if you prefer pip-managed tensorflow)

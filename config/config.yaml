@@ -1,0 +1,47 @@
+# 彩票AI预测系统配置文件
+# 用于存放应用程序配置
+
+# 应用信息
+app:
+  name: "彩票AI预测系统"
+  version: "2.0.0"
+  author: "KittenCN"
+
+# 路径配置
+paths:
+  data: "./data"
+  model: "./model"
+  predict: "./predict"
+  logs: "./logs"
+
+# 网络配置
+network:
+  timeout: 30
+  retry_count: 3
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+
+# 日志配置
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  file: "lottery_predict.log"
+
+# 模型默认参数
+model_defaults:
+  batch_size: 32
+  red_epochs: 40
+  blue_epochs: 20
+  windows_size: 5
+  learning_rate: 0.0008
+  
+# 训练配置
+training:
+  save_epoch_interval: 100
+  save_time_interval: 600
+  max_memory_usage: 0.8
+
+# GPU配置
+gpu:
+  enabled: true
+  memory_growth: true
+  device_id: 0
