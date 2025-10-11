@@ -2,7 +2,11 @@
 
 All notable changes to this project should be documented in this file.
 
+
 ## [Unreleased]
+- ❌ **KL8（快乐8）相关内容迁移**：所有KL8相关源码、数据、分析与文档已迁移至独立项目 [KL8-Lottery-Analyzer](https://github.com/KittenCN/kl8-lottery-analyzer)。本仓库不再包含KL8相关功能。
+- 🐛 **修复红球预测重复问题**：修正了双色球等玩法预测结果中红球可能重复的bug，现已确保每注红球号码唯一（见 `src/pipeline.py` 2024-06 修正）。
+- 📚 **文档同步**：更新README、ASSUMPTIONS、决策记录等文档，反映KL8迁移和预测逻辑修正。
 - Add `src.bootstrap.py` compatibility shim to map deprecated TF ragged symbol and avoid import-time crashes.
 - Create `requirements.lock.txt` (portable pip lock) and provide guidance for `environment.yml` (conda) to reproduce binary dependencies.
 - Uninstall standalone `keras` in local environment and prefer `tf.keras`.

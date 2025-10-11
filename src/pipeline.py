@@ -250,9 +250,25 @@ def predict_next_draw(
     # 最新窗口特征取 prepare_training_arrays 中的原始数组最后 window 条
     red_dataset = arrays["red"]
     latest_features = _get_latest_window(red_dataset.features, 1).reshape(1, window, cfg.red.sequence_len)
+
     red_model = models["red"]
-    red_pred = red_model.predict(latest_features, verbose=0)
-    predictions["red"] = np.argmax(red_pred, axis=-1).squeeze(axis=0).astype(int)
+    red_pred = red_model.predict(latest_features, verbose=0)  # shape: (1, 球位数, 类别数)
+    red_pred = red_pred.squeeze(axis=0)  # shape: (球位数, 类别数)
+    num_balls = cfg.red.sequence_len
+    num_classes = cfg.red.num_classes
+    # 贪心去重采样：每次选概率最大的未被选过的数字
+    chosen = set()
+    result = []
+    for i in range(num_balls):
+        probs = red_pred[i].copy()
+        # 将已选过的数字概率置为-1，避免重复
+        for idx in chosen:
+            if idx < len(probs):
+                probs[idx] = -1
+        pick = int(np.argmax(probs))
+        chosen.add(pick)
+        result.append(pick)
+    predictions["red"] = np.array(result, dtype=int)
 
     if cfg.blue and "blue" in models:
         blue_dataset = arrays["blue"]

@@ -17,11 +17,11 @@
 
 ## 1. `src.common` 模块
 
-### `get_data_run(name: str, cq: int = 0, start_issue: int | None = None, end_issue: int | None = None) -> None`
+
+### `get_data_run(name: str, start_issue: int | None = None, end_issue: int | None = None) -> None`
 下载指定彩票的历史开奖数据，并保存到 `data/<name>/data.csv`。
 
-- `name`：彩票代码，如 `ssq`、`dlt`、`kl8` 等；
-- `cq`：快乐8是否使用出球顺序版本（仅 `kl8` 有效，传入 1 开启）；
+- `name`：彩票代码，如 `ssq`、`dlt` 等（KL8已迁移至独立项目）；
 - `start_issue` / `end_issue`：可选的期号范围，缺省则下载全量。
 
 ```python
@@ -46,8 +46,11 @@ summary = train_pipeline("ssq", window_size=5, red_epochs=20, blue_epochs=5)
 print(summary.window_size, summary.trained_on_issues)
 ```
 
+
 ### `predict_latest(name: str, window_size: int | None = None) -> dict[str, list[int]]`
 使用最新训练好的模型预测下一期号码，返回 `{"red": [...], "blue": [...]}` 字典。
+
+> 2024-06起，红球预测结果已确保每注号码唯一，彻底避免重复红球。
 
 ```python
 from src.common import predict_latest

@@ -149,24 +149,6 @@ def _parse_issue_list(config: LotteryModelConfig, html: str) -> pd.DataFrame:
     return df.reset_index(drop=True)
 
 
-def _parse_kl8_sequence(text: str) -> pd.DataFrame:
-    rows = []
-    lines = sorted(text.splitlines(), reverse=True)
-    for line in lines:
-        if not line or "," not in line:
-            continue
-        parts = line.split(",")[0].split(" ")
-        if len(parts) < 22:
-            continue
-        _, issue = parts[0], parts[0]
-        record = {"期数": issue}
-        for idx in range(1, 21):
-            record[f"红球_{idx}"] = parts[idx + 1]
-        rows.append(record)
-    if not rows:
-        raise ValueError("快乐8出球顺序数据解析失败")
-    df = pd.DataFrame(rows)
-    return df.reset_index(drop=True)
 
 
 def get_current_issue(code: str, client: Optional[LotteryHttpClient] = None) -> str:
@@ -216,9 +198,7 @@ def download_history(
     )
 
     if cfg.code == "kl8" and use_sequence_order:
-        logger.info("下载快乐8出球顺序数据...")
-        text = client.get_text("https://data.917500.cn/kl81000_cq_asc.txt")
-        df = _parse_kl8_sequence(text)
+        raise NotImplementedError("KL8相关功能已迁移至独立项目：https://github.com/KittenCN/kl8-lottery-analyzer")
     else:
         url = _build_history_url(cfg, start, end)
         logger.info("下载【{}】历史数据: {}", cfg.name, url)

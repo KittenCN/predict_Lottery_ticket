@@ -4,18 +4,29 @@
 
 基于深度学习技术的彩票号码预测系统，支持多种彩票类型的数据分析和号码预测。
 
+
+> 
+> [KL8-Lottery-Analyzer (GitHub)](https://github.com/KittenCN/kl8-lottery-analyzer)
+>
+> 本仓库不再包含KL8数据和分析相关的核心算法、数据处理和分析功能，后续KL8相关更新请关注新项目。
+
 ## ✨ 功能特点
 
-- 📊 支持多种彩票：双色球、大乐透、排列三、快乐8、七星彩、福彩3D
+- 📊 支持多种彩票：双色球、大乐透、排列三、七星彩、福彩3D
 - 🧠 基于多层 LSTM 的序列建模方案
 - 🔄 自动数据获取和处理
 - 📈 多维度数据分析
 - 🐳 Docker 容器化支持
 - 🛠️ 完整的开发工具链
 
-## 🚀 快速开始
+> **重要说明：KL8（快乐8）数据和分析功能已于2025年10月独立为新项目维护，原有KL8数据和分析相关源码已全部迁移。请前往新项目仓库获取和使用：
+> 
+> [KL8-Lottery-Analyzer (GitHub)](https://github.com/KittenCN/kl8-lottery-analyzer)
+>
+> 本仓库不再包含KL8数据和分析相关的核心算法、数据处理和分析功能，后续KL8相关更新请关注新项目。
 
-### 1. 环境准备
+> **2024-06 预测逻辑修正说明**：双色球等玩法的红球预测结果已修正为“每注红球号码唯一”，彻底避免重复红球。详见 `src/pipeline.py`。
+
 
 ```bash
 # 1. 克隆项目
@@ -38,6 +49,9 @@ python -m pip install -r requirements.lock.txt
 # 项目在启动时会自动加载 `src.bootstrap`，该模块在导入第三方库前
 # 为 TensorFlow/Keras 提供必要的兼容映射（例如 RaggedTensorValue），以
 # 减少因环境差异导致的导入/弃用问题。
+
+## 📁 项目结构
+
 ```
 
 ### 2. 数据获取
@@ -61,6 +75,7 @@ python scripts/train.py --name ssq --window-size 5 --red-epochs 60
 ### 4. 预测
 
 ```bash
+```
 # 运行预测并保存结果
 make predict
 # 或手动执行
@@ -97,6 +112,7 @@ predict_Lottery_ticket/
 └─ docker-compose.yml           # 服务编排
 ```
 
+
 ## 🎯 支持的彩票类型
 
 | 彩票类型 | 代码 | 说明 |
@@ -104,9 +120,10 @@ predict_Lottery_ticket/
 | 双色球 | ssq | 6红球+1蓝球 |
 | 大乐透 | dlt | 5红球+2蓝球 |
 | 排列三 | pls | 3位数字 |
-| 快乐8 | kl8 | 20个号码 |
 | 七星彩 | qxc | 7位数字 |
 | 福彩3D | sd | 3位数字 |
+
+> **KL8（快乐8）玩法已迁移至独立项目 [KL8-Lottery-Analyzer](https://github.com/KittenCN/kl8-lottery-analyzer)**
 
 ## 🔧 技术架构
 
@@ -143,12 +160,14 @@ make clean      # 清理文件
 - `learning_rate`: 学习率（默认 5e-4~8e-4）
 - `SequenceModelSpec`: 控制嵌入维度、隐藏层深度与 dropout
 
+
 ## ⚠️ 注意事项
 
 1. **训练要求**: 必须先用 `get_data.py` 下载数据，再进行模型训练
 2. **依赖版本**: 默认依赖 TensorFlow 2.15.1（Windows/macOS/Linux 官方 wheel 可用）
 3. **模型格式**: 模型保存为 `.keras`（SavedModel），旧版 `.ckpt` 不再兼容
 4. **目录结构**: 确保 `data/`, `model/`, `predict/` 目录存在
+5. **红球预测唯一性**: 预测结果已确保每注红球号码唯一，避免重复（2024-06 修正）。
 
 ## 🐳 Docker 使用
 

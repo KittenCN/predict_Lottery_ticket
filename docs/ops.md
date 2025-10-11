@@ -6,6 +6,10 @@
 - Linux / macOS 原生支持，Windows 建议在 WSL2 或 Docker 中运行；
 - GPU 环境需预装 CUDA ≥ 12.2（可选）。
 
+> **KL8（快乐8）相关功能已于2025-10迁移至独立项目 [KL8-Lottery-Analyzer](https://github.com/KittenCN/kl8-lottery-analyzer)。本仓库仅支持双色球、大乐透、排列三、七星彩、福彩3D等玩法。**
+
+> **2024-06起，红球预测结果已确保每注号码唯一，彻底避免重复。运维时如遇预测异常请优先检查 `src/pipeline.py` 相关逻辑。**
+
 ## 2. 启动与管理
 ### 本地启动
 ```bash
