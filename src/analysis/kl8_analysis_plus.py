@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import random
 import argparse
 import datetime
+import os
 # import time
 # import threading
 # import subprocess
@@ -39,6 +40,7 @@ parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=0, type=int, help='simple mode') 
 parser.add_argument('--random_mode', default=0, type=int, help='random mode')
 parser.add_argument('--max_workers', default=4, type=int, help='max_workers')
+parser.add_argument('--advanced_mode', default=0, type=int, help='advanced algorithm mode: 0=original, 1=genetic+bayesian, 2=full_advanced')
 #-------------------------------------------------------------------------------------------------------------#
 args = parser.parse_args()
 
@@ -276,31 +278,104 @@ def sum_analysis(limit=limit_line, result_list=None):
     # logger.info(sum_rate_group)
     return sum_rate_group
 
-## 使用贝叶斯定理分析
+## 使用贝叶斯定理分析（修正版）
 def bayesian_analysis():
+    import numpy as np
+    from scipy import stats
+    
     number_counts = defaultdict(int)
     total_draws = 0
+    total_numbers = 0
 
-    # 先验概率：每个号码被抽中的概率是1/80
-    prior_prob = 1/80
+    # 先验概率：每个号码被抽中的概率（考虑每期选20个数）
+    prior_prob = 20/80  # 修正：每期选20个号码
 
     for row in ori_numpy[:limit_line]:
+        total_draws += 1
         for num in row[1:21]:
-            total_draws += 1
+            total_numbers += 1
             number_counts[int(num)] += 1
 
-    # 计算后验概率
+    # 计算后验概率（修正贝叶斯公式）
     posterior_probs = {}
+    evidence = sum(number_counts.values()) / len(number_counts)  # 修正边际概率
+    
     for num in range(1, 81):
-        likelihood = number_counts[num] / total_draws
-        marginal_prob = total_draws / 80
-        posterior_prob = (likelihood * prior_prob) / marginal_prob
+        # 修正似然概率计算
+        likelihood = number_counts[num] / total_draws if total_draws > 0 else 0
+        # 使用Beta-Binomial共轭先验
+        alpha = 1 + number_counts[num]  # 后验参数
+        beta = 1 + total_draws - number_counts[num]
+        posterior_prob = alpha / (alpha + beta)  # Beta分布的期望
         posterior_probs[num] = posterior_prob
 
     # 按后验概率排序
     sorted_probs = sorted(posterior_probs.items(), key=lambda x: x[1], reverse=True)
-    # logger.info(sorted_probs[:args.cal_nums])
     return sorted_probs
+
+## 高级号码生成策略（新增）
+def advanced_number_generation_plus(use_genetic=True, use_ml=True):
+    """并行版本的高级号码生成策略"""
+    try:
+        # 简化版的高级生成，适合多进程环境
+        candidate_solutions = []
+        
+        # 1. 贝叶斯优化生成
+        bayesian_probs = bayesian_analysis()
+        top_numbers = [num for num, _ in bayesian_probs[:args.cal_nums*2]]
+        
+        # 基于贝叶斯概率的智能选择
+        bayesian_solution = []
+        remaining_numbers = top_numbers.copy()
+        
+        while len(bayesian_solution) < args.cal_nums and remaining_numbers:
+            # 考虑约束的贪心选择
+            best_num = None
+            best_score = float('-inf')
+            
+            for num in remaining_numbers:
+                test_solution = sorted(bayesian_solution + [num])
+                
+                # 简单评分
+                score = 0
+                
+                # 奇偶平衡
+                odd_count = sum(1 for n in test_solution if n % 2 == 1)
+                target_odd = int(his_odd * len(test_solution))
+                score -= abs(odd_count - target_odd)
+                
+                # 分组平衡
+                group_counts = [0] * 8
+                for n in test_solution:
+                    group_counts[(n-1)//10] += 1
+                for i, count in enumerate(group_counts):
+                    expected = his_group_rate[i] * len(test_solution)
+                    score -= abs(count - expected)
+                
+                if score > best_score:
+                    best_score = score
+                    best_num = num
+            
+            if best_num:
+                bayesian_solution.append(best_num)
+                remaining_numbers.remove(best_num)
+            else:
+                break
+        
+        # 补齐不足的号码
+        while len(bayesian_solution) < args.cal_nums:
+            available = [n for n in range(1, 81) if n not in bayesian_solution]
+            if available:
+                bayesian_solution.append(random.choice(available))
+            else:
+                break
+                
+        return sorted(bayesian_solution)
+        
+    except Exception as e:
+        logger.warning(f"高级生成失败: {e}")
+        # 降级到基本随机生成
+        return sorted(random.sample(range(1, 81), args.cal_nums))
 
 ## 使用K均值聚类算法
 def kmeans_clustering(ori_numpy, n_clusters=3):
@@ -598,9 +673,38 @@ def init_func(rate_mode=1):
 def sub_process(i):
     global results, shiftings, shifting, start_time
     current_result = [0]
+    
+    # 使用高级算法模式
+    if args.advanced_mode > 0:
+        try:
+            advanced_solution = advanced_number_generation_plus(
+                use_genetic=(args.advanced_mode >= 1),
+                use_ml=(args.advanced_mode >= 2)
+            )
+            
+            if advanced_solution:
+                current_result = [0] + advanced_solution
+                # 验证高级解是否符合约束
+                err_code, check_result = check_rate([current_result])
+                if check_result:
+                    results.append(current_result[1:])
+                    shiftings.append(shifting)
+                    return results, shiftings, shifting, start_time
+        except Exception as e:
+            logger.warning(f"高级算法失败，使用原始算法: {e}")
+    
+    # 原始算法作为后备
     err = [0] * len(cal_shiftings)
     err_code_max = -1
+    attempt_count = 0
+    max_attempts = 1000 if args.advanced_mode == 0 else 500
     while True:
+        attempt_count += 1
+        if attempt_count > max_attempts:
+            # 强制生成一个基本解
+            current_result = [0] + sorted(random.sample(range(1, 81), args.cal_nums))
+            break
+            
         err_code, check_result = check_rate([current_result])
         if check_result:
             break

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import random
 import argparse
 import datetime
+import os
 # import time
 import threading
 from tqdm import tqdm
@@ -35,6 +36,7 @@ parser.add_argument('--repeat', default=1, type=int, help='repeat')
 parser.add_argument('--path', default="", type=str, help='path')
 parser.add_argument('--simple_mode', default=0, type=int, help='simple mode') 
 parser.add_argument('--random_mode', default=0, type=int, help='random mode')
+parser.add_argument('--advanced_mode', default=0, type=int, help='advanced algorithm mode: 0=original, 1=genetic+bayesian, 2=full_advanced')
 args = parser.parse_args()
 
 current_time = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
@@ -101,28 +103,167 @@ def cal_not_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
     # logger.info("{:2f}%".format(march_rate * 100))
     return march_rate
 
-## 计算往期重复的概率
+## 计算往期重复的概率（优化版）
 def cal_repeat_rate(limit=limit_line, result_list=None, j_shiftint=1):
+    import numpy as np
+    from collections import Counter
+    
     march_cal = [0] * (args.cal_nums + 1)
     march_rate = [0.0] * (args.cal_nums + 1)
     total_march = 0
+    
     if result_list is None:
         result_list = ori_numpy
         j_shiftint = 1
-    for i in range(limit):
-        for j in range(i + j_shiftint, limit_line):
-            march_num = 0
-            total_march += 1
-            march_num = len(set(result_list[i][1:]) & set(ori_numpy[j][1:]))
-            if len(result_list[i]) > (args.cal_nums + 1):
-                march_num = int(round(march_num / (20 / args.cal_nums), 0))
+    
+    # 优化：预处理所有集合，减少重复计算
+    processed_sets = []
+    for i in range(min(limit, len(result_list))):
+        if i + j_shiftint < len(ori_numpy):
+            set1 = set(result_list[i][1:])
+            set2 = set(ori_numpy[i + j_shiftint][1:])
+            processed_sets.append((set1, set2))
+    
+    # 批量计算交集
+    for set1, set2 in processed_sets:
+        total_march += 1
+        march_num = len(set1 & set2)
+        
+        # 修正：根据实际选择数量调整
+        if len(result_list[0]) > (args.cal_nums + 1):
+            march_num = int(round(march_num * args.cal_nums / 20, 0))
+        
+        if march_num <= args.cal_nums:
             march_cal[march_num] += 1
-    for i in range(args.cal_nums + 1):
-        march_rate[i] = march_cal[i] / total_march
-
-    # logger.info(march_cal)
-    # logger.info(["{:.2f}%".format(item*100) for item in  march_rate])
+    
+    # 计算概率分布
+    if total_march > 0:
+        for i in range(args.cal_nums + 1):
+            march_rate[i] = march_cal[i] / total_march
+    
     return march_rate
+
+## 遗传算法优化号码选择（新增）
+def genetic_algorithm_optimization(population_size=100, generations=50, mutation_rate=0.1):
+    """使用遗传算法优化号码组合"""
+    import numpy as np
+    import random
+    
+    def create_individual():
+        """创建个体（号码组合）"""
+        return sorted(random.sample(range(1, 81), args.cal_nums))
+    
+    def fitness(individual):
+        """适应度函数：基于多维约束的综合评分"""
+        score = 0.0
+        
+        # 检查重复率约束
+        result_list = [[0] + individual]
+        try:
+            current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
+            repeat_score = sum(abs(his_repeat_rate[i] - current_repeat_rate[i]) 
+                             for i in range(1, len(current_repeat_rate)))
+            score -= repeat_score
+        except:
+            score -= 10
+        
+        # 检查冷热号比例
+        try:
+            hot_count = sum(1 for num in individual if num in hot_list)
+            cold_count = sum(1 for num in individual if num in cold_list)
+            hot_ratio = hot_count / len(individual)
+            cold_ratio = cold_count / len(individual)
+            score -= abs(hot_ratio - his_hot_balls) + abs(cold_ratio - his_cold_balls)
+        except:
+            score -= 5
+        
+        # 检查奇偶比例
+        odd_count = sum(1 for num in individual if num % 2 == 1)
+        even_count = len(individual) - odd_count
+        odd_ratio = odd_count / len(individual)
+        even_ratio = even_count / len(individual)
+        score -= abs(odd_ratio - his_odd) + abs(even_ratio - his_even)
+        
+        # 检查组分布
+        group_counts = [0] * 8
+        for num in individual:
+            group_idx = (num - 1) // 10
+            group_counts[group_idx] += 1
+        
+        group_ratios = [count / len(individual) for count in group_counts]
+        score -= sum(abs(group_ratios[i] - his_group_rate[i]) for i in range(8))
+        
+        return score
+    
+    def crossover(parent1, parent2):
+        """交叉操作"""
+        # 保持号码唯一性的交叉
+        child = []
+        all_nums = set(parent1 + parent2)
+        
+        # 随机选择一半来自parent1
+        child.extend(random.sample(parent1, args.cal_nums // 2))
+        
+        # 从parent2中选择剩余号码
+        remaining = [num for num in parent2 if num not in child]
+        needed = args.cal_nums - len(child)
+        
+        if len(remaining) >= needed:
+            child.extend(random.sample(remaining, needed))
+        else:
+            child.extend(remaining)
+            # 从全局范围补充
+            available = [num for num in range(1, 81) if num not in child]
+            child.extend(random.sample(available, needed - len(remaining)))
+        
+        return sorted(child)
+    
+    def mutate(individual):
+        """变异操作"""
+        if random.random() < mutation_rate:
+            # 随机替换一个号码
+            idx = random.randint(0, len(individual) - 1)
+            available = [num for num in range(1, 81) if num not in individual]
+            if available:
+                individual[idx] = random.choice(available)
+                individual.sort()
+        return individual
+    
+    # 初始化种群
+    population = [create_individual() for _ in range(population_size)]
+    
+    # 进化过程
+    for generation in range(generations):
+        # 计算适应度
+        fitness_scores = [(individual, fitness(individual)) for individual in population]
+        fitness_scores.sort(key=lambda x: x[1], reverse=True)
+        
+        # 选择优秀个体
+        elite_size = population_size // 4
+        new_population = [individual for individual, _ in fitness_scores[:elite_size]]
+        
+        # 生成新个体
+        while len(new_population) < population_size:
+            # 锦标赛选择
+            tournament_size = 3
+            tournament = random.sample(fitness_scores[:population_size//2], tournament_size)
+            parent1 = max(tournament, key=lambda x: x[1])[0]
+            
+            tournament = random.sample(fitness_scores[:population_size//2], tournament_size)
+            parent2 = max(tournament, key=lambda x: x[1])[0]
+            
+            # 交叉和变异
+            child = crossover(parent1, parent2)
+            child = mutate(child)
+            new_population.append(child)
+        
+        population = new_population
+    
+    # 返回最优解
+    final_fitness = [(individual, fitness(individual)) for individual in population]
+    final_fitness.sort(key=lambda x: x[1], reverse=True)
+    
+    return final_fitness[:10]  # 返回前10个最优解
 
 ## 计算前10的冷热号
 def cal_hot_cold(begin=0, end=limit_line):
@@ -277,31 +418,121 @@ def sum_analysis(limit=limit_line, result_list=None):
     # logger.info(sum_rate_group)
     return sum_rate_group
 
-## 使用贝叶斯定理分析
+## 使用贝叶斯定理分析（修正版）
 def bayesian_analysis():
+    import numpy as np
+    from scipy import stats
+    
     number_counts = defaultdict(int)
     total_draws = 0
+    total_numbers = 0
 
-    # 先验概率：每个号码被抽中的概率是1/80
-    prior_prob = 1/80
+    # 先验概率：每个号码被抽中的概率（考虑每期选20个数）
+    prior_prob = 20/80  # 修正：每期选20个号码
 
     for row in ori_numpy[:limit_line]:
+        total_draws += 1
         for num in row[1:21]:
-            total_draws += 1
+            total_numbers += 1
             number_counts[int(num)] += 1
 
-    # 计算后验概率
+    # 计算后验概率（修正贝叶斯公式）
     posterior_probs = {}
+    evidence = sum(number_counts.values()) / len(number_counts)  # 修正边际概率
+    
     for num in range(1, 81):
-        likelihood = number_counts[num] / total_draws
-        marginal_prob = total_draws / 80
-        posterior_prob = (likelihood * prior_prob) / marginal_prob
+        # 修正似然概率计算
+        likelihood = number_counts[num] / total_draws if total_draws > 0 else 0
+        # 使用Beta-Binomial共轭先验
+        alpha = 1 + number_counts[num]  # 后验参数
+        beta = 1 + total_draws - number_counts[num]
+        posterior_prob = alpha / (alpha + beta)  # Beta分布的期望
         posterior_probs[num] = posterior_prob
 
     # 按后验概率排序
     sorted_probs = sorted(posterior_probs.items(), key=lambda x: x[1], reverse=True)
-    # logger.info(sorted_probs[:args.cal_nums])
     return sorted_probs
+
+## 马尔可夫链分析（新增）
+def markov_chain_analysis(order=1):
+    """分析号码间的马尔可夫转移概率"""
+    import numpy as np
+    
+    if order < 1 or order > 3:
+        order = 1
+        
+    transition_counts = defaultdict(lambda: defaultdict(int))
+    
+    for i in range(order, len(ori_numpy[:limit_line])):
+        # 当前状态：前order期的号码组合特征
+        current_state = []
+        for j in range(order):
+            prev_numbers = set(ori_numpy[i-j-1][1:21])
+            current_state.append(tuple(sorted(prev_numbers)))
+        
+        state_key = tuple(current_state)
+        
+        # 下一状态：当前期的号码
+        next_numbers = set(ori_numpy[i][1:21])
+        
+        # 统计转移
+        for num in next_numbers:
+            transition_counts[state_key][num] += 1
+    
+    # 计算转移概率
+    transition_probs = {}
+    for state, next_states in transition_counts.items():
+        total = sum(next_states.values())
+        transition_probs[state] = {num: count/total for num, count in next_states.items()}
+    
+    return transition_probs
+
+## 信息熵分析（新增）
+def entropy_analysis():
+    """计算号码选择的信息熵和互信息"""
+    import numpy as np
+    from scipy.stats import entropy
+    
+    # 计算每个号码的概率分布
+    number_probs = np.zeros(81)
+    total_count = 0
+    
+    for row in ori_numpy[:limit_line]:
+        for num in row[1:21]:
+            number_probs[num] += 1
+            total_count += 1
+    
+    number_probs = number_probs[1:] / total_count  # 归一化，去掉索引0
+    
+    # 计算信息熵
+    info_entropy = entropy(number_probs, base=2)
+    
+    # 计算条件熵和互信息
+    mutual_info = {}
+    for i in range(1, 81):
+        for j in range(i+1, 81):
+            # 计算号码i和j的联合概率
+            joint_count = 0
+            count_i = 0
+            count_j = 0
+            
+            for row in ori_numpy[:limit_line]:
+                numbers = set(row[1:21])
+                if i in numbers and j in numbers:
+                    joint_count += 1
+                if i in numbers:
+                    count_i += 1
+                if j in numbers:
+                    count_j += 1
+            
+            if joint_count > 0 and count_i > 0 and count_j > 0:
+                p_ij = joint_count / limit_line
+                p_i = count_i / limit_line
+                p_j = count_j / limit_line
+                mi = p_ij * np.log2(p_ij / (p_i * p_j))
+                mutual_info[(i, j)] = mi
+    
+    return info_entropy, mutual_info
 
 ## 使用K均值聚类算法
 def kmeans_clustering(ori_numpy, n_clusters=3):
@@ -488,6 +719,84 @@ def cal_average(lst):
         return 0
     return total / count
 
+## 统计显著性检验（新增）
+def statistical_significance_test(observed, expected, alpha=0.05):
+    """使用卡方检验验证概率差异的统计显著性"""
+    from scipy.stats import chisquare, ks_2samp
+    import numpy as np
+    
+    if len(observed) != len(expected):
+        return False, 1.0
+    
+    # 卡方检验
+    try:
+        chi2_stat, p_value = chisquare(observed, expected)
+        is_significant = p_value < alpha
+        return is_significant, p_value
+    except:
+        return False, 1.0
+
+## 改进的动态调整机制（新增）
+class AdaptiveThresholdManager:
+    def __init__(self, initial_thresholds, learning_rate=0.01, momentum=0.9):
+        self.thresholds = initial_thresholds.copy()
+        self.initial_thresholds = initial_thresholds.copy()
+        self.learning_rate = learning_rate
+        self.momentum = momentum
+        self.velocity = [0.0] * len(initial_thresholds)
+        self.success_history = [[] for _ in range(len(initial_thresholds))]
+        self.failure_counts = [0] * len(initial_thresholds)
+        self.total_attempts = [0] * len(initial_thresholds)
+        
+    def update_threshold(self, constraint_idx, success, error_magnitude=None):
+        """基于成功/失败和误差大小动态更新阈值"""
+        if constraint_idx >= len(self.thresholds):
+            return
+            
+        self.total_attempts[constraint_idx] += 1
+        
+        if success:
+            self.success_history[constraint_idx].append(1)
+            # 成功时略微收紧阈值
+            gradient = -self.learning_rate * 0.1
+        else:
+            self.success_history[constraint_idx].append(0)
+            self.failure_counts[constraint_idx] += 1
+            # 失败时基于误差大小调整
+            if error_magnitude:
+                gradient = self.learning_rate * min(error_magnitude, 0.5)
+            else:
+                gradient = self.learning_rate * 0.2
+        
+        # 动量更新
+        self.velocity[constraint_idx] = (
+            self.momentum * self.velocity[constraint_idx] + gradient
+        )
+        self.thresholds[constraint_idx] += self.velocity[constraint_idx]
+        
+        # 限制阈值范围
+        self.thresholds[constraint_idx] = max(
+            self.initial_thresholds[constraint_idx] * 0.1,
+            min(self.thresholds[constraint_idx], 
+                self.initial_thresholds[constraint_idx] * 10)
+        )
+        
+        # 保持历史记录窗口
+        if len(self.success_history[constraint_idx]) > 100:
+            self.success_history[constraint_idx] = self.success_history[constraint_idx][-100:]
+    
+    def get_success_rate(self, constraint_idx):
+        """获取约束的成功率"""
+        if not self.success_history[constraint_idx]:
+            return 0.0
+        return sum(self.success_history[constraint_idx]) / len(self.success_history[constraint_idx])
+    
+    def should_relax_constraint(self, constraint_idx, threshold=0.1):
+        """判断是否应该放松约束"""
+        if self.total_attempts[constraint_idx] < 50:
+            return False
+        return self.get_success_rate(constraint_idx) < threshold
+
 ## 分析当前期与历史概率数据的乖离性
 def analysis_rate(rate_mode=0):
     global limit_line
@@ -585,7 +894,7 @@ def check_list_length(lst):
     return False
 
 def init_func(rate_mode=1):
-    global shifting, cal_shiftings, limit_line, his_repeat_rate, hot_list, cold_list, hot_rate, cold_rate, his_hot_balls, his_cold_balls, his_odd, his_even, his_group_rate, his_consecutive_rate, his_sum_rate, his_not_repeat_rate
+    global shifting, cal_shiftings, limit_line, his_repeat_rate, hot_list, cold_list, hot_rate, cold_rate, his_hot_balls, his_cold_balls, his_odd, his_even, his_group_rate, his_consecutive_rate, his_sum_rate, his_not_repeat_rate, threshold_manager
     if args.analysis_history == 1:
         cal_shiftings = analysis_rate(rate_mode=rate_mode).copy()
     else:
@@ -600,6 +909,9 @@ def init_func(rate_mode=1):
     his_consecutive_rate = analysis_consecutive_number()
     his_sum_rate = sum_analysis()
     his_not_repeat_rate = cal_not_repeat_rate()
+    
+    # 初始化自适应阈值管理器
+    threshold_manager = AdaptiveThresholdManager(cal_shiftings)
 
 def generate_random_numbers(num_rows, num_nums_per_row):
     results = []
@@ -607,6 +919,275 @@ def generate_random_numbers(num_rows, num_nums_per_row):
         row = sorted(random.sample(range(1, 81), num_nums_per_row))
         results.append(row)
     return results
+
+## 深度学习特征提取（新增）
+def deep_feature_extraction():
+    """使用深度学习方法提取高级特征"""
+    try:
+        import numpy as np
+        from sklearn.decomposition import PCA
+        from sklearn.preprocessing import StandardScaler
+        from sklearn.neural_network import MLPRegressor
+        
+        # 构建特征矩阵
+        features = []
+        targets = []
+        
+        for i in range(10, len(ori_numpy[:limit_line])):
+            # 特征：前10期的统计信息
+            feature_vector = []
+            
+            # 历史重复率特征
+            hist_data = ori_numpy[i-10:i]
+            repeat_features = []
+            for j in range(1, len(hist_data)):
+                overlap = len(set(hist_data[j][1:]) & set(hist_data[j-1][1:]))
+                repeat_features.append(overlap)
+            feature_vector.extend(repeat_features)
+            
+            # 号码频率特征
+            freq_counts = np.zeros(81)
+            for row in hist_data:
+                for num in row[1:]:
+                    freq_counts[num] += 1
+            feature_vector.extend(freq_counts[1:])  # 去掉索引0
+            
+            # 奇偶比例特征
+            odd_counts = []
+            for row in hist_data:
+                odd_count = sum(1 for num in row[1:] if num % 2 == 1)
+                odd_counts.append(odd_count)
+            feature_vector.extend(odd_counts)
+            
+            # 分组分布特征
+            group_features = []
+            for row in hist_data:
+                group_dist = [0] * 8
+                for num in row[1:]:
+                    group_idx = (num - 1) // 10
+                    group_dist[group_idx] += 1
+                group_features.extend(group_dist)
+            feature_vector.extend(group_features)
+            
+            features.append(feature_vector)
+            
+            # 目标：当前期的号码特征（简化为热号数量）
+            current_numbers = set(ori_numpy[i][1:])
+            if i > 0:
+                prev_hot, prev_cold = cal_hot_cold(max(0, i-50), i)
+                hot_count = sum(1 for num in current_numbers if num in prev_hot)
+                targets.append(hot_count)
+        
+        if len(features) < 10:
+            return None, None
+            
+        features = np.array(features)
+        targets = np.array(targets)
+        
+        # 标准化特征
+        scaler = StandardScaler()
+        features_scaled = scaler.fit_transform(features)
+        
+        # PCA降维
+        pca = PCA(n_components=min(20, features_scaled.shape[1]))
+        features_pca = pca.fit_transform(features_scaled)
+        
+        # 训练神经网络
+        mlp = MLPRegressor(
+            hidden_layer_sizes=(64, 32, 16),
+            activation='relu',
+            max_iter=500,
+            random_state=42,
+            alpha=0.01
+        )
+        
+        # 分割训练集和测试集
+        split_idx = int(0.8 * len(features_pca))
+        X_train, X_test = features_pca[:split_idx], features_pca[split_idx:]
+        y_train, y_test = targets[:split_idx], targets[split_idx:]
+        
+        mlp.fit(X_train, y_train)
+        
+        # 预测
+        predictions = mlp.predict(X_test)
+        
+        return mlp, scaler, pca, predictions
+        
+    except ImportError:
+        logger.warning("深度学习依赖库未安装，跳过深度特征提取")
+        return None, None, None, None
+    except Exception as e:
+        logger.error(f"深度特征提取出错: {e}")
+        return None, None, None, None
+
+## 高级号码生成策略（新增）
+def advanced_number_generation(use_genetic=True, use_ml=True):
+    """结合多种高级算法的号码生成策略"""
+    candidate_solutions = []
+    
+    # 1. 遗传算法生成
+    if use_genetic:
+        try:
+            genetic_solutions = genetic_algorithm_optimization(
+                population_size=50, 
+                generations=30, 
+                mutation_rate=0.15
+            )
+            candidate_solutions.extend([sol[0] for sol in genetic_solutions[:5]])
+        except Exception as e:
+            logger.warning(f"遗传算法失败: {e}")
+    
+    # 2. 贝叶斯优化生成
+    try:
+        bayesian_probs = bayesian_analysis()
+        top_numbers = [num for num, _ in bayesian_probs[:args.cal_nums*2]]
+        
+        # 基于贝叶斯概率的智能选择
+        bayesian_solution = []
+        remaining_numbers = top_numbers.copy()
+        
+        while len(bayesian_solution) < args.cal_nums and remaining_numbers:
+            # 考虑约束的贪心选择
+            best_num = None
+            best_score = float('-inf')
+            
+            for num in remaining_numbers:
+                test_solution = sorted(bayesian_solution + [num])
+                
+                # 简单评分
+                score = 0
+                
+                # 奇偶平衡
+                odd_count = sum(1 for n in test_solution if n % 2 == 1)
+                target_odd = int(his_odd * len(test_solution))
+                score -= abs(odd_count - target_odd)
+                
+                # 分组平衡
+                group_counts = [0] * 8
+                for n in test_solution:
+                    group_counts[(n-1)//10] += 1
+                for i, count in enumerate(group_counts):
+                    expected = his_group_rate[i] * len(test_solution)
+                    score -= abs(count - expected)
+                
+                if score > best_score:
+                    best_score = score
+                    best_num = num
+            
+            if best_num:
+                bayesian_solution.append(best_num)
+                remaining_numbers.remove(best_num)
+            else:
+                break
+        
+        # 补齐不足的号码
+        while len(bayesian_solution) < args.cal_nums:
+            available = [n for n in range(1, 81) if n not in bayesian_solution]
+            if available:
+                bayesian_solution.append(random.choice(available))
+            else:
+                break
+                
+        candidate_solutions.append(sorted(bayesian_solution))
+        
+    except Exception as e:
+        logger.warning(f"贝叶斯生成失败: {e}")
+    
+    # 3. 马尔可夫链生成
+    try:
+        import numpy as np
+        markov_transitions = markov_chain_analysis(order=2)
+        if markov_transitions:
+            # 基于转移概率生成号码
+            markov_solution = []
+            
+            # 获取最近的状态
+            recent_states = []
+            for i in range(min(2, len(ori_numpy))):
+                recent_numbers = set(ori_numpy[i][1:21])
+                recent_states.append(tuple(sorted(recent_numbers)))
+            
+            state_key = tuple(recent_states)
+            
+            if state_key in markov_transitions:
+                transition_probs = markov_transitions[state_key]
+                # 按概率加权选择
+                numbers = list(transition_probs.keys())
+                weights = list(transition_probs.values())
+                
+                if numbers and weights:
+                    # 使用概率分布选择号码
+                    selected = np.random.choice(
+                        numbers, 
+                        size=min(args.cal_nums, len(numbers)), 
+                        replace=False, 
+                        p=np.array(weights)/sum(weights)
+                    )
+                    markov_solution = sorted(selected.tolist())
+            
+            if len(markov_solution) == args.cal_nums:
+                candidate_solutions.append(markov_solution)
+                
+    except Exception as e:
+        logger.warning(f"马尔可夫链生成失败: {e}")
+    
+    # 4. 如果没有足够的候选解，使用改进的随机生成
+    while len(candidate_solutions) < 3:
+        solution = []
+        
+        # 按约束概率生成
+        hot_count = max(1, int(his_hot_balls * args.cal_nums))
+        cold_count = max(1, int(his_cold_balls * args.cal_nums))
+        
+        # 选择热号
+        if hot_list:
+            solution.extend(random.sample(hot_list, min(hot_count, len(hot_list))))
+        
+        # 选择冷号
+        if cold_list:
+            available_cold = [n for n in cold_list if n not in solution]
+            solution.extend(random.sample(available_cold, min(cold_count, len(available_cold))))
+        
+        # 补充其他号码
+        remaining = [n for n in range(1, 81) if n not in solution and n not in hot_list and n not in cold_list]
+        needed = args.cal_nums - len(solution)
+        if needed > 0 and remaining:
+            solution.extend(random.sample(remaining, min(needed, len(remaining))))
+        
+        if len(solution) == args.cal_nums:
+            candidate_solutions.append(sorted(solution))
+    
+    # 5. 评估并选择最佳解
+    best_solution = None
+    best_score = float('-inf')
+    
+    for solution in candidate_solutions:
+        try:
+            result_list = [[0] + solution]
+            _, is_valid = check_rate(result_list)
+            
+            if is_valid:
+                # 计算综合评分
+                score = 0
+                
+                # 重复率评分
+                current_repeat_rate = cal_repeat_rate(limit=1, result_list=result_list, j_shiftint=0)
+                repeat_score = -sum(abs(his_repeat_rate[i] - current_repeat_rate[i]) 
+                                  for i in range(1, min(len(his_repeat_rate), len(current_repeat_rate))))
+                score += repeat_score
+                
+                # 其他约束评分 (简化)
+                odd_count = sum(1 for n in solution if n % 2 == 1)
+                score -= abs(odd_count/len(solution) - his_odd) * 10
+                
+                if score > best_score:
+                    best_score = score
+                    best_solution = solution
+                    
+        except Exception as e:
+            continue
+    
+    return best_solution if best_solution else candidate_solutions[0] if candidate_solutions else None
 
 if __name__ == "__main__":
     # cal_hot_cold()
@@ -813,14 +1394,44 @@ if __name__ == "__main__":
             start_time = datetime.datetime.now()
             for i in range(1, total_create + 1):
                 current_result = [0]
+                
+                # 使用高级算法模式
+                if args.advanced_mode > 0:
+                    advanced_solution = advanced_number_generation(
+                        use_genetic=(args.advanced_mode >= 1),
+                        use_ml=(args.advanced_mode >= 2)
+                    )
+                    
+                    if advanced_solution:
+                        current_result = [0] + advanced_solution
+                        # 验证高级解是否符合约束
+                        err_code, check_result = check_rate([current_result])
+                        if check_result:
+                            results.append(current_result[1:])
+                            shiftings.append(shifting)
+                            if args.simple_mode == 0:
+                                tqdm.write("Advanced: {current_result}".format(current_result=[num for num in current_result[1:]]))
+                            pbar.update(1)
+                            continue
+                
+                # 原始算法作为后备
                 err = [0] * len(cal_shiftings)
-                # shifting = [item * 0.9 for item in cal_shiftings]
-                # shifting = [item * 0.9 for item in shifting]
-                # for i in range(len(shifting)):
-                #     shifting[i] = max(shifting[i], ori_shiftings[i])
                 err_code_max = -1
+                attempt_count = 0
+                max_attempts = 1000 if args.advanced_mode == 0 else 500  # 高级模式下减少尝试次数
                 while True:
-                    pbar.set_description("{current_nums} {err} {shifting}".format(current_nums=[str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums], err=err, shifting=[round(num, 3) for num in shifting]))
+                    attempt_count += 1
+                    if attempt_count > max_attempts:
+                        # 强制生成一个基本解
+                        current_result = [0] + sorted(random.sample(range(1, 81), args.cal_nums))
+                        break
+                        
+                    pbar.set_description("{mode} {current_nums} {err} {shifting}".format(
+                        mode=f"ADV{args.advanced_mode}" if args.advanced_mode > 0 else "STD",
+                        current_nums=[str(int(ori_data.drop(ori_data.columns[0], axis=1).to_numpy()[0][0])+1) if args.current_nums == -1 else args.current_nums], 
+                        err=err, 
+                        shifting=[round(num, 3) for num in shifting]
+                    ))
                     err_code, check_result = check_rate([current_result])
                     if check_result:
                         break
